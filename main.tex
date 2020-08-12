@@ -1,0 +1,154 @@
+%Document FORMATTING [D]
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[top=2.5cm,bottom=2cm,right=4cm, left=4cm,includefoot]{geometry}
+\usepackage{rotating}
+\usepackage{tikz}
+
+%BIBLIOGRAPHY
+\usepackage[hyphen]{url}
+\urlstyle{same}
+
+\usepackage{booktabs}
+\usepackage{lipsum}
+\usepackage{setspace}
+\usepackage{amsmath}
+
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{floatrow} %forces table caption to top
+\floatsetup[table]{capposition=top}
+
+\usepackage{graphicx} %for figures
+\usepackage{caption}
+\captionsetup{margin=10pt,font=small} 
+\usepackage{subcaption}
+
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{4pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{4pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{4pt}}m{#1}}
+\usepackage{floatrow}
+% Table float box with bottom caption, box width adjusted to content
+\newfloatcommand{capbtabbox}{table}[][\FBwidth]
+\usepackage{lastpage}   
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{}        %clears fancy head
+\fancyfoot{}        %clears fancy foot
+\rfoot{\thepage\ of \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0pt}
+\usepackage{titlesec}
+\titleformat*{\section}{\large\bfseries}
+\titleformat*{\subsection}{\bfseries}
+
+
+\begin{document}
+%TITLE PAGE [D]
+\begin{titlepage}
+    \begin{center}
+        \vspace*{100pt}
+        \large{Faculty of Engineering, Computer\\ and Mathematical Sciences}\\
+        \vspace*{15pt}
+  
+        {\large SIVT 1}\\
+        [-5pt]
+        \line(1,0){350}\\
+        [15pt]
+        {\huge \bfseries Initial Report }\\
+        [1pt]
+        \line(1,0){350}\\
+        [5pt]
+        {\large \bfseries Software Engineering \& Project}
+        \\
+        [10pt]
+        {\Large 2020}\\
+        \vspace*{50pt}
+        \textsc{\normalsize Members:}\\
+        [10pt]
+    \centering
+    \begin{minipage}{ .45\textwidth}
+        \centering
+        {\normalsize 
+        \flushleft Colin Ross
+        \flushleft Elliot Wheatland
+        \flushleft Steve Monger 
+       \flushleft Kristina Plavsa
+       \flushleft Rhett Hull
+        \flushleft Gabriel Piragibe
+         \flushleft Jackson Dearing 
+       \flushleft Brian Yip
+       \flushleft Joshua Tatton\\}
+    \end{minipage}%
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        {\normalsize 
+        \flushright id
+        \flushright id
+        \flushright id
+        \flushright a1723663
+        \flushright id
+        \flushright id
+        \flushright a1686411
+        \flushright id
+        \flushright a1690417\\}
+    
+    \end{minipage}\\
+    
+    \vspace*{20pt}
+        \textsc{\normalsize Submitted on:}\\
+        [5pt]
+        {$14^{th}$ August 2020}\\
+    \end{center}
+\end{titlepage}
+%______________________________________
+\cleardoublepage
+\newgeometry{margin=2.54cm,left=2.0cm,right=2.0cm, includefoot}
+%_______________________________________
+
+\section{Project Vision}
+%Brief (100-200 words) summary of the project vision in your own words
+
+\section{Customer Q\&A}
+
+\section{Users}
+
+\section{Software Architecture}
+
+\section{Tech Stack and Standards}
+
+\section{Snapshot}
+
+\iffalse
+Title Page:
+Title: Initial Report of Group <Group ID>
+Name of project
+List of team members with their a-numbers
+Project Vision:
+Brief (100-200 words) summary of the project vision in your own words
+Customer Q&A:
+This section should summarise the questions you asked during the kickoff meeting and the client's responses. You should starting writing down potential questions as soon as you got assigned to a team and project
+This section should also contain a brief (100-200 words) reflection on how the kickoff meeting went, what you could have done differently, and what you've learned for the next meeting, maybe including potential follow-up questions
+Users:
+Describe the roles you identified after the kickoff meeting (roles in the sense of different kinds of users of your app)
+You should list the roles and provide brief summaries of their responsibilities and potential actions (3-4 sentences)
+Software Architecture:
+Rough sketch of the potential architecture of your application
+Can be structured UML, but can also be an ad hoc boxes-and-arrows diagrams with a legend
+Provide a brief (100-200 words) justification for the architecture you chose
+Tech Stack and Standards:
+List the likely tech stack for your application (distinguish between back-end and front-end, programming languages and frameworks)
+Agree on tools for communication and development (e.g., Slack, IDEs, etc.)
+Agree on coding standards
+Provide justifications for your choices
+Group Meetings and Team Member Roles:
+How frequently and for how long do you intend to (virtually) meet?
+Please remember to time-box the meetings!
+When will you schedule the sprint retrospective meetings?
+Did you arrange for additional feedback channels with the customer (e.g., via Slack or email)?
+Please name the Scrum Masters for each sprint (each team member can only be the Scrum Master for up to one sprint)
+Snapshot:
+Provide a snapshot before first sprint (see snapshot assignment)
+
+\fi
+\end{document}
