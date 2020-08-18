@@ -1,3 +1,3 @@
 #!/bin/bash
-flake8 **/*.py
-eslint **/*.js
+flake8 **/*.py *.py
+eslint **/*.js *.js
