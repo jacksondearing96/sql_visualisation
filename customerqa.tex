@@ -1,0 +1,57 @@
+% Customer Q&A:
+% This section should summarise the questions you asked during the kickoff meeting and the client's responses. You should starting writing down potential questions as soon as you got assigned to a team and project
+% This section should also contain a brief (100-200 words) reflection on how the kickoff meeting went, what you could have done differently, and what you've learned for the next meeting, maybe including potential follow-up questions
+
+\section{Customer Q\&A}
+\begin{spacing}{1.3}
+The first customer Q\&A was a general overview of the final product with the product owner and provided. The meeting provided the necessary starting information to begin the first sprint. The product owner described their final product as being a web application that allows developers and analysts to input a presto SQL file, from which an interactive data lineage will be visualized. For example, given an SQL script, it will be possible to trace the source and transformation of a column of data from a "Users" table with ease. \\ \vspace{-5pt}
+
+The following questions were asked during the kickoff meeting:
+\begin{QandA}
+   \item What is the domain of the provided input? (Aside from being SQL queries) Is there any other formal specification you have already?
+        \begin{answered}
+            The file input will be a SQL presto file.
+        \end{answered}
+
+   \item What user action triggers the visualisation?
+         \begin{answered}
+            The output is automatically a visual representation, i.e. given an SQL file path, it should automatically load the visualization, without running other scripts.
+         \end{answered}
+         
+    \item Do you have a preference or disposition to any specific subset of available tools, programming languages or frameworks. If so, what are they?
+        \begin{answered}
+            No restrictions, open source is acceptable. Input scripts must be be Presto syntax.
+        \end{answered}
+        
+    \item Do you have a preference for the application to be available in the web browser or as a native application? If the latter, what operating system do Propic developers use?
+        \begin{answered}
+            Please use a system agnostic solution, such as a web application.
+        \end{answered}
+\end{QandA}
+
+For the first sprint, the Product Owner recommended the development team focus on parsing the Presto SQL code. The first sprint iteration of the product should thus output a table of data showing which tables are using which data. As demonstrated in Section~\ref{sec:snapshot}, the first sprint is dedicated to initial configuration of the system, as well as achieving this initial goal. \\
+\vspace{-5pt}
+
+On reflection, the team determined the initial meeting was successful, as sufficient information was gathered to understand the Product Owner's vision, and the core objectives that we must achieve. All group members engaged with the product owner, asking insightful follow-up questions and collectively created a list of tasks and objectives. \\ \vspace{-5pt}
+
+However, the team determined that the scrum master should take primary lead during meetings as the primary spokesperson and chairman, to ease communication with a large development team. In particular, the scrum master should have been the person posing the questions formulated by the team, and delegating speaking responsibilities to other members in the group. This would have facilitated in-depth discussions with the product owner about their needs and allowed for everyone the chance to provide their input and pose relevant follow-up questions. \\
+
+In hindsight, follow-up questions were posed to the client after internal discussions, which were as follows:
+\begin{QandA}
+    \item Who is the typical intended user of our tool? What kind of typical technical background do they come from? Are the staff low-level analysts or high-level management for example?
+    \begin{answered}
+        Users will be data analysts and data engineers whose role requires an in-depth understanding and frequent interaction of the data pipeline.
+    \end{answered}
+    
+    \item How is this tool going to assist and be integrated into their workflow?
+    \begin{answered}
+        It is going to be used in the maintenance of ETL (Extract, transform and Load Data) development process. This will be useful to see the complete data flow from origin to destination. The main goal is to provide a better understanding to the user of what happened to the data throughout the life cycle.
+    \end{answered}
+    
+    \item Can you confirm that a Web-based application is suitable for Propic?
+    \begin{answered}
+        Yes, a Web-based application is suitable. To make the deployment easier for us, I would prefer using technology like Docker. But I am no expert on it, happy to see what you recommend.
+    \end{answered}
+\end{QandA}
+
+\end{spacing}
