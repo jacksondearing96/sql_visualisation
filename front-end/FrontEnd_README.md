@@ -1,5 +1,9 @@
 # Front End Vue
 
+## Installation
+Please, follow the instructions in this page: [Reference](https://cli.vuejs.org/guide/installation.html).
+
+
 ## Project setup
 ```
 npm install
