@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/FacebookParserExperiment.iml" filepath="$PROJECT_DIR$/FacebookParserExperiment.iml" />
-      <module fileurl="file://$PROJECT_DIR$/SivtJava.iml" filepath="$PROJECT_DIR$/SivtJava.iml" />
     </modules>
   </component>
 </project>
