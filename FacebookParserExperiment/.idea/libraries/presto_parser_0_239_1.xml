@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="presto-parser-0.239.1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/presto-parser-0.239.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
