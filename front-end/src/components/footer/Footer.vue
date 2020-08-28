@@ -2,9 +2,8 @@
     <div id="footer" class="footer-basic">
         <footer>
             <div class="social">
-                <a href="#"><i class="fa fa-globe"></i></a>
-                <a href="#"><i class="fa fa-twitter"></i></a>
-                <a href="#"><i class="fa fa-facebook"></i></a></div>
+                <a href="https://github.cs.adelaide.edu.au/Propic/SIVT1" target="_blank"><i class="fa fa-github"></i></a>
+            </div>
             <ul class="list-inline">
                 <li class="list-inline-item"><a href="#">Home</a></li>
                 <li class="list-inline-item"><a href="#">About</a></li>
