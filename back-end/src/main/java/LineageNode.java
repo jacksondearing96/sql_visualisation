@@ -1,19 +1,27 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class JsonNode {
+/**
+ * Top-Level node. This can represent either a Table or a View.
+ */
+public class LineageNode {
     private String type = "";
     private String name = "";
     private String alias = "";
     private final ArrayList<Column> columns = new ArrayList<Column>();
 
-    public JsonNode(String type, String name, String alias) {
+    /**
+     * Create a lineage node.
+     * @param type Either "TABLE" or "VIEW"
+     * @param name Column name
+     * @param alias Column name alias
+     */
+    public LineageNode(String type, String name, String alias) {
         this.type = type;
         this.name = name;
         this.alias = alias;
     }
 
-    // Setters
     public void setType(String type) {
         this.type = type;
     }
@@ -30,7 +38,12 @@ public class JsonNode {
         this.columns.add(column);
     }
 
-    // Getters
+    public void addListOfColumns(ArrayList<Column> columns) {
+        for (Column column : columns) {
+            addColumn(column);
+        }
+    }
+
     public String getType() {
         return this.type;
     }

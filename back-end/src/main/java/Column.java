@@ -1,19 +1,28 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Columns within a particular table or view.
+ */
 public class Column {
     private String name = "";
     private String alias = "";
     private String id = "";
     private ArrayList<String> sources = new ArrayList<String>();
 
+    /**
+     * Create a column.
+     * @param name Column name.
+     * @param alias Column alias name.
+     * @param id Each column has a unique ID as a combination of
+     *           <tableName>::<columnName>.
+     */
     public Column(String name, String alias, String id){
         this.name = name;
         this.alias = alias;
         this.id = id;
     }
 
-    // Setters
     public void setName(String name) {
         this.name = name;
     }
@@ -30,7 +39,12 @@ public class Column {
         this.sources.add(source);
     }
 
-    // Getters
+    public void addListOfSources(ArrayList<String> sources) {
+        for (String source : sources) {
+            addSource(source);
+        }
+    }
+
     public String getName() {
         return this.name;
     }

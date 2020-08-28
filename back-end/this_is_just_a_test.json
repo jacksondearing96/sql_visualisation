@@ -1,7 +1,7 @@
 [ {
-  "type" : "nodeT",
-  "name" : "nodeN",
-  "alias" : "nodeA",
+  "type" : "TABLE",
+  "name" : "Woosh",
+  "alias" : "Woosh1",
   "columns" : [ {
     "name" : "testa",
     "alias" : "test1a",
@@ -14,9 +14,14 @@
     "sources" : [ "test::BANANA", "test::WAMBLE2" ]
   } ]
 }, {
-  "type" : "nodeT",
-  "name" : "nodeN",
-  "alias" : "nodeA",
+  "type" : "VIEW",
+  "name" : "Spooky",
+  "alias" : "Spooky2",
+  "columns" : [ ]
+}, {
+  "type" : "TABLE",
+  "name" : "Woosh",
+  "alias" : "Woosh1",
   "columns" : [ {
     "name" : "testa",
     "alias" : "test1a",

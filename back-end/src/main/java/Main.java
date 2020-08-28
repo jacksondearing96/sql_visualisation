@@ -58,20 +58,27 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        // Rhett testing - **REMOVE ME**
-        Column testA = new Column("testa", "test1a", "test2a");
-        testA.addSource("test::APPLE");
-        testA.addSource("test::WAMBLE");
-        Column testB = new Column("testb", "test1b", "test2b");
-        testB.addSource("test::BANANA");
-        testB.addSource("test::WAMBLE2");
-        JsonNode testNode = new JsonNode("nodeT", "nodeN", "nodeA");
-        testNode.addColumn(testA);
-        testNode.addColumn(testB);
-        JsonWriter writer = new JsonWriter("test.json");
-        writer.addNode(testNode);
-        writer.addNode(testNode);
-        writer.WriteToJson();
+        // ----- TESTING, REMOVE ME WHEN READY -----
+        // Building a list of columns
+        Column columnA = new Column("testa", "test1a", "test2a");
+        Column columnB = new Column("testb", "test1b", "test2b");
+        columnA.addSource("test::APPLE");
+        columnA.addSource("test::WAMBLE");
+        columnB.addSource("test::BANANA");
+        columnB.addSource("test::WAMBLE2");
+
+        // Constructing a node (which contains columns)
+        LineageNode nodeA = new LineageNode("TABLE", "Woosh", "Woosh1");
+        LineageNode nodeB = new LineageNode("VIEW", "Spooky", "Spooky2");
+        nodeA.addColumn(columnA);
+        nodeA.addColumn(columnB);
+
+        // Store and write out the lineage
+        DataLineage lineage = new DataLineage("this_is_just_a_test.json");
+        lineage.addNode(nodeA);
+        lineage.addNode(nodeB);
+        lineage.addNode(nodeA);
+        lineage.toJSON();
 
         // All the SQL scripts have been concatenated into the AllStatements.sql file.
         String sql = FileReader.ReadFile("resources/AllStatements.sql");
