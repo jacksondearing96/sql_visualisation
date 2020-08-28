@@ -1,5 +1,5 @@
 <template>
-    <div class="navbar">
+    <div id="navBar">
         <!-- Navbar -->
         <nav class="navbar navbar-light navbar-expand-md">
             <div class="container-fluid">
