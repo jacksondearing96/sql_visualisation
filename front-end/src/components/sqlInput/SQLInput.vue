@@ -11,13 +11,21 @@
                 <input type="file" class="custom-file-input" id="inputFile">
                 <label class="custom-file-label" for="inputFile" aria-describedby="inputFile">SQL script</label>
             </div>
-            <button class="btn btn-primary" type="button">Upload!</button>
+            <button class="btn btn-primary" type="button" @click.prevent="upload">Upload!</button>
         </div>
     </div>
 </template>
 <script>
+    import {mapActions} from 'vuex'
+
     export default {
-        name: 'SQLInput'
+        name: 'SQLInput',
+        methods: {
+            ...mapActions(['uploadScript']),
+            upload(){
+                this.uploadScript()
+            }
+        }
     }
 </script>
 <style scoped>

@@ -14,12 +14,12 @@
 
 
       <!-- SQL Input -->
-      <SQLInput></SQLInput>
+      <SQLInput v-if="!getisUploaded"></SQLInput>
       <!-- End SQL Input -->
 
 
       <!-- Force Directed Graph -->
-      <ForceGraph v-if="loading"></ForceGraph>
+      <ForceGraph v-if="getisUploaded"></ForceGraph>
       <!-- End Force Directed Graph -->
     </div>
     
@@ -36,12 +36,17 @@
   import ForceGraph from '@/components/forceGraph/ForceGraph.vue'
   import Footer from '@/components/footer/Footer.vue'
 
+  import {mapGetters} from 'vuex'
+
   export default {
     name: 'Home',
     data(){
       return {
         loading: false
       }
+    },
+    computed: {
+      ...mapGetters(['getisUploaded'])
     },
     components: {
       Navbar,
