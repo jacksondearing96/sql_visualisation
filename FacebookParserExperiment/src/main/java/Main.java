@@ -58,6 +58,21 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        // Rhett testing - **REMOVE ME**
+        Column testA = new Column("testa", "test1a", "test2a");
+        testA.addSource("test::APPLE");
+        testA.addSource("test::WAMBLE");
+        Column testB = new Column("testb", "test1b", "test2b");
+        testB.addSource("test::BANANA");
+        testB.addSource("test::WAMBLE2");
+        JsonNode testNode = new JsonNode("nodeT", "nodeN", "nodeA");
+        testNode.addColumn(testA);
+        testNode.addColumn(testB);
+        JsonWriter writer = new JsonWriter("test.json");
+        writer.addNode(testNode);
+        writer.addNode(testNode);
+        writer.WriteToJson();
+
         // All the SQL scripts have been concatenated into the AllStatements.sql file.
         String sql = FileReader.ReadFile("resources/AllStatements.sql");
         List<StatementSplitter.Statement> statements = getStatements(sql);

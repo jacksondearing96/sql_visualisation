@@ -27,6 +27,17 @@
             <artifactId>presto-parser</artifactId>
             <version>0.239.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml</groupId>
+            <artifactId>jackson-xml-databind</artifactId>
+            <version>0.6.2</version>
+        </dependency>
     </dependencies>
 
 </project>

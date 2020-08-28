@@ -1,0 +1,31 @@
+[ {
+  "type" : "nodeT",
+  "name" : "nodeN",
+  "alias" : "nodeA",
+  "columns" : [ {
+    "name" : "testa",
+    "alias" : "test1a",
+    "id" : "test2a",
+    "sources" : [ "test::APPLE", "test::WAMBLE" ]
+  }, {
+    "name" : "testb",
+    "alias" : "test1b",
+    "id" : "test2b",
+    "sources" : [ "test::BANANA", "test::WAMBLE2" ]
+  } ]
+}, {
+  "type" : "nodeT",
+  "name" : "nodeN",
+  "alias" : "nodeA",
+  "columns" : [ {
+    "name" : "testa",
+    "alias" : "test1a",
+    "id" : "test2a",
+    "sources" : [ "test::APPLE", "test::WAMBLE" ]
+  }, {
+    "name" : "testb",
+    "alias" : "test1b",
+    "id" : "test2b",
+    "sources" : [ "test::BANANA", "test::WAMBLE2" ]
+  } ]
+} ]
