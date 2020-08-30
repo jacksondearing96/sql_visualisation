@@ -8,7 +8,7 @@
         <div class="buttons">
             <!-- <input class="form-control-lg" type="text" style="height: 40px;" placeholder="SQL script"> -->
             <div class="custom-file">
-                <input type="file" class="custom-file-input" id="inputFile">
+                <input ref="file" type="file" class="custom-file-input" id="inputFile" @change="extractFile">
                 <label class="custom-file-label" for="inputFile" aria-describedby="inputFile">SQL script</label>
             </div>
             <button class="btn btn-primary" type="button" @click.prevent="upload">Upload!</button>
@@ -20,10 +20,24 @@
 
     export default {
         name: 'SQLInput',
+        data(){
+            return {
+                file: ''
+            }
+        },
         methods: {
             ...mapActions(['uploadScript']),
+            extractFile(){
+                this.file = this.$refs.file.files[0]
+            },
             upload(){
-                this.uploadScript()
+                // Instantiate formData object
+                let formData = new FormData()
+
+                // Append file to  formData
+                formData.append('file', this.file)
+                
+                this.uploadScript(formData)
             }
         }
     }

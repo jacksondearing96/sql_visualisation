@@ -1,22 +1,33 @@
+import axios from 'axios'
+
 const state = {
     isUploaded: false
 }
 
 const getters = {
-    getisUploaded(state){
+    getisUploaded(state) {
         return state.isUploaded
     }
 }
 
 const actions = {
-    // Change state of isUplaoded, just a test for now so we can see component rendering
-    uploadScript(context){
-        context.commit('uploadScript')
+    // POST request
+    uploadScript(context, formData) {
+        axios.post('http://127.0.0.1:5000/uploader', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        }).then(response => {
+            console.log(response)
+            context.commit('uploadScript')
+        }).catch(error => {
+            console.log('POST request upload script error: ' + error)
+        })
     }
 }
 
 const mutations = {
-    uploadScript(state){
+    uploadScript(state) {
         // Mutate isUploaded
         state.isUploaded = true
     }
