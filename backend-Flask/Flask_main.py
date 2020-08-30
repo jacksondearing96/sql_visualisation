@@ -14,9 +14,8 @@ which will then be redirected to the vue application.
 """
 @app.route('/uploader', methods=['GET', 'POST'])
 def upload_file():
-    if request.method is "POST" and request.files:
-        return request.files["file"].read()                    
-
+    if request.method == "POST" and request.files:
+        return request.files["file"].read()
 
 if __name__ == '__main__':
     app.run(debug=True)
