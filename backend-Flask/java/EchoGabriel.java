@@ -7,7 +7,7 @@ package au.com.piragibe.testegabriel;
 
 /**
  *
- * @author franc
+ * @author gabrielP
  */
 public class EchoGabriel {
 
