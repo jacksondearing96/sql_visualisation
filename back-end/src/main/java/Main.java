@@ -55,7 +55,7 @@ public class Main {
 
     public static void main(String[] args) {
         // All the SQL scripts have been concatenated into the AllStatements.sql file.
-        String sql = FileReader.ReadFile("resources/agent_leads.sql");
+        String sql = FileReader.ReadFile("../propic_sql_scripts/agent_leads.sql");
         List<StatementSplitter.Statement> statements = getStatements(sql);
 
         // Create the SqlParser.
@@ -149,7 +149,7 @@ class Extractors {
 //                    System.out.println(column);
 //                }
 
-                return null;
+                return query_body;
             }
 
             @Override
