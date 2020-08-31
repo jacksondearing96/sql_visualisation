@@ -22,7 +22,8 @@ const mutations = {
         // Creating Nodes
         state.nodes.push({
           id: parseInt(element.id),
-          name: element.name
+          name: element.name,
+          _color: '#'+((1<<24)*Math.random()|0).toString(16)
         })
         //creating links
          element.children_id.forEach(children_id => {
