@@ -5,24 +5,20 @@ import java.util.IdentityHashMap;
 import java.io.PrintStream;
 import java.util.Set;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Stack;
 
 import com.facebook.presto.sql.parser.SqlParser;
 import com.facebook.presto.sql.parser.ParsingOptions;
-import com.facebook.presto.sql.tree.Statement;
+import com.facebook.presto.sql.tree.*;
 import com.facebook.presto.sql.TreePrinter;
-import com.facebook.presto.sql.tree.Expression;
-import com.facebook.presto.sql.tree.QualifiedName;
 import com.facebook.presto.sql.parser.StatementSplitter;
-import com.facebook.presto.sql.tree.AstVisitor;
-import com.facebook.presto.sql.tree.Node;
-import com.facebook.presto.sql.tree.Table;
-import com.facebook.presto.sql.tree.CreateView;
-import com.facebook.presto.sql.tree.Select;
 import static com.facebook.presto.sql.parser.ParsingOptions.DecimalLiteralTreatment.AS_DECIMAL;
 
 class FileReader {
@@ -58,36 +54,9 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        // ----- TESTING, REMOVE ME WHEN READY -----
-        // Building a list of columns
-        Column columnA = new Column("testa", "test1a", "test2a");
-        Column columnB = new Column("testb", "test1b", "test2b");
-        columnA.addSource("test::APPLE");
-        columnA.addSource("test::WAMBLE");
-        columnB.addSource("test::BANANA");
-        columnB.addSource("test::WAMBLE2");
-
-        // Constructing a node (which contains columns)
-        LineageNode nodeA = new LineageNode("TABLE", "Woosh", "Woosh1");
-        LineageNode nodeB = new LineageNode("VIEW", "Spooky", "Spooky2");
-        nodeA.addColumn(columnA);
-        nodeA.addColumn(columnB);
-
-        // Store and write out the lineage
-        DataLineage lineage = new DataLineage("this_is_just_a_test.json");
-        lineage.addNode(nodeA);
-        lineage.addNode(nodeB);
-        lineage.addNode(nodeA);
-        lineage.toJSON();
-
         // All the SQL scripts have been concatenated into the AllStatements.sql file.
-        String sql = FileReader.ReadFile("resources/AllStatements.sql");
+        String sql = FileReader.ReadFile("resources/agent_leads.sql");
         List<StatementSplitter.Statement> statements = getStatements(sql);
-
-        // Print out the SQL statements to check they were read and split correctly.
-        for (StatementSplitter.Statement statement : statements) {
-            System.out.println(statement.statement());
-        }
 
         // Create the SqlParser.
         SqlParser sqlParser = new SqlParser();
@@ -104,28 +73,15 @@ public class Main {
         TreePrinter treePrinter = new TreePrinter(resolvedNameReferences, printStream);
         treePrinter.print(statementToPrint);
 
-        // Note: what we refer to as 'column' is equivalent to the API's 'select'.
-        // Will stay be consistent with the 'select' notation here.
-        AstVisitorExtractor<Table, ?> tableVisitor = AstVisitorExtractor.by(Extractors.extractTables());
-        AstVisitorExtractor<Select, ?> selectVisitor = AstVisitorExtractor.by(Extractors.extractSelects());
-        AstVisitorExtractor<CreateView, ?> createViewVisitor = AstVisitorExtractor.by(Extractors.extractCreateViews());
+        AstVisitorExtractor<Node, ?> sivtVisitor = AstVisitorExtractor.by(Extractors.sivtVisitor());
+
 
         // Iterate through each statement.
         // Use the sqlParser to parse the statement and then extract its table names.
         for (StatementSplitter.Statement splitterStatement : statements) {
             Statement statement = sqlParser.createStatement(splitterStatement.statement(), parsingOptionsBuilder.build());
-
-            List<Table> tables = statement.accept(tableVisitor, null)
+            statement.accept(sivtVisitor, null)
                     .collect(Collectors.toList());
-            List<CreateView> createViews = statement.accept(createViewVisitor, null)
-                    .collect(Collectors.toList());
-            List<Select> selects = statement.accept(selectVisitor, null)
-                    .collect(Collectors.toList());
-
-            System.out.println(tables);
-            System.out.println(createViews);
-            System.out.println(selects);
-            System.out.println("");
         }
     }
 }
@@ -157,29 +113,131 @@ class AstVisitorExtractor<R, C> extends AstVisitor<Stream<R>, C> {
 
 // Custom extractor functions for traversal of the AST.
 class Extractors {
-    public static AstVisitor<Table, Object> extractTables() {
-        return new AstVisitor<Table, Object>() {
+    private static DataLineage data_lineage = new DataLineage("lineage_output.json");
+    private static Stack<ArrayList<LineageNode>> lineage_nodes_stack = new Stack<>();
+    private static Stack<ArrayList<Column>> columns_stack = new Stack<>();
+    private static Stack<ArrayList<String>> table_names_stack = new Stack<>();
+
+    public static void unexpectedWarning(String message) {
+        System.out.println("\n\n!!! WARNING !!! - Unexpected: " + message + "\n\n");
+        System.exit(1);
+    }
+
+    public static AstVisitor<Node, Object> sivtVisitor() {
+        return new AstVisitor<Node, Object>()  {
             @Override
-            protected Table visitTable(Table node, Object context) {
+            protected Node visitQuerySpecification(QuerySpecification query_specification, Object context) {
+                // If this is not a 'SELECT' query specificaiton, return.
+                Optional<Relation> from = query_specification.getFrom();
+                if (!from.isPresent()) return visitQueryBody(query_specification, context);
+
+                System.out.println("Visiting select spec");
+
+                System.out.println(columns_stack);
+
+                ArrayList<Column> columns = new ArrayList<Column>();
+                ArrayList<String> tables = new ArrayList<String>();
+                columns_stack.push(columns);
+                table_names_stack.push(tables);
+
+                Node query_body = visitQueryBody(query_specification, context);
+
+                System.out.println(columns_stack);
+
+//                columns = columns_stack.pop();
+//                for (Column column : columns) {
+//                    System.out.println(column);
+//                }
+
+                return null;
+            }
+
+            @Override
+            protected Node visitSelectItem(SelectItem selectItem, Object context) {
+                System.out.println("visiting select item");
+                if (!columns_stack.empty()) {
+                    System.out.println("column");
+                    ArrayList<Column> columns = columns_stack.pop();
+                    columns.add(new Column(selectItem.toString()));
+                    columns_stack.push(columns);
+                }
+                return visitNode(selectItem, context);
+            }
+
+            @Override
+            protected Node visitNode(Node node, Object context) {
                 return node;
             }
+
+            @Override
+            protected Node visitTable(Table node, Object context) {
+                if (!table_names_stack.empty()) {
+                    ArrayList<String> table_names = table_names_stack.pop();
+                    table_names.add(node.toString());
+                    table_names_stack.push(table_names);
+                }
+                return visitQueryBody(node, context);
+            }
+
         };
     }
+
+
 
     public static AstVisitor<CreateView, Object> extractCreateViews() {
         return new AstVisitor<CreateView, Object>() {
+
             @Override
             protected CreateView visitCreateView(CreateView node, Object context) {
-                return node;
-            }
-        };
-    }
+                System.out.println("\n\n");
+                List<SelectItem> selectItems = new ArrayList<SelectItem>();
 
-    // note: 'selects' is the same as our terminology for 'columns'.
-    public static AstVisitor<Select, Object> extractSelects() {
-        return new AstVisitor<Select, Object>() {
-            @Override
-            protected Select visitSelect(Select node, Object context) {
+                // TODO: Think about whether we should consider isReplace (See CreateView.java class file)
+
+                QualifiedName viewName = node.getName();
+                List<Node> children = node.getChildren();
+                if (children.size() > 0) {
+                    // Get the first child (there should only be one here).
+                    // There should ALWAYS be a query here, it is requiredNonNull
+                    // in the constructor of a CreateView.
+                    // Explicitly cast it to a query.
+                    Iterator<Node> iterator = children.iterator();
+                    Query childQuery = (Query)iterator.next();
+
+                    // This should be a QuerySpecification.
+                    QueryBody queryBody = childQuery.getQueryBody();
+
+                    Optional<Relation> from;
+                    if (queryBody.getClass() == QuerySpecification.class) {
+                        from = ((QuerySpecification)queryBody).getFrom();
+                        if (from.isPresent()) {
+                            System.out.println("FROM: " + from);
+                        } else {
+                            unexpectedWarning("No FROM clause in query specification");
+                        }
+                    } else if (queryBody.getClass() == TableSubquery.class) {
+                        // Handle
+                    } else  {
+                        unexpectedWarning("Query body was not a query specification (" + queryBody.getClass().getName() + ")");
+                    }
+
+                    List<? extends Node> queryBodyChildren = queryBody.getChildren();
+
+                    for (Node child : queryBodyChildren) {
+                        // Get the selected items.
+                        if (child.getClass() == Select.class) {
+                            Select select = (Select)child;
+                            selectItems = select.getSelectItems();
+                        }
+                        //System.out.println("type: " + child.getClass().getName());
+//                        System.out.println("val:  " + child);
+
+                    }
+                }
+
+                System.out.println("VIEW NAME: " + viewName);
+                System.out.println("SELECTED COLUMNS: " + selectItems);
+
                 return node;
             }
         };

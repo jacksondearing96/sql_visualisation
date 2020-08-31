@@ -10,6 +10,10 @@ public class Column {
     private String id = "";
     private ArrayList<String> sources = new ArrayList<String>();
 
+    public Column(String name) {
+        this(name, "", "");
+    }
+
     /**
      * Create a column.
      * @param name Column name.
