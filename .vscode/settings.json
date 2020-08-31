@@ -2,5 +2,6 @@
   "python.linting.enabled": true,
   "python.linting.flake8Enabled": true,
   "eslint.format.enable": true,
-  "eslint.run": "onType"
+  "eslint.run": "onType",
+  "python.pythonPath": "C:\\Users\\gabri\\anaconda3\\envs\\SIVT1\\python.exe"
 }
