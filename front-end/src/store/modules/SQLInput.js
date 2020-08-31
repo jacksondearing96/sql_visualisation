@@ -19,6 +19,8 @@ const actions = {
             }
         }).then(response => {
             console.log(response)
+            // calling set_tables mutation in forceDirectedGraph.js
+            context.commit('SET_TABLES', response.data.tables, null, {root: true})
             context.commit('uploadScript')
         }).catch(error => {
             console.log('POST request upload script error: ' + error)

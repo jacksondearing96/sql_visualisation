@@ -51,7 +51,7 @@
                     force: 5000,
                     canvas: this.canvas
                 }
-            }
+            },
         },
         methods: {
             linkInfo(link) {
@@ -79,12 +79,10 @@
                 })
             }
         },
-        created() {
-            // Retrieving all nodes from vuex
-            this.nodes = this.$store.getters.allNodes
-
-            // Retrieving all links from vuex
-            this.links = this.$store.getters.allLinks
+         created() {
+            // Retrieving all nodes and links from vuex
+            this.nodes =  this.$store.getters.allNodes
+            this.links =  this.$store.getters.allLinks
         },
         components: {
             D3Network

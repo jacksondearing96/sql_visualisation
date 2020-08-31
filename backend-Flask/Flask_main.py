@@ -23,7 +23,7 @@ AGENT_LEADS = [{
     "alias": "Woosh1",
     "id": "0",
     "parents_id": "1",
-    "children_id": "6",
+    "children_id": ["2"],
     "columns": [{
         "name": "testa",
         "alias": "test1a",
@@ -42,7 +42,7 @@ AGENT_LEADS = [{
     "alias": "Woosh1",
     "id": "1",
     "parents_id": "",
-    "children_id": "0",
+    "children_id": ["0"],
     "columns": [{
         "name": "testa",
         "alias": "test1a",
@@ -61,7 +61,7 @@ AGENT_LEADS = [{
     "alias": "Woosh1",
     "id": "2",
     "parents_id": ["3", "4"],
-    "children_id": "",
+    "children_id": [""],
     "columns": [{
         "name": "testa",
         "alias": "test1a",
@@ -80,7 +80,7 @@ AGENT_LEADS = [{
     "alias": "Woosh1",
     "id": "3",
     "parents_id": "",
-    "children_id": "2",
+    "children_id": ["2"],
     "columns": [{
         "name": "testa",
         "alias": "test1a",
@@ -99,7 +99,7 @@ AGENT_LEADS = [{
     "alias": "Woosh1",
     "id": "4",
     "parents_id": "",
-    "children_id": "2",
+    "children_id": ["2"],
     "columns": [{
         "name": "testa",
         "alias": "test1a",
