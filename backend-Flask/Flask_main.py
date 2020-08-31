@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
-
+import jnius_config
+jnius_config.set_classpath('.', './java/testeGabriel.jar')
+from jnius import autoclass
 # Configuration
 DEBUG = True
 
@@ -130,6 +132,27 @@ def upload_file():
         response_object['name'] = file.filename
         response_object['tables'] = AGENT_LEADS
     return jsonify(response_object)
+
+
+"""
+Trying to integrate Java with Python Back-end
+
+Add to your Environment Variables:
+   PATH C:\Program Files\Java\jdk1.7.0_79\jre\bin\server , C:\Program Files\Java\jdk1.7.0_79\bin
+   Follow instructions here: https://pyjnius.readthedocs.io/en/stable/installation.html
+"""
+
+
+@app.route('/javatest', methods=['GET', 'POST'])
+def javatest():
+    response_object = {'status': 'success'}
+    if request.method == 'POST':
+        post_data = request.get_json()
+        EchoGabriel = autoclass('au.com.piragibe.testegabriel.EchoGabriel')
+        sb = EchoGabriel()
+        responseText = sb.makeEcho(post_data.get('name'))
+        response_object['resp'] = responseText
+        return jsonify(response_object)
 
 
 if __name__ == '__main__':

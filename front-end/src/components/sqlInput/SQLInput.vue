@@ -12,12 +12,13 @@
                 <label class="custom-file-label" for="inputFile" aria-describedby="inputFile">SQL script</label>
             </div>
             <button class="btn btn-primary" type="button" @click.prevent="upload">Upload!</button>
+            <button class="btn btn-primary" type="button" @click.prevent="javaTest">java!</button>
         </div>
     </div>
 </template>
 <script>
     import {mapActions} from 'vuex'
-
+    import axios from 'axios'
     export default {
         name: 'SQLInput',
         data(){
@@ -38,6 +39,15 @@
                 formData.append('file', this.file)
                 
                 this.uploadScript(formData)
+            },
+            javaTest(){
+                axios.post('http://127.0.0.1:5000/javatest', {
+                    name: 'Gabriel'
+                }).then(response => {
+                    console.log(response)
+                }).catch(error => {
+                    console.log('java error' + error)
+                })
             }
         }
     }
