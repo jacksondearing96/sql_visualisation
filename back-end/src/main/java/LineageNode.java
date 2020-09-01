@@ -59,4 +59,8 @@ public class LineageNode {
     public List<Column> getColumns() {
         return this.columns;
     }
+
+    public boolean hasAlias() {
+        return !this.alias.equals("");
+    }
 }
