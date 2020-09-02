@@ -40,7 +40,7 @@ public class LineageNode {
 
     private boolean hasColumnWithName(String name) {
         for (Column column : columns) {
-            if (column.getName() == name) return true;
+            if (column.getName().equals(name)) return true;
         }
         return false;
     }
