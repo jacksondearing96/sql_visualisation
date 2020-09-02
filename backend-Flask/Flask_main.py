@@ -2,7 +2,11 @@ from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 import jnius_config
 import json
-jnius_config.set_classpath('.', './java/sivtJavaTest.jar')
+
+with open('./configuration/config.JSON') as config_file:
+    data = json.load(config_file)
+
+jnius_config.set_classpath('.', data['jar'])
 from jnius import autoclass
 # Configuration
 DEBUG = True
@@ -41,7 +45,7 @@ def upload_file():
     if request.method == "POST" and request.files:
         file = request.files['file']
         response_object['name'] = file.filename
-        agentLeadOutput = autoclass('au.com.gabriel.sivtjavatest.scriptOutputTest')
+        agentLeadOutput = autoclass(data['classes'])
         sb = agentLeadOutput()
         response_text = sb.outputDataStruct(file.filename)
         response_object['tables'] = json.loads(response_text)
