@@ -32,4 +32,5 @@ out/
 *.ipr
 *.iws
 
-
+## VSCode
+.vscode

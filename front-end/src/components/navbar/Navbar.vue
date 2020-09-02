@@ -1,5 +1,5 @@
 <template>
-    <div class="navbar">
+    <div id="navBar">
         <!-- Navbar -->
         <nav class="navbar navbar-light navbar-expand-md">
             <div class="container-fluid">
@@ -10,11 +10,12 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navcol-1">
                     <ul class="nav navbar-nav ml-auto">
-                        <li class="nav-item" role="presentation"><a class="nav-link active" href="#">Home</a></li>
                         <li class="nav-item" role="presentation">
-                            <router-link to="/about" tag="li"><a class="nav-link">blabla</a></router-link>
+                            <a class="nav-link active" href="#" style="font-family: Roboto, sans-serif;">Home</a>
                         </li>
-                        <li class="nav-item" role="presentation"></li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" href="#" style="font-family: Roboto, sans-serif;">About</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -30,5 +31,9 @@
 </script>
 
 <style scoped>
+.navbar-brand{
+    font-family: Roboto, sans-serif;
+    font-size: 30px;
+}
 
 </style>
