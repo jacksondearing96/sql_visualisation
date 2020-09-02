@@ -22,7 +22,6 @@
     </build>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/com.facebook.presto/presto-parser -->
         <dependency>
             <groupId>com.facebook.presto</groupId>
             <artifactId>presto-parser</artifactId>
