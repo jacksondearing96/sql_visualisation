@@ -1,25 +1,21 @@
 <template>
-    <div class="footer">
-        <!-- Footer -->
-        <div class="footer-basic">
-            <footer>
-                <div class="social"><a href="#">
-                        <ion-icon name="globe-outline"></ion-icon>
-                    </a></div>
-                <ul class="list-inline">
-                    <li class="list-inline-item"><a href="#">Home</a></li>
-                    <li class="list-inline-item"><router-link to="/about" tag="li"><a class="nav-link">blabla</a></router-link></li>
-                </ul>
-                <p class="copyright">SIVT1 © 2020</p>
-            </footer>
-        </div>
-        <!-- End Footer -->
+    <div id="footer" class="footer-basic">
+        <footer>
+            <div class="social">
+                <a href="https://github.cs.adelaide.edu.au/Propic/SIVT1" target="_blank"><i class="fa fa-github"></i></a>
+            </div>
+            <ul class="list-inline">
+                <li class="list-inline-item"><a href="#">Home</a></li>
+                <li class="list-inline-item"><a href="#">About</a></li>
+            </ul>
+            <p class="copyright">SIVT1© 2020</p>
+        </footer>
     </div>
 </template>
 
 <script>
     export default {
-        name: 'Footer'
+
     }
 </script>
 
@@ -28,6 +24,7 @@
         padding: 40px 0;
         background-color: #ffffff;
         color: #4b4c4d;
+        margin-top: 150px;
     }
 
     .footer-basic ul {
@@ -44,6 +41,7 @@
     }
 
     .footer-basic ul a {
+        font-family: Roboto, sans-serif;
         color: inherit;
         text-decoration: none;
         opacity: 0.8;
