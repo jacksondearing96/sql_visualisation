@@ -27,6 +27,16 @@ public class Column {
         this.id = id;
     }
 
+    /**
+     * Copy a column.
+     * @return The copied column.
+     */
+    public Column getCopy() {
+        Column copy = new Column(name, alias, id);
+        copy.sources = new ArrayList<String>(sources);
+        return copy;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
