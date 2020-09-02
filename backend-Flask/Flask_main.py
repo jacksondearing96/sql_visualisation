@@ -43,8 +43,8 @@ def upload_file():
         response_object['name'] = file.filename
         agentLeadOutput = autoclass('au.com.gabriel.sivtjavatest.scriptOutputTest')
         sb = agentLeadOutput()
-        responseText = sb.outputDataStruct(file.filename)
-        response_object['tables'] = json.loads(responseText)
+        response_text = sb.outputDataStruct(file.filename)
+        response_object['tables'] = json.loads(response_text)
     return jsonify(response_object)
 
 
