@@ -36,6 +36,12 @@ AGENT_LEADS = [{
         "alias": "test1b",
         "id": "test2b",
         "sources": ["test::BANANA", "test::WAMBLE2"]
+    },
+     {
+        "name": "testc",
+        "alias": "test1c",
+        "id": "test1c",
+        "sources": ["test::Oats", "test::WAMBLE3"]
     }]
 },
     {
@@ -55,6 +61,12 @@ AGENT_LEADS = [{
         "alias": "test1b",
         "id": "test2b",
         "sources": ["test::BANANA", "test::WAMBLE2"]
+    },
+        {
+        "name": "testc",
+        "alias": "test1c",
+        "id": "test1c",
+        "sources": ["test::Oats", "test::WAMBLE3"]
     }]
 },
     {
