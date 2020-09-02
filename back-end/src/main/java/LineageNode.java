@@ -32,7 +32,15 @@ public class LineageNode {
      */
     public boolean isSourceOf(List<String> sources) {
         for (String source : sources) {
-            if (source == alias || source == name) return true;
+            if (source.contains(alias + "::") || source.contains(name + "::")
+            || source.equals(alias) || source.equals(name)) return true;
+        }
+        return false;
+    }
+
+    private boolean hasColumnWithName(String name) {
+        for (Column column : columns) {
+            if (column.getName() == name) return true;
         }
         return false;
     }
@@ -49,8 +57,12 @@ public class LineageNode {
         this.alias = alias;
     }
 
+    /**
+     * Add a column to the list of columns. Ensures columns are unique (by name).
+     * @param column The column to be added.
+     */
     public void addColumn(Column column) {
-        this.columns.add(column);
+        if (!hasColumnWithName(column.getName())) this.columns.add(column);
     }
 
     public void addListOfColumns(ArrayList<Column> columns) {
