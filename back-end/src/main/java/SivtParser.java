@@ -55,11 +55,11 @@ public class SivtParser {
     public static void printAstOfFirstStatement(List<StatementSplitter.Statement> statements) {
         Iterator<StatementSplitter.Statement> iterator = statements.iterator();
         StatementSplitter.Statement firstStatement = iterator.next();
-        Statement statementToPrint = sqlParser.createStatement(firstStatement.statement(), parsingOptions);
+        Statement statement = sqlParser.createStatement(firstStatement.statement(), parsingOptions);
         IdentityHashMap<Expression, QualifiedName> resolvedNameReferences = new IdentityHashMap<Expression, QualifiedName>();
         PrintStream printStream = new PrintStream(System.out);
         TreePrinter treePrinter = new TreePrinter(resolvedNameReferences, printStream);
-        treePrinter.print(statementToPrint);
+        treePrinter.print(statement);
     }
 
     /**
