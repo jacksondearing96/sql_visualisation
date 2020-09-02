@@ -10,16 +10,31 @@ public class LineageNode {
     private String alias = "";
     private final ArrayList<Column> columns = new ArrayList<Column>();
 
+    public LineageNode(String type) { this(type, "", ""); }
+    public LineageNode(String type, String name) { this(type, name, ""); }
+
     /**
      * Create a lineage node.
-     * @param type Either "TABLE" or "VIEW"
-     * @param name Column name
-     * @param alias Column name alias
+     * @param type Either "TABLE", "VIEW" or "ANONYMOUS"
+     * @param name Table or view name
+     * @param alias Table, view or subquery alias
      */
     public LineageNode(String type, String name, String alias) {
         this.type = type;
         this.name = name;
         this.alias = alias;
+    }
+
+    /**
+     * Determine if this LineageNode is represented in a given list of sources.
+     * @param sources A list of sources that may or may not contain this LineageNode.
+     * @return True if this LineageNode is a source within sources. False otherwise.
+     */
+    public boolean isSourceOf(List<String> sources) {
+        for (String source : sources) {
+            if (source == alias || source == name) return true;
+        }
+        return false;
     }
 
     public void setType(String type) {
