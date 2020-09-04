@@ -6,12 +6,12 @@ import java.util.ArrayList;
 public class PrettyPrinter {
 
     public static void printLineageNodesNames(ArrayList<LineageNode> list) {
-        for (LineageNode item : list) System.out.print(item.getName() + ", ");
+        for (LineageNode item : list) System.out.print(item.getName().concat(", "));
         System.out.print("\n");
     }
 
     public static void printColumns(ArrayList<Column> list) {
-        for (Column item : list) System.out.print(item.getName() + ", ");
+        for (Column item : list) System.out.print(item.getName().concat(", "));
         System.out.print("\n");
     }
 
@@ -23,7 +23,7 @@ public class PrettyPrinter {
 
     private static void printLineContent(int maxWidth, String content) {
         // Left margin.
-        System.out.print("| " + content);
+        System.out.print("| ".concat(content));
 
         int remainingSpaces = maxWidth - content.length();
         for (int i = 0; i < remainingSpaces; ++i) System.out.print(" ");
@@ -37,14 +37,14 @@ public class PrettyPrinter {
         int maxWidth = 0;
 
         String header = lineageNode.getName();
-        if (lineageNode.hasAlias()) header += " AS " + lineageNode.getAlias();
-        header += " TYPE(" + lineageNode.getType() + ")";
+        if (lineageNode.hasAlias()) header = header.concat(" AS ").concat(lineageNode.getAlias());
+        header = header.concat(" TYPE(").concat(lineageNode.getType()).concat(")");
         if (header.length() > maxWidth) maxWidth = header.length();
 
         for (Column column : lineageNode.getColumns()) {
             String row = column.getName();
-            if (!column.getAlias().equals("")) row += " AS " + column.getAlias();
-            if (!column.getSources().isEmpty()) row += " SOURCES " + column.getSources();
+            if (!column.getAlias().equals("")) row = row.concat(" AS ").concat(column.getAlias());
+            if (!column.getSources().isEmpty()) row = row.concat(" SOURCES ").concat(column.getSources().toString());
             if (row.length() > maxWidth) maxWidth = row.length();
             rows.add(row);
         }
