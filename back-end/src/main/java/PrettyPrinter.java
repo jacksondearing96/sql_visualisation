@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Stack;
 
 /**
  * Printer class for printing readable tables to the terminal.
