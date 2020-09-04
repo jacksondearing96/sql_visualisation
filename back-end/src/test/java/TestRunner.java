@@ -1,28 +1,30 @@
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 public class TestRunner {
 
     @BeforeAll
     static void setup(){
-        System.out.println("Testing for SIVT Back-end Parser");
+        System.out.println("Testing for SIVT Back-end:");
+    }
+
+    @AfterAll
+    static void afterAll(){
+        System.out.println("All tests complete.");
     }
 
     @BeforeEach
-    void setupEach(){
-        System.out.println("This is executed before each test");
+    void beforeEach(TestInfo testInfo){
+        System.out.println("Testing: " + testInfo.getDisplayName() + " - Started");
     }
 
-    @Tag("FileReader")
+    @AfterEach
+    void afterEach(TestInfo testInfo){
+        System.out.println("Testing: " + testInfo.getDisplayName() + " - Complete");
+    }
+
     @Test
-    void testFileReader(){
-        System.out.println("Test: FileReader");
+    @DisplayName("testFileReader")
+    void testFileReader(TestInfo testInfo){
         Assertions.assertEquals(" SELECT * FROM hello### SELECT a FROM goodbye", FileReader.ReadFile("./src/test/java/testInput.sql"));
     }
 
