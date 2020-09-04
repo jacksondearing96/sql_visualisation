@@ -20,6 +20,10 @@ public class DataLineage {
         this.fileName = fileName;
     }
 
+    public List<LineageNode> GetNodeList() {
+        return nodeList;
+    }
+
     /**
      * Writes out the data lineage to a JSON file.
      */
