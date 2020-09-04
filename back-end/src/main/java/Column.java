@@ -4,7 +4,7 @@ import java.util.List;
 /**
  * Columns within a particular table or view.
  */
-public class Column {
+public class Column implements Cloneable {
     private String name = "";
     private String alias = "";
     private String id = "";
@@ -27,6 +27,10 @@ public class Column {
         this.id = id;
     }
 
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -39,11 +43,19 @@ public class Column {
         this.id = id;
     }
 
+    public void setSources(List<String> sources) { setSources(new ArrayList<String>(sources)); }
+
+    public void setSources(ArrayList<String> sources) { this.sources = sources; }
+
     public void addSource(String source) {
         this.sources.add(source);
     }
 
     public void addListOfSources(ArrayList<String> sources) {
+        addListOfSources((List<String>)sources);
+    }
+
+    public void addListOfSources(List<String> sources) {
         for (String source : sources) {
             addSource(source);
         }

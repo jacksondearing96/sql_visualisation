@@ -60,4 +60,8 @@ public class DataLineage {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
+
+    public static String makeId(String source, String target) {
+        return source.concat("::").concat(target);
+    }
 }
