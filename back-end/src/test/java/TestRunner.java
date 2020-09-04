@@ -19,10 +19,11 @@ public class TestRunner {
         System.out.println("This is executed before each test");
     }
 
-    @Tag("TAG")
+    @Tag("FileReader")
     @Test
-    void thisTest(){
-        System.out.println("This is a Test!");
+    void testFileReader(){
+        System.out.println("Test: FileReader");
+        Assertions.assertEquals(" SELECT * FROM hello### SELECT a FROM goodbye", FileReader.ReadFile("./src/test/java/testInput.sql"));
     }
 
 
