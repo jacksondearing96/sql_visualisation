@@ -24,7 +24,7 @@ public class TestRunner {
 
     @Test
     @DisplayName("testFileReader")
-    void testFileReader(TestInfo testInfo){
+    void testFileReader(){
         Assertions.assertEquals(" SELECT * FROM hello### SELECT a FROM goodbye", FileReader.ReadFile("./src/test/java/testInput.sql"));
     }
 
