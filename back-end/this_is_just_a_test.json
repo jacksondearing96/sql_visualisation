@@ -1,0 +1,36 @@
+[ {
+  "type" : "TABLE",
+  "name" : "Woosh",
+  "alias" : "Woosh1",
+  "columns" : [ {
+    "name" : "testa",
+    "alias" : "test1a",
+    "id" : "test2a",
+    "sources" : [ "test::APPLE", "test::WAMBLE" ]
+  }, {
+    "name" : "testb",
+    "alias" : "test1b",
+    "id" : "test2b",
+    "sources" : [ "test::BANANA", "test::WAMBLE2" ]
+  } ]
+}, {
+  "type" : "VIEW",
+  "name" : "Spooky",
+  "alias" : "Spooky2",
+  "columns" : [ ]
+}, {
+  "type" : "TABLE",
+  "name" : "Woosh",
+  "alias" : "Woosh1",
+  "columns" : [ {
+    "name" : "testa",
+    "alias" : "test1a",
+    "id" : "test2a",
+    "sources" : [ "test::APPLE", "test::WAMBLE" ]
+  }, {
+    "name" : "testb",
+    "alias" : "test1b",
+    "id" : "test2b",
+    "sources" : [ "test::BANANA", "test::WAMBLE2" ]
+  } ]
+} ]
