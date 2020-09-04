@@ -23,23 +23,11 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     private static int anonymousTableCount = 0;
 
     /**
-     * Regular expression with a capture group to extract the alias from a SelectItem object that has been converted
-     * toString().
-     * Eg. For a particular SelectItem string:
-     * "cast(activitydate as date) as task_note_date"
-     * The regex capture group would return:
-     * "task_note_date"
-     */
-    private static final Pattern aliasPattern = Pattern.compile("[^\\s] ([^\\s]+)$");
-
-    /**
      * Returns the next ID used for allocating unique names to anonymous tables.
      * @return The next unique ID.
      */
     private int getNextAnonymousTableId() {
-        int nextId = anonymousTableCount;
-        ++anonymousTableCount;
-        return nextId;
+        return ++anonymousTableCount;
     }
 
     /**
@@ -151,13 +139,16 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
                     Predicate<String> isNameOrAlias = sourceName -> sourceName.equals(source.getAlias()) || sourceName.equals(source.getName());
                     column.getSources().removeIf(isNameOrAlias);
 
-                    Column sourceColumn = column.getCopy();
-                    sourceColumn.setAlias("");
-                    sourceColumn.setID(DataLineage.makeId(source.getName(), column.getName()));
-                    source.addColumn(sourceColumn);
+                    try {
+                        Column sourceColumn = (Column)column.clone();
+                        sourceColumn.setAlias("");
+                        sourceColumn.setID(DataLineage.makeId(source.getName(), column.getName()));
+                        source.addColumn(sourceColumn);
 
-                    // Add this as a source of the column. This will be for the anonymous table.
-                    column.addSource(sourceColumn.getID());
+                        // Add this as a source of the column. This will be for the anonymous table.
+                        column.addSource(sourceColumn.getID());
+                    } catch(CloneNotSupportedException c) {}
+
                 }
 
                 // Every selected item is added to the anonymous table.
@@ -239,8 +230,8 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     private String extractAlias(SelectItem selectItem) {
         // TODO: Could this be done better? Ideally we don't want to rely on string manipulation to extract semantics.
         // There is probably a way to better utilise the type system and the AST to extract what we are after here.
-        Matcher matcher = aliasPattern.matcher(selectItem.toString());
-        if (matcher.find()) return matcher.group(1);
+        String[] splitStrings = selectItem.toString().split(" ");
+        if (splitStrings.length > 1) return splitStrings[splitStrings.length - 1];
         return "";
     }
 

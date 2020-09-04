@@ -4,7 +4,7 @@ import java.util.List;
 /**
  * Columns within a particular table or view.
  */
-public class Column {
+public class Column implements Cloneable {
     private String name = "";
     private String alias = "";
     private String id = "";
@@ -27,14 +27,8 @@ public class Column {
         this.id = id;
     }
 
-    /**
-     * Copy a column.
-     * @return The copied column.
-     */
-    public Column getCopy() {
-        Column copy = new Column(name, alias, id);
-        copy.sources = new ArrayList<String>(sources);
-        return copy;
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 
     public void setName(String name) {
