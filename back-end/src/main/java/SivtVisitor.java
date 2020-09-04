@@ -43,10 +43,10 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
-     * Stack to maintain the class context.
+     * Stack to maintain the context within which the recursive decent visitor is in.
      * This is important for when a node is visited and its behaviour depends on the context from which it was called.
      * For example, when a table name identifier is visited, it must know if it has been reached in the context of an
-     * aliased relation or not so that the table can be associated with the correct alias if one exists.
+     * aliased relation or not so that the table can be associated with the correct alias, if one exists.
      */
     private static final Stack<Class> currentlyInside = new Stack<>();
 
@@ -74,7 +74,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     @Override
     protected R visitCreateView(CreateView createView, C context) {
 
-        // Push space on the stack for the source that is to be received.
+        // Push space on the stack for the source LineageNode that is to be received.
         sourcesStack.push(new ArrayList<>());
 
         currentlyInside.push(CreateView.class);
@@ -84,8 +84,6 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         // Mutate the anonymous table that was received to become the view.
         LineageNode view = sourcesStack.pop().get(0);
         convertNodeToView(view, createView.getName().toString());
-
-        PrettyPrinter.print(view);
 
         return node;
     }
@@ -117,7 +115,19 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
     /**
      * Reconcile a list of columns and sources to produce the complete lineage nodes. The list of columns and sources
-     * are a result of the SELECT statements.
+     * are a result of the SELECT statements. For example:
+     * SELECT a.x, a.y, b.z
+     * FROM table1 AS a
+     * INNER JOIN table2 AS b
+     *
+     * After recursively visiting this SELECT statement, a list of columns (a.x, a.y, b.z) and a list of sources
+     * (table1 as a, table2 as b) will available on the stacks. This function is responsible for reconciling this
+     * information into dedicated LineageNodes eg:
+     *     ______________       ______________
+     *    | table1 as a  |     | table2 as b  |
+     *    | a.x          |     | b.z          |
+     *    | a.y          |     |              |
+     *     ---------------      --------------
      * @param columns The columns that are to be populated into the sources tables (and anonymous table).
      * @param sources The source tables that the columns came from.
      */
@@ -155,13 +165,6 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
                 anonymousNode.addColumn(column);
             }
         }
-
-        for (LineageNode source : sources) {
-            PrettyPrinter.print(source);
-            System.out.println("^SOURCE");
-        }
-        PrettyPrinter.print(anonymousNode);
-        System.out.println("^RESULT");
 
         // Define all the parent nodes that are interested in keeping the resultant anonymous table to use as a source.
         ArrayList<Class> contextToKeepList =
@@ -261,12 +264,12 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return node;
     }
 
-    @Override
-    protected R visitFunctionCall(FunctionCall functionCall, C context) {
-        System.out.println("FUNCTION: " + functionCall);
-        return visitExpression(functionCall, context);
-    }
-
+    /**
+     * Visit an Identifier node in the AST.
+     * @param identifier The identifier node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
     @Override
     protected R visitIdentifier(Identifier identifier, C context) {
         if (currentlyInside.peek() == SelectItem.class) {
@@ -275,8 +278,20 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return visitExpression(identifier, context);
     }
 
+    /**
+     * Visit a DereferencedExpression node in the AST.
+     * A DereferencedExpression is an identifier-like entity that involves a base and a field.
+     * Eg: SELECT a.b, c, d.e FROM tableName
+     * Here, a.b is an example DereferencedExpression (base = a, field = b).
+     * c is a regualr Identifier
+     * d.e is also a DereferencedExpression
+     * @param dereferenceExpression The dereferenced expression node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
     @Override
     protected R visitDereferenceExpression(DereferenceExpression dereferenceExpression, C context) {
+        // Add this as a column. The base may be an alias, this can be reconciled later.
         if (currentlyInside.peek() == SelectItem.class) {
             Column column = new Column(dereferenceExpression.getField().getValue());
             column.addSource(dereferenceExpression.getBase().toString());
