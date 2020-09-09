@@ -27,7 +27,6 @@ buildNumber.properties
 ## IntelliJ
 out/
 .idea_modules/
-*.iml
 *.ipr
 *.iws
 

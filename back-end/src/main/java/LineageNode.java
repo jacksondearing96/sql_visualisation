@@ -38,6 +38,23 @@ public class LineageNode {
         return false;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        LineageNode lineage = (LineageNode) o;
+
+        return name.equals(lineage.name) &&
+                alias.equals(lineage.alias) &&
+                type.equals(lineage.type) &&
+                columns.equals(lineage.columns);
+    }
+
+
     private boolean hasColumnWithName(String name) {
         for (Column column : columns) {
             if (column.getName().equals(name)) return true;
@@ -90,4 +107,5 @@ public class LineageNode {
     public boolean hasAlias() {
         return !this.alias.equals("");
     }
+
 }

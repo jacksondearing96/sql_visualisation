@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
-    private static final ArrayList<LineageNode> lineageNodes = new ArrayList<>();
+    private static ArrayList<LineageNode> lineageNodes = new ArrayList<>();
 
     private static final Stack<ArrayList<Column>> columnsStack = new Stack<>();
     private static final Stack<ArrayList<LineageNode>> sourcesStack = new Stack<>();
@@ -43,7 +43,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * @param statement The statement which will have its AST traversed recursively to extract the lineage.
      * @return A list of the lineage nodes that have been extracted from statement
      */
-    public List<LineageNode> extractLineage(Statement statement) {
+    public ArrayList<LineageNode> extractLineage(Statement statement) {
         statement.accept(this, null);
         return lineageNodes;
     }
@@ -169,6 +169,11 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
                 }
             }
         }
+
+        lineageNodes.addAll(sources);
+        // TODO: Add unconditionally for testing. But this should depend on whether the parent node intends to transform
+        // this anonymous node into a TABLE/VIEW.
+        lineageNodes.add(anonymousNode);
     }
 
     /**
