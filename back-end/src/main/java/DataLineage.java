@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Stores a list of nodes (tables or view) and writes out the information to
@@ -20,7 +21,7 @@ public class DataLineage {
         this.fileName = fileName;
     }
 
-    public List<LineageNode> GetNodeList() {
+    public List<LineageNode> getNodeList() {
         return nodeList;
     }
 

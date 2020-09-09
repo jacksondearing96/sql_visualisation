@@ -12,7 +12,7 @@ public class LineageExtractor {
         List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
 
         // For testing.
-        SivtParser.printAstOfFirstStatement(statements);
+        // SivtParser.printAstOfFirstStatement(statements);
 
         SivtVisitor<Node, ?> sivtVisitor = new SivtVisitor<Node, Object>();
 
@@ -21,8 +21,7 @@ public class LineageExtractor {
         // Call the accept method to traverse the AST for that statement.
         for (StatementSplitter.Statement statement : statements) {
             Statement parsedStatement = SivtParser.parse(statement);
-            // TODO: add the newly extracted LineageNodes to the actual dataLineage here.
-            sivtVisitor.extractLineage(parsedStatement);
+            dataLineage.addListOfNodes(sivtVisitor.extractLineage(parsedStatement));
         }
         return dataLineage;
     }

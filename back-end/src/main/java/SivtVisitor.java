@@ -26,7 +26,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * @param statement The statement which will have its AST traversed recursively to extract the lineage.
      * @return A list of the lineage nodes that have been extracted from statement
      */
-    public List<LineageNode> extractLineage(Statement statement) {
+    public ArrayList<LineageNode> extractLineage(Statement statement) {
         statement.accept(this, null);
         return lineageNodes;
     }
