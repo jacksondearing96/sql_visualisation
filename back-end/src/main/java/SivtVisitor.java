@@ -39,6 +39,15 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     private static final Stack<Class> currentlyInside = new Stack<>();
 
     /**
+     * Safe and clean method for checking the current context according to currentlyInside.
+     * @param class_ The class that is being checked against the current context.
+     * @return Whether class_ is equal to the top of 'currentlyInside' context stack.
+     */
+    private static boolean isCurrentlyInside(Class class_) {
+        return !currentlyInside.isEmpty() && currentlyInside.peek() == class_;
+    }
+
+    /**
      * Extract the lineage from a statement.
      * @param statement The statement which will have its AST traversed recursively to extract the lineage.
      * @return A list of the lineage nodes that have been extracted from statement
@@ -95,7 +104,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         // Give the result of the subquery its alias if it has one.
         // TODO: Assumption - at the conclusion of recursing through the children of a TableSubquery, there will be a single anonymous table on the sources stack.
         // This assumption should be investigated more thoroughly to ensure it is correct.
-        if (!currentlyInside.isEmpty() && currentlyInside.peek() == AliasedRelation.class) {
+        if (isCurrentlyInside(AliasedRelation.class)) {
             sourcesStack.peek().get(0).setAlias(aliasStack.pop());
         }
         return node;
@@ -161,12 +170,10 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         ArrayList<Class> contextToKeepList =
                 new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class));
 
-        if (!currentlyInside.isEmpty()){
-            for (Class parent : contextToKeepList) {
-                if (currentlyInside.peek() == parent) {
-                    if (!sourcesStack.isEmpty()) sourcesStack.peek().add(anonymousNode);
-                    break;
-                }
+        for (Class parent : contextToKeepList) {
+            if (isCurrentlyInside(parent)) {
+                if (!sourcesStack.isEmpty()) sourcesStack.peek().add(anonymousNode);
+                break;
             }
         }
     }
@@ -263,7 +270,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      */
     @Override
     protected R visitIdentifier(Identifier identifier, C context) {
-        if (currentlyInside.peek() == SelectItem.class) {
+        if (isCurrentlyInside(SelectItem.class)) {
             columnsStack.peek().add(new Column(identifier.getValue()));
         }
         return visitExpression(identifier, context);
@@ -283,7 +290,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     @Override
     protected R visitDereferenceExpression(DereferenceExpression dereferenceExpression, C context) {
         // Add this as a column. The base may be an alias, this can be reconciled later.
-        if (currentlyInside.peek() == SelectItem.class) {
+        if (isCurrentlyInside(SelectItem.class)) {
             Column column = new Column(dereferenceExpression.getField().getValue());
             column.addSource(dereferenceExpression.getBase().toString());
             columnsStack.peek().add(column);
@@ -351,7 +358,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
         // Get the alias if we are within an AliasedRelation context.
         String alias = "";
-        if (currentlyInside.peek() == AliasedRelation.class) alias = aliasStack.pop();
+        if (isCurrentlyInside(AliasedRelation.class)) alias = aliasStack.pop();
 
         // Create a new LineageNode (table) and append it to the list that is on top of the stack.
         sourcesStack.peek().add(new LineageNode("TABLE", table.getName().toString(), alias));
