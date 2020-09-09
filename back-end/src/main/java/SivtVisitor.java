@@ -143,7 +143,10 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
                         Column sourceColumn = (Column)column.clone();
                         sourceColumn.setAlias("");
                         sourceColumn.setID(DataLineage.makeId(source.getName(), column.getName()));
-                        source.addColumn(sourceColumn);
+
+                        // Add the source column to the source table.
+                        // Skip wildcard columns.
+                        if (!sourceColumn.getName().equals("*")) source.addColumn(sourceColumn);
 
                         // Add this as a source of the column. This will be for the anonymous table.
                         column.addSource(sourceColumn.getID());
