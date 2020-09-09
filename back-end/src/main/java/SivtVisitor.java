@@ -40,10 +40,10 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
     /**
      * Safe and clean method for checking the current context according to currentlyInside.
-     * @param class_ The class that is being checked against the current context.
-     * @return Whether class_ is equal to the top of 'currentlyInside' context stack.
+     * @param object The class that is being checked against the current context.
+     * @return Whether object is equal to the top of 'currentlyInside' context stack.
      */
-    private static boolean isCurrentlyInside(Class class_) {
+    private static boolean isCurrentlyInside(Class object) {
         return !currentlyInside.isEmpty() && currentlyInside.peek() == class_;
     }
 
