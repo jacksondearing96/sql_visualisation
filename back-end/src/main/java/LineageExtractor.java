@@ -11,9 +11,6 @@ public class LineageExtractor {
     public static DataLineage extractLineage(String sql) {
         List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
 
-        // For testing.
-        // SivtParser.printAstOfFirstStatement(statements);
-
         SivtVisitor<Node, ?> sivtVisitor = new SivtVisitor<Node, Object>();
 
         // Iterate through each statement.
