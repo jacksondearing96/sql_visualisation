@@ -3,8 +3,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.*;
 
@@ -35,32 +33,33 @@ public class TestRunner {
     @Test
     @DisplayName("testFileReader")
     void testFileReader(){
-        Assertions.assertEquals(" SELECT * FROM hello### SELECT a FROM goodbye", FileReader.ReadFile("./src/test/java/testInput.sql"));
+        Assertions.assertEquals(" SELECT * FROM hello### SELECT a FROM goodbye",
+                FileReader.ReadFile("./src/test/java/testInput.sql"));
     }
 
-    // TODO: Make some way of comparing two lineage nodes. I'm not sure how this is typically done in Java but
-    // in c++ this would be like overloading the == operator so that we can compare lineage nodes much more easily
-    // that the extensive repetition below.
-    @Tag("LineageExtractor")
     @Test
-    void testSimpleSelect() {
+    @DisplayName("testLineageNodes")
+    void testLineageNodes() {
         String simpleSelect = "SELECT a FROM b###";
         List<LineageNode> nodeList = LineageExtractor.extractLineage(simpleSelect).getNodeList();
 
-        Assertions.assertEquals(2, nodeList.size());
-
         // Anonymous table.
-        Assertions.assertEquals("ANONYMOUS", nodeList.get(0).getType());
-        Assertions.assertEquals("Anonymous0", nodeList.get(0).getName());
-        Assertions.assertEquals(false, nodeList.get(0).hasAlias());
-        Assertions.assertEquals(1, nodeList.get(0).getColumns().size());
-        Assertions.assertEquals("a", nodeList.get(0).getColumns().get(0).getName());
+        LineageNode anonymousNode = new LineageNode("ANONYMOUS", "Anonymous1", "");
+        Column anonymousColumn = new Column("a", "", "Anonymous1::a");
+        anonymousColumn.addSource("b::a");
+        anonymousNode.addColumn(anonymousColumn);
 
         // Source table.
-        Assertions.assertEquals("b", nodeList.get(1).getName());
-        Assertions.assertEquals(false, nodeList.get(1).hasAlias());
-        Assertions.assertEquals(1, nodeList.get(1).getColumns().size());
-        Assertions.assertEquals("a", nodeList.get(1).getColumns().get(0).getName());
-        Assertions.assertEquals("TABLE", nodeList.get(1).getType());
+        LineageNode sourceNode = new LineageNode("TABLE", "b", "");
+        Column sourceColumn = new Column("a", "", "b::a");
+        sourceColumn.addSource("b::a");
+        sourceNode.addColumn(sourceColumn);
+
+        // Compare the pair.
+        boolean success = true;
+        success &= nodeList.get(1).equals(anonymousNode);
+        success &= nodeList.get(0).equals(sourceNode);
+
+        Assertions.assertTrue(success);
     }
 }

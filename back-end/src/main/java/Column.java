@@ -31,6 +31,22 @@ public class Column implements Cloneable {
         return super.clone();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Column column = (Column) o;
+
+        return name.equals(column.name) &&
+                alias.equals(column.alias) &&
+                id.equals(column.id) &&
+                sources.equals(column.sources);
+    }
+
     public void setName(String name) {
         this.name = name;
     }
