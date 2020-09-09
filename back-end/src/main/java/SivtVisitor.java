@@ -19,8 +19,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
     /**
      * Counter variable used to generate the unique IDs for anonymous tables.
+     * Start this count at -1 so the auto-increment allocates 0 to the first anonymous table.
      */
-    private static int anonymousTableCount = 0;
+    private static int anonymousTableCount = -1;
 
     /**
      * Returns the next ID used for allocating unique names to anonymous tables.
