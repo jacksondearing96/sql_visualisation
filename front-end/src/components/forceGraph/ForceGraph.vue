@@ -1,5 +1,6 @@
 <template>
     <div id="forceGraph" class="text-center">
+        <!-- Force Graph -->
         <div class="jumbotron">
             <h3>Base table for {{ baseTable }} tables </h3>
             <h3>Derived from {{ derivedTable }} tables </h3>
@@ -22,11 +23,25 @@
             <d3-network :net-nodes="nodes" :net-links="links" :options="options" :link-cb="linkInfo"
                 @node-click="nodeInfo" />
         </div>
+        <!-- End Force Graph -->
+
+        <!-- Node info -->
+        <div id="infoButton" class="container">
+            <p class="lead mr-3">Node selected: {{ nodeSelected }}
+                <button class="btn btn-info ml-4" data-bs-hover-animate="swing" type="button" @click="showColumns">Info</button>
+            </p>
+        </div>
+        <!-- End Node info -->
+
+        <!-- Table Info -->
+        <TableInfo v-if="isColumn" :node="nodeSelected"></TableInfo>
+        <!-- End Table Info -->
     </div>
 </template>
 
 <script>
     import D3Network from 'vue-d3-network'
+    import TableInfo from '@/components/tableInfo/TableInfo.vue'
     export default {
         data() {
             return {
@@ -36,7 +51,9 @@
                 canvas: false,
                 tableLinkInformation: [],
                 baseTable: 0,
-                derivedTable: 0
+                derivedTable: 0,
+                isColumn: false,
+                nodeSelected: ''
             }
         },
         computed: {
@@ -64,9 +81,10 @@
                 return link
             },
             nodeInfo(event, node) {
+                this.nodeSelected = node.name
+                this.isColumn = false
                 this.baseTable = 0
                 this.derivedTable = 0
-
 
                 this.tableLinkInformation.forEach(element => {
                     if (element.sid == node.id) {
@@ -77,15 +95,19 @@
                         this.derivedTable += 1
                     }
                 })
+            },
+            showColumns(){
+                this.isColumn = true;
             }
         },
-         created() {
+        created() {
             // Retrieving all nodes and links from vuex
-            this.nodes =  this.$store.getters.allNodes
-            this.links =  this.$store.getters.allLinks
+            this.nodes = this.$store.getters.allNodes
+            this.links = this.$store.getters.allLinks
         },
         components: {
-            D3Network
+            D3Network,
+            TableInfo
         }
     }
 </script>

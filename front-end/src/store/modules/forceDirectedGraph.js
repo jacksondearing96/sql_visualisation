@@ -10,6 +10,9 @@ const getters = {
     },
     allLinks: (state) => {
         return state.links
+    },
+    allTables: (state) => {
+      return state.tables
     }
 }
 
