@@ -28,7 +28,9 @@ public class Column implements Cloneable {
     }
 
     public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+        Column clone = (Column)super.clone();
+        clone.sources = new ArrayList<String>(sources);
+        return clone;
     }
 
     public void setName(String name) {
