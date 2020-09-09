@@ -143,7 +143,10 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
                         Column sourceColumn = (Column)column.clone();
                         sourceColumn.setAlias("");
                         sourceColumn.setID(DataLineage.makeId(source.getName(), column.getName()));
-                        source.addColumn(sourceColumn);
+
+                        // Add the source column to the source table.
+                        // Skip wildcard columns.
+                        if (!sourceColumn.getName().equals("*")) source.addColumn(sourceColumn);
 
                         // Add this as a source of the column. This will be for the anonymous table.
                         column.addSource(sourceColumn.getID());
@@ -373,6 +376,16 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      */
     @Override
     public final R visitNode(Node node, C context) {
+
+        // Columns are usually captured in the visitIdentifier function but wildcard operators
+        // are not classed as an Identifier which means they are skipped.
+        // Explicitly add wildcard select items here instead.
+        if (node.toString().equals("*")) {
+            if (!currentlyInside.isEmpty() && currentlyInside.peek() == SelectItem.class) {
+                columnsStack.peek().add(new Column(node.toString()));
+            }
+        }
+
         List<? extends Node> children = node.getChildren();
         for (Node child : children) {
             this.process(child, context);
