@@ -49,18 +49,18 @@ public class TestRunner {
 
         Assertions.assertEquals(2, nodeList.size());
 
+        // Anonymous table.
+        Assertions.assertEquals("ANONYMOUS", nodeList.get(0).getType());
+        Assertions.assertEquals("Anonymous0", nodeList.get(0).getName());
+        Assertions.assertEquals(false, nodeList.get(0).hasAlias());
+        Assertions.assertEquals(1, nodeList.get(0).getColumns().size());
+        Assertions.assertEquals("a", nodeList.get(0).getColumns().get(0).getName());
+
         // Source table.
-        Assertions.assertEquals("TABLE", nodeList.get(1).getType());
         Assertions.assertEquals("b", nodeList.get(1).getName());
         Assertions.assertEquals(false, nodeList.get(1).hasAlias());
         Assertions.assertEquals(1, nodeList.get(1).getColumns().size());
         Assertions.assertEquals("a", nodeList.get(1).getColumns().get(0).getName());
-
-        // Anonymous table.
-        Assertions.assertEquals("ANONYMOUS", nodeList.get(1).getType());
-        Assertions.assertEquals("Anonymous0", nodeList.get(1).getName());
-        Assertions.assertEquals(false, nodeList.get(1).hasAlias());
-        Assertions.assertEquals(1, nodeList.get(1).getColumns().size());
-        Assertions.assertEquals("a", nodeList.get(1).getColumns().get(0).getName());
+        Assertions.assertEquals("TABLE", nodeList.get(1).getType());
     }
 }
