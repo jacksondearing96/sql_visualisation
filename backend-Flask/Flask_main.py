@@ -43,7 +43,8 @@ Add to your Environment Variables:
 def upload_file():
     response_object = {'status': 'success'}
     if request.method == "POST" and request.files:
-        file = request.files['file']
+        file = request.files['file[0]']
+        response_object['input'] = request.form['concatInput']
         response_object['name'] = file.filename
         agentLeadOutput = autoclass(data['classes'])
         sb = agentLeadOutput()
