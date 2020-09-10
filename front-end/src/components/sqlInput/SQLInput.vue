@@ -37,7 +37,7 @@
                 // Propic's file compilation order
                 const order = [
                     'crm_join.sql',
-                    'supporting_view.sql',
+                    'supporting_views.sql',
                     'appraisal_case.sql',
                     'buyer_vendor_case.sql',
                     'record_sale_nearby.sql',
@@ -49,7 +49,13 @@
 
                 // Sorting files and assigning to this.files
                 this.files = _.sortBy(this.files, obj => {
-                    return _.indexOf(order, obj.name)
+                    var i = 0
+                    if (_.indexOf(order, obj.name) == -1) {
+                        i++
+                        return this.files.length + i
+                    } else {
+                        return _.indexOf(order, obj.name)
+                    }
                 })
 
                 // Iterating over files, reading them and appending result to text
