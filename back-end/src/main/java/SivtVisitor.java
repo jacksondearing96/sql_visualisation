@@ -45,7 +45,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * @return Whether object is equal to the top of 'currentlyInside' context stack.
      */
     private static boolean isCurrentlyInside(Class object) {
-        return !currentlyInside.isEmpty() && currentlyInside.peek() == class_;
+        return !currentlyInside.isEmpty() && currentlyInside.peek() == object;
     }
 
     /**
