@@ -12,7 +12,7 @@ node_modules
 hs_err_pid*
 
 ## Maven
-**.idea
+**.idea/
 target/
 pom.xml.tag
 pom.xml.releaseBackup
