@@ -35,6 +35,17 @@ public class TestRunner {
                 FileReader.ReadFile("./src/test/java/testInput.sql"));
     }
 
+    /**
+     * Get the data from a column in the format:
+     * "alias=columnAlias,id=columnID,name=columnName,sources={source1,source2,...}"
+     * @param column The column which will have its data extracted and stringified.
+     * @return The column data in the string form (above).
+     */
+    private String getColumnDataString(Column column)  {
+        String columnData = ReflectionToStringBuilder.reflectionToString(column);
+        return columnData.substring(columnData.indexOf("[")+1, columnData.indexOf("]"));
+    }
+
     @Test
     @DisplayName("testColumn")
     void testColumn() {
@@ -53,11 +64,9 @@ public class TestRunner {
         column.setSources(sources);
         column.addSource("source3");
         column.addListOfSources(sources);
-        String columnData = ReflectionToStringBuilder.reflectionToString(column);
-        columnData = columnData.substring(columnData.indexOf("[")+1, columnData.indexOf("]"));
         Assertions.assertEquals(
                 "alias=newAlias,id=newID,name=newName,sources={source1,source2,source3,source1,source2}",
-                columnData);
+                getColumnDataString(column));
 
         // Test Column cloning and equals
         try {
