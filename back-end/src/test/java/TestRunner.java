@@ -1,13 +1,10 @@
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.junit.jupiter.api.*;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 
 public class TestRunner {
 
@@ -41,55 +38,28 @@ public class TestRunner {
     @Test
     @DisplayName("testColumn")
     void testColumn() {
-        // Constructors and getters.
+        // Testing "getters"
         Column column = new Column("name", "alias", "id");
         Assertions.assertEquals("name", column.getName());
         Assertions.assertEquals("alias", column.getAlias());
         Assertions.assertEquals("id", column.getID());
         Assertions.assertTrue(column.getSources().isEmpty());
 
-        column = new Column("otherName");
-        Assertions.assertEquals("otherName", column.getName());
-        Assertions.assertTrue(column.getAlias().isEmpty());
-        Assertions.assertTrue(column.getID().isEmpty());
-
-        // Setters.
+        // Testing "setters"
+        ArrayList<String> sources = new ArrayList<>(Arrays.asList("source1", "source2"));
         column.setName("newName");
-        Assertions.assertEquals("newName", column.getName());
         column.setAlias("newAlias");
-        Assertions.assertEquals("newAlias", column.getAlias());
         column.setID("newID");
-        Assertions.assertEquals("newID", column.getID());
-
-        // Set sources.
-        ArrayList<String> sources = new ArrayList<>();
-        sources.add("source1");
-        sources.add("source2");
         column.setSources(sources);
-        Assertions.assertEquals(sources, column.getSources());
+        column.addSource("source3");
+        column.addListOfSources(sources);
+        String columnData = ReflectionToStringBuilder.reflectionToString(column);
+        columnData = columnData.substring(columnData.indexOf("[")+1, columnData.indexOf("]"));
+        Assertions.assertEquals(
+                "alias=newAlias,id=newID,name=newName,sources={source1,source2,source3,source1,source2}",
+                columnData);
 
-        // Add single source.
-        column.addSource("anotherSource");
-        sources.add("anotherSource");
-        Assertions.assertEquals(sources, column.getSources());
-
-        // Add list of sources.
-        ArrayList<String> moreSources = new ArrayList<>();
-        moreSources.add("source3");
-        moreSources.add("source4");
-        sources.add("source3");
-        sources.add("source4");
-        column.addListOfSources(moreSources);
-        Assertions.assertEquals(sources, column.getSources());
-
-        // Equals.
-        Column equalColumn = new Column("newName", "newAlias", "newID");
-        equalColumn.addListOfSources(column.getSources());
-        Assertions.assertTrue(column.equals(equalColumn));
-        equalColumn.addSource("additionalSource");
-        Assertions.assertFalse(column.equals(equalColumn));
-
-        // Clone.
+        // Test Column cloning and equals
         try {
             Column clone = (Column) column.clone();
             Assertions.assertTrue(column.equals(clone));
@@ -105,8 +75,8 @@ public class TestRunner {
         List<LineageNode> nodeList = LineageExtractor.extractLineage(simpleSelect).getNodeList();
 
         // Anonymous table.
-        LineageNode anonymousNode = new LineageNode("ANONYMOUS", "Anonymous1", "");
-        Column anonymousColumn = new Column("a", "", "Anonymous1::a");
+        LineageNode anonymousNode = new LineageNode("ANONYMOUS", "Anonymous0", "");
+        Column anonymousColumn = new Column("a", "", "Anonymous0::a");
         anonymousColumn.addSource("b::a");
         anonymousNode.addColumn(anonymousColumn);
 
