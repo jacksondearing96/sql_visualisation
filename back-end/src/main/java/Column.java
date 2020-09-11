@@ -61,9 +61,7 @@ public class Column implements Cloneable {
         this.id = id;
     }
 
-    public void setSources(List<String> sources) { setSources(new ArrayList<String>(sources)); }
-
-    public void setSources(ArrayList<String> sources) { this.sources = sources; }
+    public void setSources(ArrayList<String> sources) { this.sources = new ArrayList<>(sources); }
 
     public void addSource(String source) {
         this.sources.add(source);
