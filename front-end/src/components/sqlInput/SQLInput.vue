@@ -8,46 +8,82 @@
         <div class="buttons">
             <!-- <input class="form-control-lg" type="text" style="height: 40px;" placeholder="SQL script"> -->
             <div class="custom-file">
-                <input ref="file" type="file" class="custom-file-input" id="inputFile" @change="extractFile">
+                <input ref="file" type="file" class="custom-file-input" id="inputFile" @change="extractFile" multiple>
                 <label class="custom-file-label" for="inputFile" aria-describedby="inputFile">SQL script</label>
             </div>
             <button class="btn btn-primary" type="button" @click.prevent="upload">Upload!</button>
-            <button class="btn btn-primary" type="button" @click.prevent="javaTest">java!</button>
         </div>
     </div>
 </template>
 <script>
-    import {mapActions} from 'vuex'
-    import axios from 'axios'
+    import {
+        mapActions
+    } from 'vuex'
+    import _ from 'lodash'
     export default {
         name: 'SQLInput',
-        data(){
+        data() {
             return {
-                file: ''
+                files: '',
+                text: ''
             }
         },
         methods: {
             ...mapActions(['uploadScript']),
-            extractFile(){
-                this.file = this.$refs.file.files[0]
+            extractFile() {
+                // Assigning file(s) to this.files
+                this.files = this.$refs.file.files
+
+                // Propic's file compilation order
+                const order = [
+                    'crm_join.sql',
+                    'supporting_views.sql',
+                    'appraisal_case.sql',
+                    'buyer_vendor_case.sql',
+                    'record_sale_nearby.sql',
+                    'leads_from_crm.sql',
+                    'leads_from_market.sql',
+                    'leads_with_score.sql',
+                    'agent_leads.sql'
+                ]
+
+                // Sorting files and assigning to this.files
+                this.files = _.sortBy(this.files, obj => {
+                    let i = 0
+
+                    if (_.indexOf(order, obj.name) === -1) {
+                        i++
+                        return this.files.length + i
+                    } 
+
+                    return _.indexOf(order, obj.name)
+                })
+
+                // Iterating over files, reading them and appending result to text
+                this.files.forEach(file => {
+                    const reader = new FileReader()
+
+                    reader.onload = () => {
+                        this.text += reader.result + '\n'
+                    }
+
+                    // This is asynchronous, that's why we need the onload above
+                    reader.readAsText(file)
+                })
             },
-            upload(){
+            upload() {
                 // Instantiate formData object
                 let formData = new FormData()
 
-                // Append file to  formData
-                formData.append('file', this.file)
-                
-                this.uploadScript(formData)
-            },
-            javaTest(){
-                axios.post('http://127.0.0.1:5000/javatest', {
-                    name: 'Gabriel'
-                }).then(response => {
-                    console.log(response)
-                }).catch(error => {
-                    console.log('java error' + error)
+                // Append file(s) to  formData
+                this.files.forEach((file, index) => {
+                    formData.append('file[' + index + ']', file)
                 })
+
+                // Append concatenated text to formData
+                formData.append('concatInput', this.text)
+
+                this.uploadScript(formData)
             }
         }
     }

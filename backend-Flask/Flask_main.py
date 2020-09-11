@@ -41,15 +41,16 @@ Add to your Environment Variables:
 
 @app.route('/uploader', methods=['GET', 'POST'])
 def upload_file():
-    response_object = {'status': 'success'}
+    responseObject = {'status': 'success'}
     if request.method == "POST" and request.files:
-        file = request.files['file']
-        response_object['name'] = file.filename
+        file = request.files['file[0]']
+        responseObject['input'] = request.form['concatInput']
+        responseObject['name'] = file.filename
         agentLeadOutput = autoclass(data['classes'])
         sb = agentLeadOutput()
         response_text = sb.outputDataStruct(file.filename)
-        response_object['tables'] = json.loads(response_text)
-    return jsonify(response_object)
+        responseObject['tables'] = json.loads(response_text)
+    return jsonify(responseObject)
 
 
 if __name__ == '__main__':
