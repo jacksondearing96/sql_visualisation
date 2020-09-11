@@ -32,7 +32,7 @@ public class SelectStatement {
 
     private void reconcileSelectItemsWithSourceTables() {
         anonymousNode = new LineageNode("ANONYMOUS", "Anonymous" + Util.getNextAnonymousTableId());
-        System.out.println(selectItems.size());
+
         for (SelectItem selectItem : selectItems) {
             for (LineageNode sourceTable : sourceTables) {
 
@@ -42,13 +42,13 @@ public class SelectStatement {
 
                     Column column = new Column(identifier.getField());
                     if (!identifier.getBase().isEmpty()) column.addSource(identifier.getBase());
-                   System.out.println(column.getName() + ":" + column.getSources());
+
                     // In the case of a single source, the columns won't already have the source recorded in their list of
                     // sources (because it will have appeared as a pure identifier in the SQL eg. columnName instead of
                     // tableName.columnName.
                     // Therefore, explicitly check for the case of a single source.
                     if (sourceTables.size() == 1 || sourceTable.isSourceOf(column.getSources())) {
-                        System.out.println(column.getName());
+
                         // When this point is reached, 'sourceTable' is a known source of 'column'.
                         // Add this column to the source table.
 
@@ -80,7 +80,6 @@ public class SelectStatement {
                 anonymousColumn.setID(DataLineage.makeId(anonymousNode.getName(), anonymousColumn.getName()));
                 // Every selected item is added to the anonymous table.
                 anonymousNode.addColumn(anonymousColumn);
-                System.out.println(anonymousColumn.getSources());
             }
         }
         isReconciled = true;
