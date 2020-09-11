@@ -49,13 +49,14 @@
 
                 // Sorting files and assigning to this.files
                 this.files = _.sortBy(this.files, obj => {
-                    var i = 0
-                    if (_.indexOf(order, obj.name) == -1) {
+                    let i = 0
+
+                    if (_.indexOf(order, obj.name) === -1) {
                         i++
                         return this.files.length + i
-                    } else {
-                        return _.indexOf(order, obj.name)
-                    }
+                    } 
+
+                    return _.indexOf(order, obj.name)
                 })
 
                 // Iterating over files, reading them and appending result to text
