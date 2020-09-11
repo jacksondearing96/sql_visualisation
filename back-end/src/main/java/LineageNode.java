@@ -79,7 +79,12 @@ public class LineageNode {
      * @param column The column to be added.
      */
     public void addColumn(Column column) {
-        if (!hasColumnWithName(column.getName())) this.columns.add(column);
+
+        if (!hasColumnWithName(column.getName())) {
+            try {
+                this.columns.add((Column)column.clone());
+            } catch (CloneNotSupportedException c) {}
+        }
     }
 
     public void addListOfColumns(ArrayList<Column> columns) {
