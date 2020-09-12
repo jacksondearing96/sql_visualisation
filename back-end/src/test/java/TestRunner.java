@@ -110,11 +110,11 @@ public class TestRunner {
 
         LineageNode anonymousTable = new LineageNode("ANONYMOUS", "Anonymous0", "");
         Column column1a = new Column("column1", "", "");
-        column1a.setSources(new ArrayList<>(Arrays.asList("column1::column1")));
+        column1a.setSources(new ArrayList<>(Arrays.asList("tableName::column1")));
         Column column2a = new Column("column2", "", "");
-        column1a.setSources(new ArrayList<>(Arrays.asList("column2::column2")));
+        column1a.setSources(new ArrayList<>(Arrays.asList("tableName::column2")));
         Column columnA = new Column("columnA", "", "");
-        column1a.setSources(new ArrayList<>(Arrays.asList("columnA::someDate")));
+        column1a.setSources(new ArrayList<>(Arrays.asList("tableName::someDate")));
         anonymousTable.addListOfColumns(new ArrayList<>(Arrays.asList(column1a, column2a, columnA)));
 
         // Compare the pair.
