@@ -102,4 +102,26 @@ public class TestRunner {
 
         Assertions.assertTrue(success);
     }
+
+    @Test
+    @DisplayName("testNumericSelectValues")
+    void testNumbericSelectValues() {
+        String numericSelectValues = "SELECT 1 as one FROM a###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(numericSelectValues).getNodeList();
+
+        // Source table (no columns).
+        LineageNode sourceTable = new LineageNode("TABLE", "a");
+
+        // Anonymous table.
+        LineageNode anonymousTable = new LineageNode("ANONYMOUS", "Anonymous0");
+        anonymousTable.addColumn(new Column("one"));
+
+        for (LineageNode node : nodeList) {
+            PrettyPrinter.printLineageNode(node);
+        }
+
+        Assertions.assertEquals(2, nodeList.size());
+        Assertions.assertEquals(sourceTable, nodeList.get(0));
+        Assertions.assertEquals(anonymousTable, nodeList.get(1));
+    }
 }
