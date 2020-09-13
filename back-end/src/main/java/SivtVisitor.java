@@ -53,6 +53,13 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         node.setAlias("");
     }
 
+    /**
+     * Visit a CreateView node in the AST.
+     *
+     * @param createView The CreateView node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
     @Override
     protected R visitCreateView(CreateView createView, C context) {
 

@@ -2,10 +2,15 @@ import java.util.ArrayList;
 import java.util.Stack;
 import java.util.function.Predicate;
 
+/**
+ * Represents a select statement from an SQL statement.
+ * A select statement contains potentially multiple distinct select items and these items
+ * are sourced from potentially multiple source tables.
+ */
 public class SelectStatement {
     private Stack<SelectItem> selectItems = new Stack<>();
     private ArrayList<LineageNode> sourceTables = new ArrayList<>();
-    private LineageNode anonymousNode;
+    private LineageNode anonymousTable;
     private boolean isReconciled = false;
 
     public void addEmptySelectItem() {
@@ -20,18 +25,32 @@ public class SelectStatement {
         return selectItems.peek();
     }
 
+    /**
+     * Make sure the select items have been reconciled with the source tables before returning
+     * the source tables.
+     * @return The (completed) source tables.
+     */
     public ArrayList<LineageNode> getSourceTables() {
         if (!isReconciled) reconcileSelectItemsWithSourceTables();
         return sourceTables;
     }
 
+    /**
+     * Make sure the select items have been reconciled with the source tables before returning
+     * the anonymous table.
+     * @return The anonymous table.
+     */
     public LineageNode getAnonymousTable() {
         if (!isReconciled) reconcileSelectItemsWithSourceTables();
-        return anonymousNode;
+        return anonymousTable;
     }
 
+    /**
+     * Takes the select items and the source tables for the select statement and reconciles them into
+     * completed LineageNodes. This finalises the sourceTables and anonymousTable members.
+     */
     private void reconcileSelectItemsWithSourceTables() {
-        anonymousNode = new LineageNode("ANONYMOUS", "Anonymous" + Util.getNextAnonymousTableId());
+        anonymousTable = new LineageNode("ANONYMOUS", "Anonymous" + Util.getNextAnonymousTableId());
 
         for (SelectItem selectItem : selectItems) {
             for (LineageNode sourceTable : sourceTables) {
@@ -74,7 +93,7 @@ public class SelectStatement {
                 // If an alias exists for this column, use it as the name for the anonymous table.
                 if (!selectItem.getAlias().isEmpty()) anonymousColumn.setName(selectItem.getAlias());
                 // Every selected item is added to the anonymous table.
-                anonymousNode.addColumn(anonymousColumn);
+                anonymousTable.addColumn(anonymousColumn);
             }
         }
         isReconciled = true;

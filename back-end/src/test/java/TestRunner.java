@@ -101,6 +101,14 @@ public class TestRunner {
         Assertions.assertEquals(2, nodeList.size(), "nodeList size");
         LineageNodeCompare.assertNodesEquals(nodeList.get(0), myTable);
         LineageNodeCompare.assertNodesEquals(nodeList.get(1), anonymousTable);
+
+        // While we have the expected tables constructed, test more statements with the same expected output
+        // with variations to the SQL syntax.
+        multipleIdentifiersSelectStatement = "select someFunction(a, b) as c, d from mytable###";
+        nodeList = LineageExtractor.extractLineage(multipleIdentifiersSelectStatement).getNodeList();
+        Assertions.assertEquals(2, nodeList.size(), "nodeList size");
+        LineageNodeCompare.assertNodesEquals(nodeList.get(0), myTable);
+        LineageNodeCompare.assertNodesEquals(nodeList.get(1), anonymousTable);
     }
 
     @Test

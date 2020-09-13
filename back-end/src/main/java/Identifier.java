@@ -1,3 +1,6 @@
+/**
+ * Represents an immutable identifier in an SQL statement.
+ */
 public class Identifier {
     private final String base;
     private final String field;
