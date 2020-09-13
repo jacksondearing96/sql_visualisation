@@ -60,9 +60,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      */
     private boolean isInContextToKeep() {
         for (Class parent : contextToKeepList) {
-            if (isCurrentlyInside(parent)) {
-                return true;
-            }
+            if (isCurrentlyInside(parent)) return true;
         }
         return false;
     }
