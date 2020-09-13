@@ -11,17 +11,17 @@ import java.util.Arrays;
 
 class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
-    private static ArrayList<LineageNode> lineageNodes = new ArrayList<>();
+    private ArrayList<LineageNode> lineageNodes = new ArrayList<>();
 
-    private static final Stack<ArrayList<Column>> columnsStack = new Stack<>();
-    private static final Stack<ArrayList<LineageNode>> sourcesStack = new Stack<>();
-    private static final Stack<String> aliasStack = new Stack<>();
+    private final Stack<ArrayList<Column>> columnsStack = new Stack<>();
+    private final Stack<ArrayList<LineageNode>> sourcesStack = new Stack<>();
+    private final Stack<String> aliasStack = new Stack<>();
 
     /**
      * Counter variable used to generate the unique IDs for anonymous tables.
      * Start this count at -1 so the auto-increment allocates 0 to the first anonymous table.
      */
-    private static int anonymousTableCount = -1;
+    private int anonymousTableCount = -1;
 
     /**
      * Returns the next ID used for allocating unique names to anonymous tables.

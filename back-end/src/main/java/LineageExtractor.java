@@ -5,10 +5,9 @@ import com.facebook.presto.sql.tree.Statement;
 import java.util.List;
 
 public class LineageExtractor {
-
-    private static DataLineage dataLineage = new DataLineage("lineage_output.json");
-
     public static DataLineage extractLineage(String sql) {
+        DataLineage dataLineage = new DataLineage("lineage_output.json");
+
         List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
 
         SivtVisitor<Node, ?> sivtVisitor = new SivtVisitor<Node, Object>();

@@ -83,17 +83,18 @@ public class TestRunner {
         String simpleSelect = "SELECT a FROM b###";
         List<LineageNode> nodeList = LineageExtractor.extractLineage(simpleSelect).getNodeList();
 
-        // Anonymous table.
-        LineageNode anonymousNode = new LineageNode("ANONYMOUS", "Anonymous0", "");
-        Column anonymousColumn = new Column("a", "", "Anonymous0::a");
-        anonymousColumn.addSource("b::a");
-        anonymousNode.addColumn(anonymousColumn);
-
         // Source table.
-        LineageNode sourceNode = new LineageNode("TABLE", "b", "");
-        Column sourceColumn = new Column("a", "", "b::a");
-        sourceColumn.addSource("b::a");
-        sourceNode.addColumn(sourceColumn);
+        LineageNode sourceNode = new LineageNode("TABLE", "b");
+        Column a = new Column("a");
+        sourceNode.addColumn(a);
+
+        PrettyPrinter.printLineageNode(nodeList.get(0));
+        PrettyPrinter.printLineageNode(sourceNode);
+
+        // Anonymous table.
+        LineageNode anonymousNode = new LineageNode("ANONYMOUS", "Anonymous0");
+        a.addSource("b::a");
+        anonymousNode.addColumn(a);
 
         // Compare the pair.
         boolean success = true;
