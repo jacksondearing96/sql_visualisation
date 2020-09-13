@@ -1,5 +1,9 @@
 /**
  * Represents an immutable identifier in an SQL statement.
+ * Eg. SELECT tableName.columnName FROM tableName;
+ * Here, The Identifier is tableName.columnName
+ * with base = tableName
+ *      field = columnName
  */
 public class Identifier {
     private final String base;
