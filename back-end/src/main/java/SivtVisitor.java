@@ -17,8 +17,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
     /**
      * Counter variable used to generate the unique IDs for anonymous tables.
+     * Start this count at -1 so the auto-increment allocates 0 to the first anonymous table.
      */
-    private static int anonymousTableCount = 0;
+    private static int anonymousTableCount = -1;
 
     /**
      * Returns the next ID used for allocating unique names to anonymous tables.
@@ -36,10 +37,18 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      */
     private static final Stack<Class> currentlyInside = new Stack<>();
 
+    /**
+     * Safe and clean method for checking the current context according to currentlyInside.
+     * @param object The class that is being checked against the current context.
+     * @return Whether object is equal to the top of 'currentlyInside' context stack.
+     */
+    private static boolean isCurrentlyInside(Class object) {
+        return !currentlyInside.isEmpty() && currentlyInside.peek() == object;
+    }
+
     private ColumnIdentifierList topColumnIdentifierList()  {
         return columnIdentifierListStack.peek().get(columnIdentifierListStack.peek().size() - 1);
     }
-
 
     /**
      * Extract the lineage from a statement.
@@ -98,7 +107,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         // Give the result of the subquery its alias if it has one.
         // TODO: Assumption - at the conclusion of recursing through the children of a TableSubquery, there will be a single anonymous table on the sources stack.
         // This assumption should be investigated more thoroughly to ensure it is correct.
-        if (!currentlyInside.isEmpty() && currentlyInside.peek() == AliasedRelation.class) {
+        if (isCurrentlyInside(AliasedRelation.class)) {
             sourcesStack.peek().get(0).setAlias(aliasStack.pop());
         }
         return node;
@@ -149,8 +158,10 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
                         Predicate<String> isNameOrAlias = sourceName -> sourceName.equals(source.getAlias()) || sourceName.equals(source.getName());
                         column.getSources().removeIf(isNameOrAlias);
 
-                        column.setAlias("");
                         source.addColumn(column);
+                        // Add the source column to the source table.
+                        // Skip wildcard columns.
+                        if (!column.getName().equals("*")) source.addColumn(column);
 
                         // Add this as a source of the column. This will be for the anonymous table.
                         anonymousColumn.addSource(column.getID());
@@ -174,21 +185,12 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         ArrayList<Class> contextToKeepList =
                 new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class));
 
-        if (!currentlyInside.isEmpty()){
-            for (Class parent : contextToKeepList) {
-                if (currentlyInside.peek() == parent) {
-                    if (!sourcesStack.isEmpty()) sourcesStack.peek().add(anonymousNode);
-                    break;
-                }
+        for (Class parent : contextToKeepList) {
+            if (isCurrentlyInside(parent)) {
+                if (!sourcesStack.isEmpty()) sourcesStack.peek().add(anonymousNode);
+                break;
             }
         }
-
-        for (LineageNode source : sources) {
-            PrettyPrinter.printLineageNode(source);
-            System.out.println("^SOURCE");
-        }
-        PrettyPrinter.printLineageNode(anonymousNode);
-        System.out.println("^DERIVED");
 
         lineageNodes.addAll(sources);
         // TODO: Add unconditionally for testing. But this should depend on whether the parent node intends to transform
@@ -289,7 +291,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      */
     @Override
     protected R visitIdentifier(com.facebook.presto.sql.tree.Identifier identifier, C context) {
-        if (currentlyInside.peek() == com.facebook.presto.sql.tree.SelectItem.class) {
+        if (isCurrentlyInside(com.facebook.presto.sql.tree.SelectItem.class)) {
             topColumnIdentifierList().add(new ColumnIdentifier(identifier.getValue()));
         }
         return visitExpression(identifier, context);
@@ -309,7 +311,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     @Override
     protected R visitDereferenceExpression(DereferenceExpression dereferenceExpression, C context) {
         // Add this as a column. The base may be an alias, this can be reconciled later.
-        if (currentlyInside.peek() == com.facebook.presto.sql.tree.SelectItem.class) {
+        if (isCurrentlyInside(com.facebook.presto.sql.tree.SelectItem.class)) {
             String base = dereferenceExpression.getBase().toString();
             String field = dereferenceExpression.getField().toString();
             topColumnIdentifierList().add(new ColumnIdentifier(base, field));
@@ -377,7 +379,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
         // Get the alias if we are within an AliasedRelation context.
         String alias = "";
-        if (currentlyInside.peek() == AliasedRelation.class) alias = aliasStack.pop();
+        if (isCurrentlyInside(AliasedRelation.class)) alias = aliasStack.pop();
 
         // Create a new LineageNode (table) and append it to the list that is on top of the stack.
         sourcesStack.peek().add(new LineageNode("TABLE", table.getName().toString(), alias));
@@ -394,6 +396,18 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      */
     @Override
     public final R visitNode(Node node, C context) {
+
+        // Columns are usually captured in the visitIdentifier function but wildcard operators
+        // are not classed as an Identifier which means they are skipped.
+        // Explicitly add wildcard select items here instead.
+        if (node.toString().equals("*")) {
+            if (!currentlyInside.isEmpty() && currentlyInside.peek() == SelectItem.class) {
+                ColumnIdentifierList wildcardColumn = new ColumnIdentifierList();
+                wildcardColumn.add(new ColumnIdentifier("*"));
+                columnIdentifierListStack.peek().add(wildcardColumn);
+            }
+        }
+
         List<? extends Node> children = node.getChildren();
         for (Node child : children) {
             this.process(child, context);

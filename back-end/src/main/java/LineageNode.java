@@ -78,7 +78,6 @@ public class LineageNode {
      * @param column The column to be added.
      */
     public void addColumn(Column column) {
-
         if (!hasColumnWithName(column.getName())) {
             try {
                 column.setID(DataLineage.makeId(name, column.getName()));
