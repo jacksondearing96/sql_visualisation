@@ -75,8 +75,6 @@ public class SelectStatement {
                         Predicate<String> isNameOrAlias = sourceName -> sourceName.equals(sourceTable.getAlias()) || sourceName.equals(sourceTable.getName());
                         column.getSources().removeIf(isNameOrAlias);
 
-                        sourceTable.addColumn(column);
-
                         // Add the source column to the source table.
                         // Skip wildcard columns.
                         if (!column.getName().equals("*")) sourceTable.addColumn(column);
