@@ -3,7 +3,6 @@ import com.facebook.presto.sql.tree.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.Stack;
 import java.util.Arrays;
 
@@ -11,23 +10,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
     private final ArrayList<LineageNode> lineageNodes = new ArrayList<>();
 
-    private final Stack<ArrayList<ColumnIdentifierList>> columnIdentifierListStack = new Stack<>();
+    private final Stack<SelectStatement> selectStatementStack = new Stack<>();
     private final Stack<ArrayList<LineageNode>> sourcesStack = new Stack<>();
     private final Stack<String> aliasStack = new Stack<>();
-
-    /**
-     * Counter variable used to generate the unique IDs for anonymous tables.
-     * Start this count at -1 so the auto-increment allocates 0 to the first anonymous table.
-     */
-    private int anonymousTableCount = -1;
-
-    /**
-     * Returns the next ID used for allocating unique names to anonymous tables.
-     * @return The next unique ID.
-     */
-    private int getNextAnonymousTableId() {
-        return ++anonymousTableCount;
-    }
 
     /**
      * Stack to maintain the context within which the recursive decent visitor is in.
@@ -46,16 +31,13 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return !currentlyInside.isEmpty() && currentlyInside.peek() == object;
     }
 
-    private ColumnIdentifierList topColumnIdentifierList()  {
-        return columnIdentifierListStack.peek().get(columnIdentifierListStack.peek().size() - 1);
-    }
-
     /**
      * Extract the lineage from a statement.
      * @param statement The statement which will have its AST traversed recursively to extract the lineage.
      * @return A list of the lineage nodes that have been extracted from statement
      */
     public ArrayList<LineageNode> extractLineage(Statement statement) {
+        Util.resetAnonymousTableCount();
         statement.accept(this, null);
         return lineageNodes;
     }
@@ -114,91 +96,6 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
-     * Reconcile a list of columns and sources to produce the complete lineage nodes. The list of columns and sources
-     * are a result of the SELECT statements. For example:
-     * SELECT a.x, a.y, b.z
-     * FROM table1 AS a
-     * INNER JOIN table2 AS b
-     *
-     * After recursively visiting this SELECT statement, a list of columns (a.x, a.y, b.z) and a list of sources
-     * (table1 as a, table2 as b) will available on the stacks. This function is responsible for reconciling this
-     * information into dedicated LineageNodes eg:
-     *     ______________       ______________
-     *    | table1 as a  |     | table2 as b  |
-     *    | a.x          |     | b.z          |
-     *    | a.y          |     |              |
-     *     ---------------      --------------
-     * @param columnIdentifierLists The columns that are to be populated into the sources tables (and anonymous table).
-     * @param sources The source tables that the columns came from.
-     */
-    public void reconcileColumnIdentifierListsWithSources(ArrayList<ColumnIdentifierList> columnIdentifierLists, ArrayList<LineageNode> sources) {
-        // The anonymous lineageNode to be populated - one of these is created by default from every SELECT statement.
-        LineageNode anonymousNode = new LineageNode("ANONYMOUS", "Anonymous" + getNextAnonymousTableId());
-
-        for (ColumnIdentifierList columnIdentifierList : columnIdentifierLists) {
-            for (LineageNode source : sources) {
-
-                Column anonymousColumn = new Column();
-
-                for (ColumnIdentifier columnIdentifier : columnIdentifierList) {
-
-                    Column column = new Column(columnIdentifier.field);
-                    if (!columnIdentifier.base.equals("")) column.addSource(columnIdentifier.base);
-
-                    // In the case of a single source, the columns won't already have the source recorded in their list of
-                    // sources (because it will have appeared as a pure identifier in the SQL eg. columnName instead of
-                    // tableName.columnName.
-                    // Therefore, explicitly check for the case of a single source.
-                    if (sources.size() == 1 || source.isSourceOf(column.getSources())) {
-
-                        // When this point is reached, 'source' is a known source of 'column'.
-                        // Add this column to the source table.
-
-                        // Filter out the sources of the column if they are the same as the source table's name or alias.
-                        Predicate<String> isNameOrAlias = sourceName -> sourceName.equals(source.getAlias()) || sourceName.equals(source.getName());
-                        column.getSources().removeIf(isNameOrAlias);
-
-                        source.addColumn(column);
-                        // Add the source column to the source table.
-                        // Skip wildcard columns.
-                        if (!column.getName().equals("*")) source.addColumn(column);
-
-                        // Add this as a source of the column. This will be for the anonymous table.
-                        anonymousColumn.addSource(column.getID());
-                    }
-
-                    // In the event that the anonymous column derives from a single column in the source table,
-                    // it will share the name of that source column.
-                    if (columnIdentifierList.size() == 1) anonymousColumn.setName(column.getName());
-                }
-
-                // If an alias exists for this column, use it as the name for the anonymous table.
-                if (!columnIdentifierList.alias.equals("")) anonymousColumn.setName(columnIdentifierList.alias);
-                anonymousColumn.setID(DataLineage.makeId(anonymousNode.getName(), anonymousColumn.getName()));
-                // Every selected item is added to the anonymous table.
-                anonymousNode.addColumn(anonymousColumn);
-
-            }
-        }
-
-        // Define all the parent nodes that are interested in keeping the resultant anonymous table to use as a source.
-        ArrayList<Class> contextToKeepList =
-                new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class));
-
-        for (Class parent : contextToKeepList) {
-            if (isCurrentlyInside(parent)) {
-                if (!sourcesStack.isEmpty()) sourcesStack.peek().add(anonymousNode);
-                break;
-            }
-        }
-
-        lineageNodes.addAll(sources);
-        // TODO: Add unconditionally for testing. But this should depend on whether the parent node intends to transform
-        // this anonymous node into a TABLE/VIEW.
-        lineageNodes.add(anonymousNode);
-    }
-
-    /**
      * Visit a QuerySpecification node in the AST.
      *
      * A QuerySpecification is the entity in the AST which acts as a wrapper for a few important components including
@@ -219,7 +116,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
         // This is a 'SELECT' statement.
         // Push new columns and tables to the stacks ready to be populated.
-        columnIdentifierListStack.push(new ArrayList<ColumnIdentifierList>());
+        selectStatementStack.push(new SelectStatement());
         sourcesStack.push(new ArrayList<LineageNode>());
 
         // Recursively visit all the children of this node.
@@ -227,9 +124,28 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         R query_body = visitQueryBody(querySpecification, context);
         currentlyInside.pop();
 
-        // This SELECT statement will have generated a list of columns and sources on their respective stacks.
-        // Reconcile these and generate the required LineageNodes.
-        reconcileColumnIdentifierListsWithSources(columnIdentifierListStack.pop(), sourcesStack.pop());
+        // Extract the source tables and anonymous table from the select statement.
+        SelectStatement selectStatement = selectStatementStack.pop();
+        selectStatement.setSourceTables(sourcesStack.pop());
+        ArrayList<LineageNode> sourceTables = selectStatement.getSourceTables();
+        LineageNode anonymouTable = selectStatement.getAnonymousTable();
+
+        // Define all the parent nodes that are interested in keeping the resultant anonymous table to use as a source.
+        ArrayList<Class> contextToKeepList =
+                new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class));
+
+        for (Class parent : contextToKeepList) {
+            if (isCurrentlyInside(parent)) {
+                if (!sourcesStack.isEmpty()) sourcesStack.peek().add(anonymouTable);
+                break;
+            }
+        }
+
+        // Add the source tables and anonymous table to the list of LineageNodes.
+        lineageNodes.addAll(sourceTables);
+        // TODO: Add unconditionally for testing. But this should depend on whether the parent node intends to transform
+        // this anonymous node into a TABLE/VIEW.
+        lineageNodes.add(anonymouTable);
 
         return query_body;
     }
@@ -271,14 +187,14 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     @Override
     protected R visitSelectItem(com.facebook.presto.sql.tree.SelectItem selectItem, C context) {
 
-        columnIdentifierListStack.peek().add(new ColumnIdentifierList());
+        selectStatementStack.peek().addEmptySelectItem();
 
         currentlyInside.push(com.facebook.presto.sql.tree.SelectItem.class);
         R node = visitNode(selectItem, context);
         currentlyInside.pop();
 
         // Extract and apply the column's alias.
-        topColumnIdentifierList().alias = extractAlias(selectItem);
+        selectStatementStack.peek().currentSelectItem().setAlias(extractAlias(selectItem));
 
         return node;
     }
@@ -292,7 +208,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     @Override
     protected R visitIdentifier(com.facebook.presto.sql.tree.Identifier identifier, C context) {
         if (isCurrentlyInside(com.facebook.presto.sql.tree.SelectItem.class)) {
-            topColumnIdentifierList().add(new ColumnIdentifier(identifier.getValue()));
+            selectStatementStack.peek().currentSelectItem().addIdentifier(identifier.getValue());
         }
         return visitExpression(identifier, context);
     }
@@ -314,7 +230,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         if (isCurrentlyInside(com.facebook.presto.sql.tree.SelectItem.class)) {
             String base = dereferenceExpression.getBase().toString();
             String field = dereferenceExpression.getField().toString();
-            topColumnIdentifierList().add(new ColumnIdentifier(base, field));
+            selectStatementStack.peek().currentSelectItem().addIdentifier(base, field);
         }
 
         currentlyInside.push(DereferenceExpression.class);
@@ -402,9 +318,8 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         // Explicitly add wildcard select items here instead.
         if (node.toString().equals("*")) {
             if (!currentlyInside.isEmpty() && currentlyInside.peek() == SelectItem.class) {
-                ColumnIdentifierList wildcardColumn = new ColumnIdentifierList();
-                wildcardColumn.add(new ColumnIdentifier("*"));
-                columnIdentifierListStack.peek().add(wildcardColumn);
+                selectStatementStack.peek().addEmptySelectItem();
+                selectStatementStack.peek().currentSelectItem().addIdentifier("*");
             }
         }
 

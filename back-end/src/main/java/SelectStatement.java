@@ -4,7 +4,7 @@ import java.util.function.Predicate;
 
 public class SelectStatement {
     private Stack<SelectItem> selectItems = new Stack<>();
-    private ArrayList<LineageNode> sourceTables;
+    private ArrayList<LineageNode> sourceTables = new ArrayList<>();
     private LineageNode anonymousNode;
     private boolean isReconciled = false;
 
@@ -13,7 +13,7 @@ public class SelectStatement {
     }
 
     public void setSourceTables(ArrayList<LineageNode> sourceTables) {
-        this.sourceTables = new ArrayList<LineageNode>(sourceTables);
+        this.sourceTables = sourceTables;
     }
 
     public SelectItem currentSelectItem() {
@@ -56,18 +56,14 @@ public class SelectStatement {
                         Predicate<String> isNameOrAlias = sourceName -> sourceName.equals(sourceTable.getAlias()) || sourceName.equals(sourceTable.getName());
                         column.getSources().removeIf(isNameOrAlias);
 
-                        try {
-                            Column sourceColumn = (Column)column.clone();
-                            sourceColumn.setAlias("");
-                            sourceColumn.setID(DataLineage.makeId(sourceTable.getName(), column.getName()));
+                        sourceTable.addColumn(column);
 
-                            // Add the source column to the source table.
-                            // Skip wildcard columns.
-                            if (!sourceColumn.getName().equals("*")) sourceTable.addColumn(sourceColumn);
+                        // Add the source column to the source table.
+                        // Skip wildcard columns.
+                        if (!column.getName().equals("*")) sourceTable.addColumn(column);
 
-                            // Add this as a source of the column. This will be for the anonymous table.
-                            column.addSource(sourceColumn.getID());
-                        } catch(CloneNotSupportedException c) {}
+                        // Add this as a source of the column. This will be for the anonymous table.
+                        anonymousColumn.addSource(column.getID());
                     }
 
                     // In the event that the anonymous column derives from a single column in the source table,
@@ -77,7 +73,6 @@ public class SelectStatement {
 
                 // If an alias exists for this column, use it as the name for the anonymous table.
                 if (!selectItem.getAlias().isEmpty()) anonymousColumn.setName(selectItem.getAlias());
-                anonymousColumn.setID(DataLineage.makeId(anonymousNode.getName(), anonymousColumn.getName()));
                 // Every selected item is added to the anonymous table.
                 anonymousNode.addColumn(anonymousColumn);
             }

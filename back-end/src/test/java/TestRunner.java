@@ -98,7 +98,7 @@ public class TestRunner {
         d.addSource("mytable::d");
         anonymousTable.addListOfColumns(new ArrayList<>(Arrays.asList(c, d)));
 
-        Assertions.assertEquals(2, nodeList.size());
+        Assertions.assertEquals(2, nodeList.size(), "nodeList size");
         LineageNodeCompare.assertNodesEquals(nodeList.get(0), myTable);
         LineageNodeCompare.assertNodesEquals(nodeList.get(1), anonymousTable);
     }
