@@ -117,7 +117,7 @@ public class TestRunner {
         anonymousTable.addColumn(new Column("one"));
 
         Assertions.assertEquals(2, nodeList.size());
-        Assertions.assertEquals(sourceTable, nodeList.get(0));
-        Assertions.assertEquals(anonymousTable, nodeList.get(1));
+        Assertions.assertTrue(sourceTable.equals(nodeList.get(0)));
+        Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
     }
 }
