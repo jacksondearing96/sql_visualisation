@@ -92,15 +92,15 @@ public class TestRunner {
 
         // Expected anonymous table.
         LineageNode anonymousTable = new LineageNode("ANONYMOUS");
-        anonymousTable.setName("Anonymous1");
+        anonymousTable.setName("Anonymous0");
         Column c = new Column("c");
         c.addListOfSources(new ArrayList<>(Arrays.asList("mytable::a", "mytable::b")));
         d.addSource("mytable::d");
         anonymousTable.addListOfColumns(new ArrayList<>(Arrays.asList(c, d)));
 
         Assertions.assertEquals(2, nodeList.size());
-        LineageNodeCompare.assertEquals(nodeList.get(0), myTable);
-        LineageNodeCompare.assertEquals(nodeList.get(1), anonymousTable);
+        LineageNodeCompare.assertNodesEquals(nodeList.get(0), myTable);
+        LineageNodeCompare.assertNodesEquals(nodeList.get(1), anonymousTable);
     }
 
     @Test
@@ -122,10 +122,7 @@ public class TestRunner {
         sourceNode.addColumn(sourceColumn);
 
         // Compare the pair.
-        boolean success = true;
-        success &= nodeList.get(1).equals(anonymousNode);
-        success &= nodeList.get(0).equals(sourceNode);
-
-        Assertions.assertTrue(success);
+        LineageNodeCompare.assertNodesEquals(anonymousNode, nodeList.get(1));
+        LineageNodeCompare.assertNodesEquals(sourceNode, nodeList.get(0));
     }
 }
