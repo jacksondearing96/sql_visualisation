@@ -122,6 +122,7 @@ public class TestRunner {
         sourceNode.addColumn(sourceColumn);
 
         // Compare the pair.
+        Assertions.assertEquals(2, nodeList.size());
         LineageNodeCompare.assertNodesEquals(anonymousNode, nodeList.get(1));
         LineageNodeCompare.assertNodesEquals(sourceNode, nodeList.get(0));
     }
