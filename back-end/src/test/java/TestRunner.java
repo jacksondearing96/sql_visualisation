@@ -102,4 +102,41 @@ public class TestRunner {
 
         Assertions.assertTrue(success);
     }
+
+    @Test
+    @DisplayName("multipleStatements")
+    void testMultipleStatements() {
+        String multipleStatements = "SELECT a FROM b### SELECT c FROM d###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(multipleStatements).getNodeList();
+
+        // Source table (first statement).
+        LineageNode firstSource = new LineageNode("TABLE", "b");
+        Column a = new Column("a");
+        firstSource.addColumn(a);
+
+        // Anonymous table (first statement).
+        LineageNode firstAnonymous = new LineageNode("ANONYMOUS", "Anonymous0");
+        a.addSource("b::a");
+        firstAnonymous.addColumn(a);
+
+        // Source table (second statement).
+        LineageNode secondSource = new LineageNode("TABLE", "d");
+        Column c = new Column("c");
+        secondSource.addColumn(c);
+
+        // Anonymous table (second statement).
+        LineageNode secondAnonymous = new LineageNode("ANONYMOUS", "Anonymous1");
+        c.addSource("d::c");
+        secondAnonymous.addColumn(c);
+
+        for (LineageNode node : nodeList) {
+            PrettyPrinter.printLineageNode(node);
+        }
+
+        Assertions.assertEquals(4, nodeList.size());
+        Assertions.assertTrue(firstSource.equals(nodeList.get(0)));
+        Assertions.assertTrue(firstAnonymous.equals(nodeList.get(1)));
+        Assertions.assertTrue(secondSource.equals(nodeList.get(2)));
+        Assertions.assertTrue(secondAnonymous.equals(nodeList.get(3)));
+    }
 }

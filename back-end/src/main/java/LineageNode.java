@@ -82,6 +82,10 @@ public class LineageNode {
         if (!hasColumnWithName(column.getName())) this.columns.add(column);
     }
 
+    public void addListOfColumns(List<Column> columns) {
+        addListOfColumns(new ArrayList<Column>(columns));
+    }
+
     public void addListOfColumns(ArrayList<Column> columns) {
         for (Column column : columns) {
             addColumn(column);

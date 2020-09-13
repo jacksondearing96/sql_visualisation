@@ -12,7 +12,7 @@ public class LineageExtractor {
         List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
 
         SivtVisitor<Node, ?> sivtVisitor = new SivtVisitor<Node, Object>();
-
+        
         // Iterate through each statement.
         // Use the SivtParser to parse the statement.
         // Call the accept method to traverse the AST for that statement.
