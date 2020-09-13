@@ -81,7 +81,7 @@ public class TestRunner {
     @DisplayName("testLineageNodes")
     void testLineageNodes() {
         String simpleSelect = "SELECT a FROM b###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineage(simpleSelect).getNodeList();
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(simpleSelect).getNodeList();
 
         // Anonymous table.
         LineageNode anonymousNode = new LineageNode("ANONYMOUS", "Anonymous0", "");
