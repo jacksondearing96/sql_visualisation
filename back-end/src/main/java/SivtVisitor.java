@@ -150,7 +150,6 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
                         column.getSources().removeIf(isNameOrAlias);
 
                         column.setAlias("");
-                        column.setID(DataLineage.makeId(source.getName(), column.getName()));
                         source.addColumn(column);
 
                         // Add this as a source of the column. This will be for the anonymous table.
@@ -190,6 +189,11 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         }
         PrettyPrinter.printLineageNode(anonymousNode);
         System.out.println("^DERIVED");
+
+        lineageNodes.addAll(sources);
+        // TODO: Add unconditionally for testing. But this should depend on whether the parent node intends to transform
+        // this anonymous node into a TABLE/VIEW.
+        lineageNodes.add(anonymousNode);
     }
 
     /**

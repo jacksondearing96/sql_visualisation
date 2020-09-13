@@ -54,7 +54,6 @@ public class LineageNode {
                 columns.equals(lineage.columns);
     }
 
-
     private boolean hasColumnWithName(String name) {
         for (Column column : columns) {
             if (column.getName().equals(name)) return true;
@@ -82,6 +81,7 @@ public class LineageNode {
 
         if (!hasColumnWithName(column.getName())) {
             try {
+                column.setID(DataLineage.makeId(name, column.getName()));
                 this.columns.add((Column)column.clone());
             } catch (CloneNotSupportedException c) {}
         }

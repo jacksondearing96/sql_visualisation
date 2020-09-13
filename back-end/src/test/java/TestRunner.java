@@ -4,8 +4,6 @@ import org.junit.jupiter.api.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
 
 
 public class TestRunner {
@@ -82,25 +80,27 @@ public class TestRunner {
     @Test
     @DisplayName("testMultipleIdentifiers")
     void testMultipleIdentifiers() {
-        String multipleIdentifiersSelectStatement = "select a * b as c, d from myTable###";
+        String multipleIdentifiersSelectStatement = "select a * b as c, d from mytable###";
         List<LineageNode> nodeList = LineageExtractor.extractLineage(multipleIdentifiersSelectStatement).getNodeList();
 
         // Expected source table.
-        LineageNode myTable = new LineageNode("TABLE", "myTable");
+        LineageNode myTable = new LineageNode("TABLE", "mytable");
         Column a = new Column("a");
         Column b = new Column("b");
         Column d = new Column("d");
         myTable.addListOfColumns(new ArrayList<>(Arrays.asList(a, b, d)));
 
         // Expected anonymous table.
-        LineageNode anonymousTable = new LineageNode("ANONYMOUS", "Anonymous0");
+        LineageNode anonymousTable = new LineageNode("ANONYMOUS");
+        anonymousTable.setName("Anonymous1");
         Column c = new Column("c");
-        c.addListOfSources(new ArrayList<>(Arrays.asList("myTable::a", "myTable::b")));
+        c.addListOfSources(new ArrayList<>(Arrays.asList("mytable::a", "mytable::b")));
+        d.addSource("mytable::d");
         anonymousTable.addListOfColumns(new ArrayList<>(Arrays.asList(c, d)));
 
         Assertions.assertEquals(2, nodeList.size());
-        Assertions.assertTrue(nodeList.get(0).equals(myTable));
-        Assertions.assertTrue(nodeList.get(1).equals(anonymousTable));
+        LineageNodeCompare.assertEquals(nodeList.get(0), myTable);
+        LineageNodeCompare.assertEquals(nodeList.get(1), anonymousTable);
     }
 
     @Test
