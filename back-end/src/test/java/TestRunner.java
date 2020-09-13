@@ -88,9 +88,6 @@ public class TestRunner {
         Column a = new Column("a");
         sourceNode.addColumn(a);
 
-        PrettyPrinter.printLineageNode(nodeList.get(0));
-        PrettyPrinter.printLineageNode(sourceNode);
-
         // Anonymous table.
         LineageNode anonymousNode = new LineageNode("ANONYMOUS", "Anonymous0");
         a.addSource("b::a");
