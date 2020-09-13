@@ -4,6 +4,8 @@ import org.junit.jupiter.api.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Arrays;
+import java.util.ArrayList;
 
 
 public class TestRunner {
@@ -75,6 +77,30 @@ public class TestRunner {
         } catch(CloneNotSupportedException c) {
             Assertions.fail("Cloning column failure.");
         }
+    }
+
+    @Test
+    @DisplayName("testMultipleIdentifiers")
+    void testMultipleIdentifiers() {
+        String multipleIdentifiersSelectStatement = "select a * b as c, d from myTable###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(multipleIdentifiersSelectStatement).getNodeList();
+
+        // Expected source table.
+        LineageNode myTable = new LineageNode("TABLE", "myTable");
+        Column a = new Column("a");
+        Column b = new Column("b");
+        Column d = new Column("d");
+        myTable.addListOfColumns(new ArrayList<>(Arrays.asList(a, b, d)));
+
+        // Expected anonymous table.
+        LineageNode anonymousTable = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column c = new Column("c");
+        c.addListOfSources(new ArrayList<>(Arrays.asList("myTable::a", "myTable::b")));
+        anonymousTable.addListOfColumns(new ArrayList<>(Arrays.asList(c, d)));
+
+        Assertions.assertEquals(2, nodeList.size());
+        Assertions.assertTrue(nodeList.get(0).equals(myTable));
+        Assertions.assertTrue(nodeList.get(1).equals(anonymousTable));
     }
 
     @Test
