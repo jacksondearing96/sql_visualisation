@@ -12,6 +12,8 @@ public class LineageExtractor {
 
         SivtVisitor<Node, ?> sivtVisitor = new SivtVisitor<Node, Object>();
 
+        Util.resetAnonymousTableCount();
+
         // Iterate through each statement.
         // Use the SivtParser to parse the statement.
         // Call the accept method to traverse the AST for that statement.

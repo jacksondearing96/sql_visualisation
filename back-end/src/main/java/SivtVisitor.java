@@ -37,7 +37,6 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * @return A list of the lineage nodes that have been extracted from statement
      */
     public ArrayList<LineageNode> extractLineage(Statement statement) {
-        Util.resetAnonymousTableCount();
         statement.accept(this, null);
         return lineageNodes;
     }
