@@ -8,7 +8,9 @@ public class Util {
      * Returns the next ID used for allocating unique names to anonymous tables.
      * @return The next unique ID.
      */
-    static public int getNextAnonymousTableId() {
+    public static int getNextAnonymousTableId() {
         return ++anonymousTableCount;
     }
+
+    public static void resetAnonymousTableCount() { anonymousTableCount = -1; }
 }
