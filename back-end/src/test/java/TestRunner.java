@@ -102,4 +102,55 @@ public class TestRunner {
 
         Assertions.assertTrue(success);
     }
+
+    @Test
+    @DisplayName("testBypassAnonymousTables")
+    void testBypassAnonymousTables() {
+        String sql =
+                "CREATE VIEW view AS " +
+                        "SELECT b " +
+                        "FROM (" +
+                        "SELECT b " +
+                        "FROM B" +
+                        ") AS A" +
+                        "###";
+
+        // Source table.
+        LineageNode source = new LineageNode("TABLE", "b");
+        Column b = new Column("b");
+        source.addColumn(b);
+
+        // Anonymous table.
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
+        anonymous.setAlias("A");
+        b.addSource(DataLineage.makeId(source.getName(), b.getName()));
+        anonymous.addColumn(b);
+
+        // View.
+        LineageNode view = new LineageNode("VIEW", "view");
+        b = new Column("b");
+        b.addSource(DataLineage.makeId(anonymous.getName(), b.getName()));
+        view.addColumn(b);
+
+        // First, verify that the anonymous table is produced correctly as the intermediate table.
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+        Assertions.assertEquals(3, nodeList.size());
+        Assertions.assertTrue(source.equals(nodeList.get(0)));
+        Assertions.assertTrue(anonymous.equals(nodeList.get(1)));
+        Assertions.assertTrue(view.equals(nodeList.get(2)));
+
+        // Now extract the lineage, including the step where the anonymous tables are bypassed.
+        nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        // Adjust the view, it's column's sources have now bypassed the anonymous table.
+        view = new LineageNode("VIEW", "view");
+        b = new Column("b");
+        b.addSource(DataLineage.makeId(source.getName(), b.getName()));
+        view.addColumn(b);
+
+        // Check the resultant lineage is as expected.
+        Assertions.assertEquals(2,  nodeList.size());
+        Assertions.assertTrue(source.equals(nodeList.get(0)));
+        Assertions.assertTrue(view.equals(nodeList.get(1)));
+    }
 }
