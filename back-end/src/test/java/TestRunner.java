@@ -1,4 +1,5 @@
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.intellij.lang.annotations.JdkConstants;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
@@ -92,14 +93,44 @@ public class TestRunner {
         // Source table.
         LineageNode sourceNode = new LineageNode("TABLE", "b", "");
         Column sourceColumn = new Column("a", "", "b::a");
-        sourceColumn.addSource("b::a");
         sourceNode.addColumn(sourceColumn);
 
         // Compare the pair.
         boolean success = true;
         success &= nodeList.get(1).equals(anonymousNode);
         success &= nodeList.get(0).equals(sourceNode);
-
         Assertions.assertTrue(success);
+    }
+
+    @Test
+    @DisplayName("testBasicAnonymousTableGeneration")
+    void testBasicAnonymousTableGeneration() {
+        String statement = "select column1, column2, cast(someDate as date) as columnA from \"tableName\"";
+
+        // Output table
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(statement).getNodeList();
+
+        // Expected tables
+        LineageNode table = new LineageNode("TABLE", "tableName", "");
+        Column column1 = new Column("column1");
+        Column column2 = new Column("column2");
+        Column dateColumn = new Column("someDate");
+        table.addListOfColumns(new ArrayList<>(Arrays.asList(column1, column2, dateColumn)));
+
+        LineageNode anonymousTable = new LineageNode("ANONYMOUS", "Anonymous0", "");
+        Column column1a = new Column("column1", "", "");
+        column1a.setSources(new ArrayList<>(Arrays.asList("tableName::column1")));
+        Column column2a = new Column("column2", "", "");
+        column1a.setSources(new ArrayList<>(Arrays.asList("tableName::column2")));
+        Column columnA = new Column("columnA", "", "");
+        column1a.setSources(new ArrayList<>(Arrays.asList("tableName::someDate")));
+        anonymousTable.addListOfColumns(new ArrayList<>(Arrays.asList(column1a, column2a, columnA)));
+
+        // Compare the pair.
+        boolean success = true;
+        success &= nodeList.get(0).equals(table);
+        success &= nodeList.get(1).equals(anonymousTable);
+        Assertions.assertTrue(success);
+
     }
 }

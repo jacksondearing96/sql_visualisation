@@ -152,7 +152,6 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
                     try {
                         Column sourceColumn = (Column)column.clone();
                         sourceColumn.setAlias("");
-                        sourceColumn.setID(DataLineage.makeId(source.getName(), column.getName()));
 
                         // Add the source column to the source table.
                         // Skip wildcard columns.
