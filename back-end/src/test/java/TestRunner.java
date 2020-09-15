@@ -133,4 +133,111 @@ public class TestRunner {
         Assertions.assertTrue(success);
 
     }
+
+    @Test
+    @DisplayName("testAliasForColumn")
+    void testAliasForColumn() {
+        String statement = "SELECT a AS b from c###";
+
+        // Output
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(statement).getNodeList();
+
+        // Expected tables.
+        LineageNode table = new LineageNode("TABLE", "c", "");
+        table.addColumn(new Column("a", "", "c::a"));
+
+        LineageNode anonymousTable = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column aliasedColumn = new Column("a", "b", "Anonymous0::a");
+        aliasedColumn.addSource("c::a");
+        anonymousTable.addColumn(aliasedColumn);
+
+        Assertions.assertTrue(nodeList.get(0).equals(table));
+        Assertions.assertTrue(nodeList.get(1).equals(anonymousTable));
+    }
+
+    @Test
+    @DisplayName("testAliasForTable")
+    void testAliasForTable() {
+        String statement = "SELECT a FROM b AS c###";
+
+        // Output
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(statement).getNodeList();
+
+        // Expected tables.
+        LineageNode table = new LineageNode("TABLE", "b", "c");
+        table.addColumn(new Column("a", "", "b::a"));
+
+        LineageNode anonymousTable = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column aliasedColumn = new Column("a", "", "Anonymous0::a");
+        anonymousTable.addColumn(aliasedColumn);
+        aliasedColumn.addSource("b::a");
+
+        Assertions.assertTrue(nodeList.get(0).equals(table));
+        Assertions.assertTrue(nodeList.get(1).equals(anonymousTable));
+    }
+
+    @Test
+    @DisplayName("testMultipleSelect")
+    void testMultipleSelect() {
+        String statement = "SELECT a, b FROM c###";
+
+        // Output
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(statement).getNodeList();
+
+        // Expected tables.
+        LineageNode table = new LineageNode("TABLE", "c", "");
+        table.addColumn(new Column("a", "", "c::a"));
+        table.addColumn(new Column("b", "", "c::b"));
+
+        LineageNode anonymousTable = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column columnA = new Column("a", "", "Anonymous0::a");
+        columnA.addSource("c::a");
+        Column columnB = new Column("b", "", "Anonymous0::b");
+        columnB.addSource("c::b");
+        anonymousTable.addColumn(columnA);
+        anonymousTable.addColumn(columnB);
+
+        Assertions.assertTrue(nodeList.get(0).equals(table));
+        Assertions.assertTrue(nodeList.get(1).equals(anonymousTable));
+    }
+
+    @Test
+    @DisplayName("testCreateView")
+    void testCreateView() {
+        String statement = "CREATE VIEW a AS SELECT b from c###";
+
+        // Output
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(statement).getNodeList();
+
+        // Expected tables.
+        LineageNode table = new LineageNode("TABLE", "c", "");
+        table.addColumn(new Column("b", "", "c::b"));
+
+        LineageNode viewTable = new LineageNode("VIEW", "a");
+        Column columnA = new Column("b", "", "c::b");
+        columnA.addSource("c::b");
+        viewTable.addColumn(columnA);
+
+        Assertions.assertTrue(nodeList.get(0).equals(table));
+        Assertions.assertTrue(nodeList.get(1).equals(viewTable));
+    }
+
+    @Test
+    @DisplayName("testWildCardOperator")
+    void testWildCardOperator() {
+        String statement = "SELECT * from b###";
+
+        // Output
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(statement).getNodeList();
+
+        // Expected tables.
+        LineageNode table = new LineageNode("TABLE", "b", "");
+        LineageNode anonymousTable = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column columnA = new Column("*", "", "Anonymous0::*");
+        columnA.addSource("");
+        anonymousTable.addColumn(columnA);
+
+        Assertions.assertTrue(nodeList.get(0).equals(table));
+        Assertions.assertTrue(nodeList.get(1).equals(anonymousTable));
+    }
 }
