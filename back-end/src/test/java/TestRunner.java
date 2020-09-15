@@ -99,16 +99,16 @@ public class TestRunner {
         anonymousTable.addListOfColumns(new ArrayList<>(Arrays.asList(c, d)));
 
         Assertions.assertEquals(2, nodeList.size(), "nodeList size");
-        LineageNodeCompare.assertNodesEquals(nodeList.get(0), myTable);
-        LineageNodeCompare.assertNodesEquals(nodeList.get(1), anonymousTable);
+        Assertions.assertTrue(myTable.equals(nodeList.get(0)));
+        Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
 
         // While we have the expected tables constructed, test more statements with the same expected output
         // with variations to the SQL syntax.
         multipleIdentifiersSelectStatement = "select someFunction(a, b) as c, d from mytable###";
         nodeList = LineageExtractor.extractLineage(multipleIdentifiersSelectStatement).getNodeList();
         Assertions.assertEquals(2, nodeList.size(), "nodeList size");
-        LineageNodeCompare.assertNodesEquals(nodeList.get(0), myTable);
-        LineageNodeCompare.assertNodesEquals(nodeList.get(1), anonymousTable);
+        Assertions.assertTrue(myTable.equals(nodeList.get(0)));
+        Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class TestRunner {
 
         // Compare the pair.
         Assertions.assertEquals(2, nodeList.size());
-        LineageNodeCompare.assertNodesEquals(anonymousNode, nodeList.get(1));
-        LineageNodeCompare.assertNodesEquals(sourceNode, nodeList.get(0));
+        Assertions.assertTrue(anonymousNode.equals(nodeList.get(1)));
+        Assertions.assertTrue(sourceNode.equals(nodeList.get(0)));
     }
 }
