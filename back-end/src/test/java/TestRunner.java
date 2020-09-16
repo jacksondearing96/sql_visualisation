@@ -64,9 +64,11 @@ public class TestRunner {
         column.setID("newID");
         column.setSources(sources);
         column.addSource("source3");
+        column.addListOfSources(Arrays.asList("source4", "source5"));
         column.addListOfSources(sources);
+        column.addSource("source1");
         Assertions.assertEquals(
-                "alias=newAlias,id=newID,name=newName,sources={source1,source2,source3,source1,source2}",
+                "alias=newAlias,id=newID,name=newName,sources={source1,source2,source3,source4,source5}",
                 getColumnDataString(column));
 
         // Test Column cloning and equals
