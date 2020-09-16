@@ -67,6 +67,10 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         node.setType("VIEW");
         node.setName(viewName);
         node.setAlias("");
+
+        for (Column column : node.getColumns()) {
+            column.setID(DataLineage.makeId(node.getName(), column.getName()));
+        }
     }
 
     /**
