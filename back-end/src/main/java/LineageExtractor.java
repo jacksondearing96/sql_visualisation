@@ -9,6 +9,12 @@ public class LineageExtractor {
     private static DataLineage dataLineage = new DataLineage("lineage_output.json");
 
     public static DataLineage extractLineage(String sql) {
+        DataLineage dataLineage = extractLineageWithAnonymousTables(sql);
+        dataLineage.bypassAnonymousTables();
+        return dataLineage;
+    }
+
+    public static DataLineage extractLineageWithAnonymousTables(String sql) {
         List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
 
         SivtVisitor<Node, ?> sivtVisitor = new SivtVisitor<Node, Object>();

@@ -100,7 +100,7 @@ public class Column implements Cloneable {
         return this.id;
     }
 
-    public List<String> getSources() {
+    public ArrayList<String> getSources() {
         return this.sources;
     }
 }
