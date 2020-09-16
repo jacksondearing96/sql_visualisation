@@ -50,6 +50,13 @@ public class Column implements Cloneable {
                 sources.equals(column.sources);
     }
 
+    private boolean hasSource(String source) {
+        for (String existingSource : sources) {
+            if (existingSource.equals(source)) return true;
+        }
+        return false;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -64,8 +71,12 @@ public class Column implements Cloneable {
 
     public void setSources(ArrayList<String> sources) { this.sources = new ArrayList<>(sources); }
 
+    /**
+     * Add only unique sources.
+     * @param source The new source to be added.
+     */
     public void addSource(String source) {
-        this.sources.add(source);
+        if (!hasSource(source)) this.sources.add(source);
     }
 
     public void addListOfSources(ArrayList<String> sources) {
@@ -90,7 +101,7 @@ public class Column implements Cloneable {
         return this.id;
     }
 
-    public List<String> getSources() {
+    public ArrayList<String> getSources() {
         return this.sources;
     }
 }

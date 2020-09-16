@@ -6,6 +6,12 @@ import java.util.List;
 
 public class LineageExtractor {
     public static DataLineage extractLineage(String sql) {
+        DataLineage dataLineage = extractLineageWithAnonymousTables(sql);
+        dataLineage.bypassAnonymousTables();
+        return dataLineage;
+    }
+
+    public static DataLineage extractLineageWithAnonymousTables(String sql) {
         DataLineage dataLineage = new DataLineage("lineage_output.json");
 
         List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);

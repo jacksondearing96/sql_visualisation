@@ -54,13 +54,6 @@ public class LineageNode {
                 columns.equals(lineage.columns);
     }
 
-    private boolean hasColumnWithName(String name) {
-        for (Column column : columns) {
-            if (column.getName().equals(name)) return true;
-        }
-        return false;
-    }
-
     public void setType(String type) {
         this.type = type;
     }
@@ -75,15 +68,27 @@ public class LineageNode {
 
     /**
      * Add a column to the list of columns. Ensures columns are unique (by name).
+     * If a duplicate column is found, the sources from the new column are copied over.
      * @param column The column to be added.
      */
     public void addColumn(Column column) {
-        if (!hasColumnWithName(column.getName())) {
-            try {
-                column.setID(DataLineage.makeId(name, column.getName()));
-                this.columns.add((Column)column.clone());
-            } catch (CloneNotSupportedException c) {}
+        // Check if this column already exists.
+        for (Column existingColumn : columns) {
+            if (existingColumn.getName().equals(column.getName())) {
+                existingColumn.addListOfSources(column.getSources());
+                return;
+            }
         }
+
+        // This is a branch new column, clone it.
+        try {
+            column.setID(DataLineage.makeId(name, column.getName()));
+            this.columns.add((Column)column.clone());
+        } catch (CloneNotSupportedException c) {}
+    }
+
+    public void addListOfColumns(List<Column> columns) {
+        addListOfColumns(new ArrayList<Column>(columns));
     }
 
     public void addListOfColumns(ArrayList<Column> columns) {

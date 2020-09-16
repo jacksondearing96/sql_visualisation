@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 
 /**
  * Stores a list of nodes (tables or view) and writes out the information to
@@ -26,6 +27,61 @@ public class DataLineage {
     }
 
     /**
+     * Replace the source of a column at index with a list of other sources.
+     * @param column The column to have its source replaced.
+     * @param index The index of the source to replace.
+     * @param sources The list of new sources to replace with.
+     */
+    private void replaceSourceWithSources(Column column, int index, ArrayList<String> sources) {
+        column.getSources().remove(index);
+        --index;
+        for (String source : sources) {
+            column.getSources().add(++index, source);
+        }
+    }
+
+    /**
+     * Removes all the anonymous tables in the nodeList, updating the sources accordingly.
+     */
+    public void bypassAnonymousTables() {
+
+        // Populate a map containing mappings from IDs to their list of sources.
+        HashMap<String, ArrayList<String>> idToSources = new HashMap<>();
+        for (LineageNode node : nodeList) {
+            for (Column column : node.getColumns()) {
+                idToSources.put(column.getID(), column.getSources());
+            }
+        }
+
+        // There may be multiple levels of anonymous tables. Therefore, repeat the process until no
+        // more changes are made.
+        boolean madeChange = true;
+
+        while (madeChange) {
+            madeChange = false;
+
+            for (LineageNode node : nodeList) {
+                for (Column column : node.getColumns()) {
+                    for (int i = 0; i < column.getSources().size(); ++i) {
+                        String source = column.getSources().get(i);
+
+                        // If a source points to a column in an anonymous table, replace this source with the sources
+                        // of the column in the anonymous table. This bypasses the anonymous table in the graph structure.
+                        if (source.contains("Anonymous")) {
+                            madeChange = true;
+                            replaceSourceWithSources(column, i, idToSources.get(source));
+                        }
+                    }
+                }
+            }
+        }
+
+        // Delete the now redundant anonymous nodes.
+        nodeList.removeIf(node -> node.getType().equals("ANONYMOUS"));
+    }
+
+
+    /**
      * Writes out the data lineage to a JSON file.
      */
     public void toJSON() {
@@ -42,11 +98,28 @@ public class DataLineage {
     }
 
     /**
-     * Add a single node to the list of nodes.
-     * @param node: node to add to the data lineage.
+     * Consolidate two nodes that represent the same node.
+     * Adds the columns of the new node to the existing node. The addColumn method takes care
+     * of ensuring these additions are all unique.
+     * @param existingNode The existing node.
+     * @param newNode The new node.
      */
-    public void addNode(LineageNode node) {
-        this.nodeList.add(node);
+    private void consolidateNodes(LineageNode existingNode, LineageNode newNode) {
+        existingNode.addListOfColumns(newNode.getColumns());
+    }
+
+    /**
+     * Add a single node to the list of nodes.
+     * @param newNode: node to add to the data lineage.
+     */
+    public void addNode(LineageNode newNode) {
+        for (LineageNode existingNode : nodeList) {
+            if (existingNode.getName().equals(newNode.getName())) {
+                consolidateNodes(existingNode, newNode);
+                return;
+            }
+        }
+        this.nodeList.add(newNode);
     }
 
     /**
