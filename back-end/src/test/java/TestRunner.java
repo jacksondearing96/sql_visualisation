@@ -110,7 +110,7 @@ public class TestRunner {
         String statement = "select column1, column2, cast(someDate as date) as columnA from \"tableName\"";
 
         // Output table
-        List<LineageNode> nodeList = LineageExtractor.extractLineage(statement).getNodeList();
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(statement).getNodeList();
 
         // Expected tables
         LineageNode table = new LineageNode("TABLE", "tableName", "");
@@ -140,7 +140,7 @@ public class TestRunner {
     @DisplayName("testMultipleStatements")
     void testMultipleStatements() {
         String multipleStatements = "SELECT a FROM b### SELECT c FROM d###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineage(multipleStatements).getNodeList();
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(multipleStatements).getNodeList();
 
         // Source table (first statement).
         LineageNode firstSource = new LineageNode("TABLE", "b");
@@ -177,7 +177,7 @@ public class TestRunner {
     @DisplayName("testMultipleReferences")
     void testMultipleReferences() {
         String multipleReferences = "SELECT a FROM b### SELECT c FROM b###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineage(multipleReferences).getNodeList();
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(multipleReferences).getNodeList();
 
         // Source table (both statements).
         LineageNode source = new LineageNode("TABLE", "b");
