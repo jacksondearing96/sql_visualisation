@@ -401,7 +401,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         // are not classed as an Identifier which means they are skipped.
         // Explicitly add wildcard select items here instead.
         if (node.toString().equals("*")) {
-            if (!currentlyInside.isEmpty() && currentlyInside.peek() == SelectItem.class) {
+            if (isCurrentlyInside(com.facebook.presto.sql.tree.SelectItem.class)) {
                 columnsStack.peek().add(new Column(node.toString()));
             }
         }
