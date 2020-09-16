@@ -98,11 +98,28 @@ public class DataLineage {
     }
 
     /**
-     * Add a single node to the list of nodes.
-     * @param node: node to add to the data lineage.
+     * Consolidate two nodes that represent the same node.
+     * Adds the columns of the new node to the existing node. The addColumn method takes care
+     * of ensuring these additions are all unique.
+     * @param existingNode The existing node.
+     * @param newNode The new node.
      */
-    public void addNode(LineageNode node) {
-        this.nodeList.add(node);
+    private void consolidateNodes(LineageNode existingNode, LineageNode newNode) {
+        existingNode.addListOfColumns(newNode.getColumns());
+    }
+
+    /**
+     * Add a single node to the list of nodes.
+     * @param newNode: node to add to the data lineage.
+     */
+    public void addNode(LineageNode newNode) {
+        for (LineageNode existingNode : nodeList) {
+            if (existingNode.getName().equals(newNode.getName())) {
+                consolidateNodes(existingNode, newNode);
+                return;
+            }
+        }
+        this.nodeList.add(newNode);
     }
 
     /**
