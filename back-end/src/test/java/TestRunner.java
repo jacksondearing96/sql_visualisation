@@ -150,6 +150,18 @@ public class TestRunner {
         success &= nodeList.get(0).equals(table);
         success &= nodeList.get(1).equals(anonymousTable);
         Assertions.assertTrue(success);
+    }
 
+    @Test
+    @DisplayName("testNameConsolidation")
+    void testNamingConvention() {
+        String sql = "SELECT a FROM b### SELECT c FROM base.b###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        LineageNode b = new LineageNode("TABLE", "b");
+        b.addListOfColumns(new ArrayList(Arrays.asList(new Column("a"), new Column("c"))));
+
+        Assertions.assertEquals(3, nodeList.size());
+        Assertions.assertTrue(b.equals(nodeList.get(0)));
     }
 }
