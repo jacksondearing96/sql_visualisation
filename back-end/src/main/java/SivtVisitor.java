@@ -37,15 +37,32 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * For example, when a table name identifier is visited, it must know if it has been reached in the context of an
      * aliased relation or not so that the table can be associated with the correct alias, if one exists.
      */
-    private static final Stack<Class> currentlyInside = new Stack<>();
+    private final Stack<Class> currentlyInside = new Stack<>();
 
     /**
      * Safe and clean method for checking the current context according to currentlyInside.
      * @param object The class that is being checked against the current context.
      * @return Whether object is equal to the top of 'currentlyInside' context stack.
      */
-    private static boolean isCurrentlyInside(Class object) {
+    private boolean isCurrentlyInside(Class object) {
         return !currentlyInside.isEmpty() && currentlyInside.peek() == object;
+    }
+
+    /**
+     * Defines all the parent nodes that are interested in keeping the resultant anonymous table to use as a source.
+      */
+    private final ArrayList<Class> contextToKeepList =
+            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class));
+
+    /**
+     * Determines whether the current Class context is one which is required to keep the anonymous table.
+     * @return true if the anonymous table should be kept and false otherwise.
+     */
+    private boolean isInContextToKeep() {
+        for (Class parent : contextToKeepList) {
+            if (isCurrentlyInside(parent)) return true;
+        }
+        return false;
     }
 
     /**
@@ -169,21 +186,16 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
             }
         }
 
-        // Define all the parent nodes that are interested in keeping the resultant anonymous table to use as a source.
-        ArrayList<Class> contextToKeepList =
-                new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class));
-
-        for (Class parent : contextToKeepList) {
-            if (isCurrentlyInside(parent)) {
-                if (!sourcesStack.isEmpty()) sourcesStack.peek().add(anonymousNode);
-                break;
-            }
-        }
-
+        // Add the source tables and anonymous table to the list of LineageNodes.
         lineageNodes.addAll(sources);
-        // TODO: Add unconditionally for testing. But this should depend on whether the parent node intends to transform
-        // this anonymous node into a TABLE/VIEW.
-        lineageNodes.add(anonymousNode);
+
+        // Either save the anonymous table for a parent node that needs it or add it to the
+        // list of lineage nodes.
+        if (isInContextToKeep() && !sourcesStack.isEmpty()) {
+            sourcesStack.peek().add(anonymousNode);
+        } else {
+            lineageNodes.add(anonymousNode);
+        }
     }
 
     /**
@@ -388,7 +400,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         // are not classed as an Identifier which means they are skipped.
         // Explicitly add wildcard select items here instead.
         if (node.toString().equals("*")) {
-            if (!currentlyInside.isEmpty() && currentlyInside.peek() == SelectItem.class) {
+            if (isCurrentlyInside(com.facebook.presto.sql.tree.SelectItem.class)) {
                 columnsStack.peek().add(new Column(node.toString()));
             }
         }
