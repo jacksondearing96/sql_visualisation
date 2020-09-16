@@ -99,6 +99,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         // Mutate the anonymous table that was received to become the view.
         LineageNode view = sourcesStack.pop().get(0);
         convertNodeToView(view, createView.getName().toString());
+        lineageNodes.add(view);
 
         return node;
     }
