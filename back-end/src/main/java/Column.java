@@ -43,10 +43,16 @@ public class Column implements Cloneable {
         }
         Column column = (Column) o;
 
-        return name.equals(column.name) &&
-                alias.equals(column.alias) &&
-                id.equals(column.id) &&
-                sources.equals(column.sources);
+        assert this.name.equals(column.name) :
+                String.format("Column names are not equal ('%s' and '%s')", name, column.name);
+        assert alias.equals(column.alias) :
+                String.format("Column aliases are not equal ('%s' and '%s')", alias, column.alias);
+        assert id.equals(column.id) :
+                String.format("Column IDs are not equal ('%s' and '%s')", id, column.id);
+        assert sources.equals(column.sources) :
+                String.format("Column sources are not equal ('%s' and '%s')", sources, column.sources);
+
+        return true;
     }
 
     private boolean hasSource(String source) {
