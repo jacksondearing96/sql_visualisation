@@ -340,7 +340,6 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         // Explicitly add wildcard select items here instead.
         if (node.toString().equals("*")) {
             if (isCurrentlyInside(com.facebook.presto.sql.tree.SelectItem.class)) {
-                selectStatementStack.peek().addEmptySelectItem();
                 selectStatementStack.peek().currentSelectItem().addIdentifier("*");
             }
         }
