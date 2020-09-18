@@ -398,7 +398,7 @@ public class TestRunner {
     @DisplayName("testAgentLeads")
     void testAgentLeads() {
         String agentLeadsSql = FileReader.ReadFile("../propic_sql_scripts/agent_leads.sql");
-        List<LineageNode> nodeList = LineageExtractor.extractLineage(agentLeadsSql).getNodeList();
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(agentLeadsSql).getNodeList();
 
         // crms_task table.
         String crmsTaskName = "%(db)s.%(crm)s_task";
@@ -495,7 +495,9 @@ public class TestRunner {
         Assertions.assertTrue(customerInsight.equals(nodeList.get(2)));
         Assertions.assertTrue(anonymous1.equals(nodeList.get(3)));
         Assertions.assertTrue(view0.equals(nodeList.get(4)));
-        // TODO: there is a %(db)s.customer_insight table produced here that should be consolidated with cusotmer_insight.
+        // TODO: the table not tested here is %(db)s.customer_insight
+        //       The behaviour here depends on how the database name prefix is handled.
+        //       The correct behaviour has not been determined yet.
         Assertions.assertTrue(view1.equals(nodeList.get(6)));
     }
 }
