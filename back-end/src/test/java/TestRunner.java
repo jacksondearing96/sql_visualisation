@@ -572,4 +572,25 @@ public class TestRunner {
         source.equals(nodeList.get(0));
         anonymous.equals(nodeList.get(1));
     }
+
+    @Test
+    @DisplayName("testMultipleAliasesWithinSelectItem")
+    void testMultipleAliasesWithinSelectItem() {
+        String sql = "SELECT cast(a AS date) AS b FROM c###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Source table.
+        LineageNode source = new LineageNode("TABLE", "c");
+        source.addColumn(new Column("a"));
+
+        // Anonymous table.
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column b = new Column("b");
+        b.addSource("c::a");
+        anonymous.addColumn(b);
+
+        Assertions.assertEquals(2, nodeList.size());
+        source.equals(nodeList.get(0));
+        anonymous.equals(nodeList.get(1));
+    }
 }
