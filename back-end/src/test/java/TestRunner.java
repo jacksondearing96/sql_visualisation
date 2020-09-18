@@ -81,6 +81,24 @@ public class TestRunner {
     }
 
     @Test
+    @DisplayName("lineageNodeNamingConvention")
+    void lineageNodeSetName() {
+        // Basic name.
+        LineageNode node = new LineageNode("TABLE", "name");
+        Assertions.assertEquals("name", node.getName());
+
+        // Name with a base prefix.
+        node.setName("base.field");
+        Assertions.assertEquals("field", node.getName());
+
+        // Name with multiple base parts.
+        node.setName("base0.base1.base2.field");
+        Assertions.assertEquals("field", node.getName());
+
+        // Empty name. Make sure this doesn't throw an error.
+        node.setName("");
+    }
+
     @DisplayName("testMultipleIdentifiers")
     void testMultipleIdentifiers() {
         String multipleIdentifiersSelectStatement = "select a * b as c, d from mytable###";
@@ -401,7 +419,7 @@ public class TestRunner {
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(agentLeadsSql).getNodeList();
 
         // crms_task table.
-        String crmsTaskName = "%(db)s.%(crm)s_task";
+        String crmsTaskName = "%(crm)s_task";
         LineageNode crmsTask = new LineageNode("TABLE", crmsTaskName);
         Column accountid = new Column("accountid");
         Column ownerid = new Column("ownerid");
@@ -434,7 +452,7 @@ public class TestRunner {
         anonymous1.addListOfColumns(Arrays.asList(acctSfId, userSfId));
 
         // View.
-        String view0Name = "%(db)s.note_count_by_agent";
+        String view0Name = "note_count_by_agent";
         LineageNode view0 = new LineageNode("VIEW", view0Name);
         acctSfId = new Column("acct_sf_id");
         acctSfId.addSource(DataLineage.makeId("Anonymous1", acctSfId.getName()));
@@ -444,13 +462,10 @@ public class TestRunner {
         view0.addListOfColumns(Arrays.asList(acctSfId, userSfId, cnt));
 
         // View (second statement).
-        customerInsightName = "%(db)s.customer_insight";
-        String view1Name =  "%(db)s.agent_prediction_obj";
+        String view1Name = "agent_prediction_obj";
         LineageNode view1 = new LineageNode("VIEW", view1Name);
         Column address_detail_pid = new Column("address_detail_pid");
-        acctSfId = new Column("acct_sf_id");
         Column acctName = new Column("acct_name");
-        userSfId = new Column("user_sf_id");
         Column spark = new Column("spark");
         Column kafka = new Column("kafka");
         Column clientAgentScore = new Column("client_agent_score");
@@ -460,6 +475,22 @@ public class TestRunner {
         Column primaryOwner = new Column("primary_owner");
         Column allOwners = new Column("all_owners");
         Column noteCnt = new Column("note_cnt");
+
+        customerInsight.addListOfColumns(
+                Arrays.asList(
+                        address_detail_pid,
+                        acctName,
+                        spark,
+                        kafka,
+                        clientAgentScore,
+                        caseE,
+                        caseF,
+                        caseG,
+                        primaryOwner,
+                        allOwners
+                )
+        );
+
         address_detail_pid.addSource(DataLineage.makeId(customerInsightName, address_detail_pid.getName()));
         acctSfId.addSource(DataLineage.makeId(customerInsightName, acctSfId.getName()));
         acctName.addSource(DataLineage.makeId(customerInsightName, acctName.getName()));
@@ -473,6 +504,7 @@ public class TestRunner {
         primaryOwner.addSource(DataLineage.makeId(customerInsightName, primaryOwner.getName()));
         allOwners.addSource(DataLineage.makeId(customerInsightName, allOwners.getName()));
         noteCnt.addSource(DataLineage.makeId(view0Name, cnt.getName()));
+
         view1.addListOfColumns(Arrays.asList(
                 address_detail_pid,
                 acctSfId,
@@ -489,7 +521,7 @@ public class TestRunner {
                 noteCnt
         ));
 
-        Assertions.assertEquals(7, nodeList.size());
+        Assertions.assertEquals(6, nodeList.size());
         Assertions.assertTrue(crmsTask.equals(nodeList.get(0)));
         Assertions.assertTrue(anonymous0.equals(nodeList.get(1)));
         Assertions.assertTrue(customerInsight.equals(nodeList.get(2)));
@@ -498,6 +530,23 @@ public class TestRunner {
         // TODO: the table not tested here is %(db)s.customer_insight
         //       The behaviour here depends on how the database name prefix is handled.
         //       The correct behaviour has not been determined yet.
-        Assertions.assertTrue(view1.equals(nodeList.get(6)));
+        Assertions.assertTrue(view1.equals(nodeList.get(5)));
+    }
+
+    @DisplayName("testNumericSelectValues")
+    void testNumbericSelectValues() {
+        String numericSelectValues = "SELECT 1 as one FROM a###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(numericSelectValues).getNodeList();
+
+        // Source table (no columns).
+        LineageNode sourceTable = new LineageNode("TABLE", "a");
+
+        // Anonymous table.
+        LineageNode anonymousTable = new LineageNode("ANONYMOUS", "Anonymous0");
+        anonymousTable.addColumn(new Column("one"));
+
+        Assertions.assertEquals(2, nodeList.size());
+        Assertions.assertTrue(sourceTable.equals(nodeList.get(0)));
+        Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
     }
 }
