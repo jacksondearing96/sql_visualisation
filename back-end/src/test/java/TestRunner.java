@@ -81,6 +81,23 @@ public class TestRunner {
     }
 
     @Test
+    @DisplayName("lineageNodeNamingConvention")
+    void lineageNodeSetName() {
+        // Basic name.
+        LineageNode node = new LineageNode("TABLE", "name");
+        Assertions.assertEquals("name", node.getName());
+
+        // Name with a base prefix.
+        node.setName("base.field");
+        Assertions.assertEquals("field", node.getName());
+
+        // Name with multiple base parts.
+        node.setName("base0.base1.base2.field");
+        Assertions.assertEquals("field", node.getName());
+
+        // Empty name. Make sure this doesn't throw an error.
+        node.setName("");
+
     @DisplayName("testMultipleIdentifiers")
     void testMultipleIdentifiers() {
         String multipleIdentifiersSelectStatement = "select a * b as c, d from mytable###";

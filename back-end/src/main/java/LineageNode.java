@@ -21,7 +21,7 @@ public class LineageNode {
      */
     public LineageNode(String type, String name, String alias) {
         this.type = type;
-        this.name = name;
+        setName(name);
         this.alias = alias;
     }
 
@@ -69,8 +69,14 @@ public class LineageNode {
         this.type = type;
     }
 
+    /**
+     * The name may be composed of multiple parts (dot delimited), eg. "%(db)s.customer_insights", just take the field part
+     * and ignore the base prefix, therefore for this case, name = "customer_insights"
+     * @param name The new name of the LineageNode.
+     */
     public void setName(String name) {
-        this.name = name;
+        String[] nameParts = name.split("[.]");
+        this.name = nameParts[nameParts.length - 1];
     }
 
     public void setAlias(String alias) {
