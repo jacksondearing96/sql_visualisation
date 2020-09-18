@@ -291,10 +291,6 @@ public class TestRunner {
         columnA.addSource("b::*");
         anonymousTable.addColumn(columnA);
 
-        for (LineageNode node :  nodeList) {
-            PrettyPrinter.printLineageNode(node);
-        }
-
         Assertions.assertEquals(2, nodeList.size());
         Assertions.assertTrue(table.equals(nodeList.get(0)));
         Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
