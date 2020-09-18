@@ -18,4 +18,15 @@ public class Util {
     }
 
     public static void resetAnonymousTableCount() { anonymousTableCount = -1; }
+
+    /**
+     * Removes the database name prefix from a given name. Eg.
+     * Input of "%(db)s.table_name" would return "table_name"
+     * @param name The name to have the prefix removed.
+     * @return The table name without the database name prefix.
+     */
+    public static String removeDatabasePrefix(String name) {
+        String[] nameParts = name.split("[.]");
+        return nameParts[nameParts.length - 1];
+    }
 }

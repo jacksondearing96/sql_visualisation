@@ -140,6 +140,6 @@ public class DataLineage {
     }
 
     public static String makeId(String source, String target) {
-        return source.concat("::").concat(target);
+        return Util.removeDatabasePrefix(source).concat("::").concat(target);
     }
 }

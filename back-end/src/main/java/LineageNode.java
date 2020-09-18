@@ -75,8 +75,7 @@ public class LineageNode {
      * @param name The new name of the LineageNode.
      */
     public void setName(String name) {
-        String[] nameParts = name.split("[.]");
-        this.name = nameParts[nameParts.length - 1];
+        this.name = Util.removeDatabasePrefix(name);
     }
 
     public void setAlias(String alias) {
@@ -110,7 +109,9 @@ public class LineageNode {
 
     public void addListOfColumns(ArrayList<Column> columns) {
         for (Column column : columns) {
-            addColumn(column);
+            try {
+                addColumn((Column)column.clone());
+            } catch (CloneNotSupportedException c) {}
         }
     }
 
