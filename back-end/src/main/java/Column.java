@@ -63,10 +63,6 @@ public class Column implements Cloneable {
         return false;
     }
 
-    public void clearSources() {
-        sources = new ArrayList<>();
-    }
-
     public void setName(String name) {
         this.name = name;
     }
