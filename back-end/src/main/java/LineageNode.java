@@ -102,6 +102,10 @@ public class LineageNode {
         addListOfColumns(new ArrayList<Column>(columns));
     }
 
+    public void addListOfColumns(List<Column> columns) {
+        addListOfColumns(new ArrayList<Column>(columns));
+    }
+
     public void addListOfColumns(ArrayList<Column> columns) {
         for (Column column : columns) {
             addColumn(column);
