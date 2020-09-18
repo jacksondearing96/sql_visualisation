@@ -10,6 +10,7 @@ public class Column implements Cloneable {
     private String id = "";
     private ArrayList<String> sources = new ArrayList<String>();
 
+    public Column() { this("", "", ""); }
     public Column(String name) {
         this(name, "", "");
     }

@@ -81,52 +81,84 @@ public class TestRunner {
     }
 
     @Test
+    @DisplayName("testMultipleIdentifiers")
+    void testMultipleIdentifiers() {
+        String multipleIdentifiersSelectStatement = "select a * b as c, d from mytable###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(multipleIdentifiersSelectStatement).getNodeList();
+
+        // Expected source table.
+        LineageNode myTable = new LineageNode("TABLE", "mytable");
+        Column a = new Column("a");
+        Column b = new Column("b");
+        Column d = new Column("d");
+        myTable.addListOfColumns(new ArrayList<>(Arrays.asList(a, b, d)));
+
+        // Expected anonymous table.
+        LineageNode anonymousTable = new LineageNode("ANONYMOUS");
+        anonymousTable.setName("Anonymous0");
+        Column c = new Column("c");
+        c.addListOfSources(new ArrayList<>(Arrays.asList("mytable::a", "mytable::b")));
+        d.addSource("mytable::d");
+        anonymousTable.addListOfColumns(new ArrayList<>(Arrays.asList(c, d)));
+
+        Assertions.assertEquals(2, nodeList.size(), "nodeList size");
+        Assertions.assertTrue(myTable.equals(nodeList.get(0)));
+        Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
+
+        // While we have the expected tables constructed, test more statements with the same expected output
+        // with variations to the SQL syntax.
+        multipleIdentifiersSelectStatement = "select someFunction(a, b) as c, d from mytable###";
+        nodeList = LineageExtractor.extractLineageWithAnonymousTables(multipleIdentifiersSelectStatement).getNodeList();
+        Assertions.assertEquals(2, nodeList.size(), "nodeList size");
+        Assertions.assertTrue(myTable.equals(nodeList.get(0)));
+        Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
+    }
+
+    @Test
     @DisplayName("testLineageNodes")
     void testLineageNodes() {
         String simpleSelect = "SELECT a FROM b###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(simpleSelect).getNodeList();
 
-        // Anonymous table.
-        LineageNode anonymousNode = new LineageNode("ANONYMOUS", "Anonymous0", "");
-        Column anonymousColumn = new Column("a", "", "Anonymous0::a");
-        anonymousColumn.addSource("b::a");
-        anonymousNode.addColumn(anonymousColumn);
-
         // Source table.
-        LineageNode sourceNode = new LineageNode("TABLE", "b", "");
-        Column sourceColumn = new Column("a", "", "b::a");
-        sourceNode.addColumn(sourceColumn);
+        LineageNode sourceNode = new LineageNode("TABLE", "b");
+        Column a = new Column("a");
+        sourceNode.addColumn(a);
+
+        // Anonymous table.
+        LineageNode anonymousNode = new LineageNode("ANONYMOUS", "Anonymous0");
+        a.addSource("b::a");
+        anonymousNode.addColumn(a);
 
         // Compare the pair.
-        boolean success = true;
-        success &= nodeList.get(1).equals(anonymousNode);
-        success &= nodeList.get(0).equals(sourceNode);
-        Assertions.assertTrue(success);
+        Assertions.assertEquals(2, nodeList.size());
+        Assertions.assertTrue(anonymousNode.equals(nodeList.get(1)));
+        Assertions.assertTrue(sourceNode.equals(nodeList.get(0)));
     }
 
     @Test
     @DisplayName("testBasicAnonymousTableGeneration")
     void testBasicAnonymousTableGeneration() {
-        String statement = "select column1, column2, cast(someDate as date) as columnA from \"tableName\"";
+        String statement = "select column1, column2, cast(someDate as date) as columnA from \"tablename\"###";
 
         // Output table
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(statement).getNodeList();
 
         // Expected tables
-        LineageNode table = new LineageNode("TABLE", "tableName", "");
+        LineageNode table = new LineageNode("TABLE", "tablename");
         Column column1 = new Column("column1");
         Column column2 = new Column("column2");
         Column dateColumn = new Column("someDate");
-        table.addListOfColumns(new ArrayList<>(Arrays.asList(column1, column2, dateColumn)));
+        table.addListOfColumns(Arrays.asList(column1, column2, dateColumn));
 
-        LineageNode anonymousTable = new LineageNode("ANONYMOUS", "Anonymous0", "");
-        Column column1a = new Column("column1", "", "");
-        column1a.setSources(new ArrayList<>(Arrays.asList("tableName::column1")));
-        Column column2a = new Column("column2", "", "");
-        column1a.setSources(new ArrayList<>(Arrays.asList("tableName::column2")));
-        Column columnA = new Column("columnA", "", "");
-        column1a.setSources(new ArrayList<>(Arrays.asList("tableName::someDate")));
-        anonymousTable.addListOfColumns(new ArrayList<>(Arrays.asList(column1a, column2a, columnA)));
+        LineageNode anonymousTable = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column column1a = new Column("column1");
+        Column column2a = new Column("column2");
+        Column columnA = new Column("columnA");
+        column1a.addSource("tablename::column1");
+        column2a.addSource("tablename::column2");
+        columnA.addSource("tablename::someDate");
+        anonymousTable.addListOfColumns(Arrays.asList(column1a, column2a, columnA));
 
         // Compare the pair.
         boolean success = true;
@@ -161,10 +193,6 @@ public class TestRunner {
         LineageNode secondAnonymous = new LineageNode("ANONYMOUS", "Anonymous1");
         c.addSource("d::c");
         secondAnonymous.addColumn(c);
-
-        for (LineageNode node : nodeList) {
-            PrettyPrinter.printLineageNode(node);
-        }
 
         Assertions.assertEquals(4, nodeList.size());
         Assertions.assertTrue(firstSource.equals(nodeList.get(0)));
@@ -232,6 +260,7 @@ public class TestRunner {
 
         // First, verify that the anonymous table is produced correctly as the intermediate table.
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
         Assertions.assertEquals(3, nodeList.size());
         Assertions.assertTrue(source.equals(nodeList.get(0)));
         Assertions.assertTrue(anonymous.equals(nodeList.get(1)));

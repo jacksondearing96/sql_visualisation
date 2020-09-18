@@ -5,9 +5,6 @@ import com.facebook.presto.sql.tree.Statement;
 import java.util.List;
 
 public class LineageExtractor {
-
-    private static DataLineage dataLineage = new DataLineage("lineage_output.json");
-
     public static DataLineage extractLineage(String sql) {
         DataLineage dataLineage = extractLineageWithAnonymousTables(sql);
         dataLineage.bypassAnonymousTables();
@@ -15,9 +12,13 @@ public class LineageExtractor {
     }
 
     public static DataLineage extractLineageWithAnonymousTables(String sql) {
+        DataLineage dataLineage = new DataLineage("lineage_output.json");
+
         List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
 
         SivtVisitor<Node, ?> sivtVisitor = new SivtVisitor<Node, Object>();
+
+        Util.resetAnonymousTableCount();
 
         // Iterate through each statement.
         // Use the SivtParser to parse the statement.

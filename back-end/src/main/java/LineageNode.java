@@ -64,7 +64,7 @@ public class LineageNode {
 
         return true;
     }
-    
+
     public void setType(String type) {
         this.type = type;
     }
