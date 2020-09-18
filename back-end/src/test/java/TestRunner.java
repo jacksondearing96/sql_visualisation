@@ -593,4 +593,35 @@ public class TestRunner {
         source.equals(nodeList.get(0));
         anonymous.equals(nodeList.get(1));
     }
+
+    @Test
+    @DisplayName("testSubquery")
+    void testSubquery() {
+        String sql = "SELECT a FROM (\n" +
+                        "SELECT b FROM c\n" +
+                      ")###\n";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Table c.
+        LineageNode tableC = new LineageNode("TABLE", "c");
+        Column b = new Column("b");
+        tableC.addColumn(b);
+
+        // Inner-most anonymous table.
+        LineageNode anonymous0 = new LineageNode("ANONYMOUS", "Anonymous0");
+        b.addSource("c::b");
+        anonymous0.addColumn(b);
+
+        // Outer-most anonymous table.
+        LineageNode anonymous1 = new LineageNode("ANONYMOUS", "Anonymous1");
+        Column a = new Column("a");
+        anonymous0.addColumn(a);
+        a.addSource("Anonymous0::a");
+        anonymous1.addColumn(a);
+
+        Assertions.assertEquals(3, nodeList.size());
+        tableC.equals(nodeList.get(0));
+        anonymous0.equals(nodeList.get(1));
+        anonymous1.equals(nodeList.get(2));
+    }
 }
