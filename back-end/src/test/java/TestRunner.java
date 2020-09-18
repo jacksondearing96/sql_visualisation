@@ -551,4 +551,25 @@ public class TestRunner {
         Assertions.assertTrue(sourceTable.equals(nodeList.get(0)));
         Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
     }
+
+    @Test
+    @DisplayName("testFunctionCall")
+    void testFunctionCall() {
+        String sql = "SELECT someFunction(a) AS b FROM c###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Source table.
+        LineageNode source = new LineageNode("TABLE", "c");
+        source.addColumn(new Column("a"));
+
+        // Anonymous table.
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column b = new Column("b");
+        b.addSource("c::a");
+        anonymous.addColumn(b);
+
+        Assertions.assertEquals(2, nodeList.size());
+        source.equals(nodeList.get(0));
+        anonymous.equals(nodeList.get(1));
+    }
 }
