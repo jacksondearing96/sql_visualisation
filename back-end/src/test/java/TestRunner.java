@@ -624,4 +624,33 @@ public class TestRunner {
         anonymous0.equals(nodeList.get(1));
         anonymous1.equals(nodeList.get(2));
     }
+
+    @Test
+    @DisplayName("testMultipleSources")
+    void testMultipleSources() {
+        String sql = "SELECT table1.a, table2.b " +
+                     "FROM table1 INNER JOIN table2 ON 1 = 1### ";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Source table1.
+        LineageNode table1 = new LineageNode("TABLE", "table1");
+        Column a = new Column("a");
+        table1.addColumn(a);
+
+        // Source table2.
+        LineageNode table2 = new LineageNode("TABLE", "table2");
+        Column b = new Column("b");
+        table2.addColumn(b);
+
+        // Anonymous table.
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
+        a.addSource("table1::a");
+        b.addSource("table2::b");
+        anonymous.addListOfColumns(Arrays.asList(a, b));
+
+        Assertions.assertEquals(3, nodeList.size());
+        table1.equals(nodeList.get(0));
+        table2.equals(nodeList.get(1));
+        anonymous.equals(nodeList.get(2));
+    }
 }
