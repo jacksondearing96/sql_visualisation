@@ -75,8 +75,7 @@ public class LineageNode {
      * @param name The new name of the LineageNode.
      */
     public void setName(String name) {
-        String[] nameParts = name.split("[.]");
-        this.name = nameParts[nameParts.length - 1];
+        this.name = Util.removeDatabasePrefix(name);
     }
 
     public void setAlias(String alias) {

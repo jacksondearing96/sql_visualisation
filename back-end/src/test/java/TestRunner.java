@@ -492,8 +492,10 @@ public class TestRunner {
         );
 
         address_detail_pid.addSource(DataLineage.makeId(customerInsightName, address_detail_pid.getName()));
+        acctSfId = new Column("acct_sf_id");
         acctSfId.addSource(DataLineage.makeId(customerInsightName, acctSfId.getName()));
         acctName.addSource(DataLineage.makeId(customerInsightName, acctName.getName()));
+        userSfId = new Column("user_sf_id");
         userSfId.addSource(DataLineage.makeId(customerInsightName, userSfId.getName()));
         spark.addSource(DataLineage.makeId(customerInsightName, spark.getName()));
         kafka.addSource(DataLineage.makeId(customerInsightName, kafka.getName()));
