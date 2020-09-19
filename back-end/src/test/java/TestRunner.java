@@ -551,4 +551,31 @@ public class TestRunner {
         Assertions.assertTrue(sourceTable.equals(nodeList.get(0)));
         Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
     }
+
+    @Test
+    @DisplayName("testDereferencedWildcard")
+    void testDereferencedWildcard() {
+        String sql = "SELECT a.*, b.c FROM a INNER JOIN b ON 1 = 1###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Source table a.
+        LineageNode sourceA = new LineageNode("TABLE", "a");
+
+        // Source table b.
+        LineageNode sourceB = new LineageNode("TABLE", "b");
+        Column c = new Column("c");
+        sourceB.addColumn(c);
+
+        // Anonymous table.
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column wildcard = new Column("*");
+        wildcard.addSource("a::*");
+        c.addSource("b::c");
+        anonymous.addListOfColumns(Arrays.asList(wildcard, c));
+
+        Assertions.assertEquals(3, nodeList.size());
+        sourceA.equals(nodeList.get(0));
+        sourceB.equals(nodeList.get(1));
+        anonymous.equals(nodeList.get(2));
+    }
 }
