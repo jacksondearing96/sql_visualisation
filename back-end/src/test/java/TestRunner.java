@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.facebook.presto.sql.parser.StatementSplitter;
+
 public class TestRunner {
 
     @BeforeAll
@@ -654,7 +656,7 @@ public class TestRunner {
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
         // The only table that will be derived from this.
-        LineageNode existingTable = new LineageNode("TABLE", "existingTable");
+        LineageNode existingTable = new LineageNode("TABLE", "existingtable");
 
         Assertions.assertEquals(1, nodeList.size());
         existingTable.equals(nodeList.get(0));
@@ -664,8 +666,10 @@ public class TestRunner {
     @DisplayName("testInsertFromSelect")
     void testInsertFromSelect() {
         String sql = "INSERT INTO existingTable SELECT * FROM a###";
+        List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
+        SivtParser.printAstOfFirstStatement(statements);
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
-
+        for (LineageNode node : nodeList) PrettyPrinter.printLineageNode(node);
         // Source table a.
         LineageNode sourceA = new LineageNode("TABLE", "a");
 
@@ -675,7 +679,7 @@ public class TestRunner {
         wildcard.addSource("a::*");
 
         // The existing table that is having values inserted.
-        LineageNode existingTable = new LineageNode("TABLE", "existingTable");
+        LineageNode existingTable = new LineageNode("TABLE", "existingtable");
         wildcard = new Column("*");
         wildcard.addSource("Anonymous0::*");
 
@@ -695,7 +699,7 @@ public class TestRunner {
         LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
 
         // The existing table that is having values inserted.
-        LineageNode existingTable = new LineageNode("TABLE", "existingTable");
+        LineageNode existingTable = new LineageNode("TABLE", "existingtable");
         existingTable.addListOfColumns(Arrays.asList(new Column("a"), new Column("b"), new Column("c")));
 
         Assertions.assertEquals(2, nodeList.size());
@@ -724,7 +728,7 @@ public class TestRunner {
         anonymous.addListOfColumns(Arrays.asList(d, e, f));
 
         // The existing table that is having values inserted.
-        LineageNode existingTable = new LineageNode("TABLE", "existingTable");
+        LineageNode existingTable = new LineageNode("TABLE", "existingtable");
         Column a = new Column("a");
         Column b = new Column("b");
         Column c = new Column("c");

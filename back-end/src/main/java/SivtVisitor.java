@@ -34,7 +34,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * Defines all the parent nodes that are interested in keeping the resultant anonymous table to use as a source.
       */
     private final ArrayList<Class> contextToKeepList =
-            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class));
+            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class, Insert.class));
 
     /**
      * Determines whether the current Class context is one which is required to keep the anonymous table.
@@ -97,6 +97,45 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return node;
     }
 
+    @Override
+    protected R visitInsert(Insert insert, C context) {
+        System.out.println(insert);
+
+        LineageNode target = new LineageNode("TABLE", insert.getTarget().getSuffix().toString());
+        sourcesStack.push(new ArrayList<>());
+
+        currentlyInside.push(Insert.class);
+        R node = visitStatement(insert, context);
+        currentlyInside.pop();
+
+        if (insert.getColumns().isPresent()) {
+            System.out.println("Columns present");
+            List<com.facebook.presto.sql.tree.Identifier> columnNames = insert.getColumns().get();
+            for (com.facebook.presto.sql.tree.Identifier columnName : columnNames) {
+                Column column = new Column(columnName.toString());
+                target.addColumn(column);
+            }
+        } else {
+            System.out.println("Columns NOT present");
+            // This implies it means all columns.
+        }
+
+        switch (sourcesStack.peek().size()) {
+            case 1:
+                LineageNode source = sourcesStack.pop().get(0);
+                lineageNodes.add(source);
+                break;
+            case 0:
+                break;
+            default:
+                Logger.warning("INSERT statement is deriving from a non-single source");
+        }
+
+        lineageNodes.add(target);
+
+        return node;
+    }
+
     /**
      * Visit a TableSubquery node in the AST.
      *
@@ -113,9 +152,12 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         R node = visitQueryBody(tableSubquery, context);
         currentlyInside.pop();
 
+        // TODO: Assumption - at the conclusion of recursing through the children of a TableSubquery,
+        //       there will be a single anonymous table on the sources stack.
+        //       This assumption should be investigated more thoroughly to ensure it is correct.
+        if (sourcesStack.peek().size() != 1) Logger.warning("There was not a single source table after recursing through a subquery");
+
         // Give the result of the subquery its alias if it has one.
-        // TODO: Assumption - at the conclusion of recursing through the children of a TableSubquery, there will be a single anonymous table on the sources stack.
-        // This assumption should be investigated more thoroughly to ensure it is correct.
         if (isCurrentlyInside(AliasedRelation.class)) {
             LabellingInformation labellingInformation = labellingInformationStack.pop();
             sourcesStack.peek().get(0).setAlias(labellingInformation.getAlias());
