@@ -624,11 +624,11 @@ public class TestRunner {
     void testLiteralInlineTablesWithAliasAndColumnLabels() {
 
         String sql = "SELECT b FROM ( " +
-                         "VALUES " +
-                             "(1, 'a')," +
-                             "(2, 'b')," +
-                             "(3, 'c')" +
-                     ") AS a (b, c)###";
+                "VALUES " +
+                "(1, 'a')," +
+                "(2, 'b')," +
+                "(3, 'c')" +
+                ") AS a (b, c)###";
 
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
@@ -645,5 +645,97 @@ public class TestRunner {
         Assertions.assertEquals(2, nodeList.size());
         inlineLiteral.equals(nodeList.get(0));
         anonymous.equals(nodeList.get(1));
+    }
+
+    @Test
+    @DisplayName("testInsertStatement")
+    void testInsertStatement() {
+        String sql = "INSERT INTO existingTable VALUES a###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // The only table that will be derived from this.
+        LineageNode existingTable = new LineageNode("TABLE", "existingTable");
+
+        Assertions.assertEquals(1, nodeList.size());
+        existingTable.equals(nodeList.get(0));
+    }
+
+    @Test
+    @DisplayName("testInsertFromSelect")
+    void testInsertFromSelect() {
+        String sql = "INSERT INTO existingTable SELECT * FROM a###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Source table a.
+        LineageNode sourceA = new LineageNode("TABLE", "a");
+
+        // Anonymous table from select statement.
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column wildcard = new Column("*");
+        wildcard.addSource("a::*");
+
+        // The existing table that is having values inserted.
+        LineageNode existingTable = new LineageNode("TABLE", "existingTable");
+        wildcard = new Column("*");
+        wildcard.addSource("Anonymous0::*");
+
+        Assertions.assertEquals(3, nodeList.size());
+        sourceA.equals(nodeList.get(0));
+        anonymous.equals(nodeList.get(1));
+        existingTable.equals(nodeList.get(2));
+    }
+
+    @Test
+    @DisplayName("testInsertWithListedColumnsAndInlineLiteral")
+    void testInsertWithListedColumnsAndInlineLiteral() {
+        String sql = "INSERT INTO existingTable (a, b, c) VALUES d, e, f###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Anonymous literal inline table.
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
+
+        // The existing table that is having values inserted.
+        LineageNode existingTable = new LineageNode("TABLE", "existingTable");
+        existingTable.addListOfColumns(Arrays.asList(new Column("a"), new Column("b"), new Column("c")));
+
+        Assertions.assertEquals(2, nodeList.size());
+        anonymous.equals(nodeList.get(0));
+        existingTable.equals(nodeList.get(1));
+    }
+
+    @Test
+    @DisplayName("testInsertWithListedColumnsAndSelect")
+    void testInsertWithListedColumnsAndSelect() {
+        String sql = "INSERT INTO existingTable (a, b, c) SELECT d, e, f FROM sourceTable###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Source table.
+        LineageNode sourceTable = new LineageNode("TABLE", "sourceTable");
+        Column d = new Column("d");
+        Column e = new Column("e");
+        Column f = new Column("f");
+        sourceTable.addListOfColumns(Arrays.asList(d, e, f));
+
+        // Anonymous table from select statement.
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
+        d.addSource(DataLineage.makeId(sourceTable.getName(), d.getName()));
+        e.addSource(DataLineage.makeId(sourceTable.getName(), e.getName()));
+        f.addSource(DataLineage.makeId(sourceTable.getName(), f.getName()));
+        anonymous.addListOfColumns(Arrays.asList(d, e, f));
+
+        // The existing table that is having values inserted.
+        LineageNode existingTable = new LineageNode("TABLE", "existingTable");
+        Column a = new Column("a");
+        Column b = new Column("b");
+        Column c = new Column("c");
+        a.addSource(DataLineage.makeId(anonymous.getName(), d.getName()));
+        b.addSource(DataLineage.makeId(anonymous.getName(), e.getName()));
+        c.addSource(DataLineage.makeId(anonymous.getName(), f.getName()));
+        existingTable.addListOfColumns(Arrays.asList(a, b, c));
+
+        Assertions.assertEquals(3, nodeList.size());
+        sourceTable.equals(nodeList.get(0));
+        anonymous.equals(nodeList.get(1));
+        existingTable.equals(nodeList.get(2));
     }
 }
