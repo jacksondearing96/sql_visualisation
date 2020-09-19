@@ -666,10 +666,8 @@ public class TestRunner {
     @DisplayName("testInsertFromSelect")
     void testInsertFromSelect() {
         String sql = "INSERT INTO existingTable SELECT * FROM a###";
-        List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
-        SivtParser.printAstOfFirstStatement(statements);
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
-        for (LineageNode node : nodeList) PrettyPrinter.printLineageNode(node);
+
         // Source table a.
         LineageNode sourceA = new LineageNode("TABLE", "a");
 
@@ -677,11 +675,13 @@ public class TestRunner {
         LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
         Column wildcard = new Column("*");
         wildcard.addSource("a::*");
+        anonymous.addColumn(wildcard);
 
         // The existing table that is having values inserted.
         LineageNode existingTable = new LineageNode("TABLE", "existingtable");
         wildcard = new Column("*");
         wildcard.addSource("Anonymous0::*");
+        existingTable.addColumn(wildcard);
 
         Assertions.assertEquals(3, nodeList.size());
         sourceA.equals(nodeList.get(0));

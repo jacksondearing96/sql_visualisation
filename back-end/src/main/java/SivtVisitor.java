@@ -108,21 +108,20 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         R node = visitStatement(insert, context);
         currentlyInside.pop();
 
-        if (insert.getColumns().isPresent()) {
-            System.out.println("Columns present");
-            List<com.facebook.presto.sql.tree.Identifier> columnNames = insert.getColumns().get();
-            for (com.facebook.presto.sql.tree.Identifier columnName : columnNames) {
-                Column column = new Column(columnName.toString());
-                target.addColumn(column);
-            }
-        } else {
-            System.out.println("Columns NOT present");
-            // This implies it intends to inherit all columns from the source table.
-        }
+        boolean insertHasColumns = insert.getColumns().isPresent();
 
-        switch (sourcesStack.peek().size()) {
+        LineageNode source = null;
+        boolean hasSource = false;
+        boolean columnEquivalent = false;
+        ArrayList<LineageNode> sources = sourcesStack.pop();
+
+        switch (sources.size()) {
             case 1:
-                LineageNode source = sourcesStack.pop().get(0);
+                hasSource = true;
+                source = sources.get(0);
+                if (insertHasColumns && source.getColumns().size() == insert.getColumns().get().size()) {
+                    columnEquivalent = true;
+                }
                 lineageNodes.add(source);
                 break;
             case 0:
@@ -130,6 +129,26 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
                 break;
             default:
                 Logger.warning("INSERT statement is deriving from a non-single source");
+        }
+
+        if (insertHasColumns) {
+            System.out.println("Columns present");
+            List<com.facebook.presto.sql.tree.Identifier> columnNames = insert.getColumns().get();
+            for (int i = 0; i < columnNames.size(); ++i) {
+                Column column = new Column(columnNames.get(i).getValue());
+                if (hasSource && columnEquivalent) {
+                    column.addSource(DataLineage.makeId(source.getName(),
+                            source.getColumns().get(i).getName()));
+                }
+                target.addColumn(column);
+            }
+        } else if (hasSource) {
+            // Just want every column from the source table.
+            for (Column sourceColumn : source.getColumns()) {
+                    Column column = new Column(sourceColumn.getName());
+                    column.addSource(DataLineage.makeId(source.getName(), column.getName()));
+                    target.addColumn(column);
+            }
         }
 
         lineageNodes.add(target);
