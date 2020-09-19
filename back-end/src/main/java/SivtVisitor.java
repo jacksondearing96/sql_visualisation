@@ -2,7 +2,6 @@ import com.facebook.presto.sql.tree.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Stack;
 import java.util.Arrays;
 
@@ -333,6 +332,15 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return visitQueryBody(table, context);
     }
 
+    /**
+     * Visit a Values node in the AST.
+     *
+     * This keyword generates an inline literal table. Therefore, a new anonymous table is required to be pushed
+     * to the sourcesStack.
+     * @param values The values node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
     @Override
     protected R visitValues(Values values, C context) {
 

@@ -1,12 +1,9 @@
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.intellij.lang.annotations.JdkConstants;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.facebook.presto.sql.parser.StatementSplitter;
 
 public class TestRunner {
 
@@ -619,9 +616,6 @@ public class TestRunner {
                              "(2, 'b')," +
                              "(3, 'c')" +
                      ") AS a (b, c)###";
-
-        List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
-        SivtParser.printAstOfFirstStatement(statements);
 
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
