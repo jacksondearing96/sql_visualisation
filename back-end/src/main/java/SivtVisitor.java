@@ -1,9 +1,11 @@
 import com.facebook.presto.sql.tree.*;
+import com.facebook.presto.sql.tree.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
@@ -97,31 +99,18 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return node;
     }
 
-    @Override
-    protected R visitInsert(Insert insert, C context) {
-        System.out.println(insert);
-
-        LineageNode target = new LineageNode("TABLE", insert.getTarget().getSuffix().toString());
-        sourcesStack.push(new ArrayList<>());
-
-        currentlyInside.push(Insert.class);
-        R node = visitStatement(insert, context);
-        currentlyInside.pop();
-
-        boolean insertHasColumns = insert.getColumns().isPresent();
-
+    /**
+     * Get the source table that is used as content for INSERT statements.
+     * @return The source table.
+     */
+    LineageNode getSourceForInsertStatement() {
         LineageNode source = null;
-        boolean hasSource = false;
-        boolean columnEquivalent = false;
         ArrayList<LineageNode> sources = sourcesStack.pop();
 
         switch (sources.size()) {
             case 1:
-                hasSource = true;
+                // Standard case of a single source table.
                 source = sources.get(0);
-                if (insertHasColumns && source.getColumns().size() == insert.getColumns().get().size()) {
-                    columnEquivalent = true;
-                }
                 lineageNodes.add(source);
                 break;
             case 0:
@@ -130,25 +119,74 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
             default:
                 Logger.warning("INSERT statement is deriving from a non-single source");
         }
+        return source;
+    }
+
+    /**
+     * Copies every column from source into target.
+     * @param target The target lineage node.
+     * @param source The source lineage node.
+     */
+    void copyEveryColumnFromSource(LineageNode target, LineageNode source) {
+        // Just want every column from the source table.
+        for (Column sourceColumn : source.getColumns()) {
+            Column column = new Column(sourceColumn.getName());
+            column.addSource(DataLineage.makeId(source.getName(), column.getName()));
+            target.addColumn(column);
+        }
+    }
+
+    /**
+     * Visit an Insert node in the AST.
+     *
+     * @param insert The Insert node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
+    @Override
+    protected R visitInsert(Insert insert, C context) {
+
+        // Create a new lineage node for the table that will have values inserted into it.
+        LineageNode target = new LineageNode("TABLE", insert.getTarget().getSuffix());
+
+        // Make room for the sources table which contains the insert values.
+        sourcesStack.push(new ArrayList<>());
+
+        currentlyInside.push(Insert.class);
+        R node = visitStatement(insert, context);
+        currentlyInside.pop();
+
+        LineageNode source = getSourceForInsertStatement();
+
+        // Flags to track what kind of INSERT statement this is.
+        boolean insertHasColumns = insert.getColumns().isPresent();
+        boolean insertAndSourceAreColumnEquivalent =
+                source != null
+                && insertHasColumns
+                && source.getColumns().size() == insert.getColumns().get().size();
 
         if (insertHasColumns) {
-            System.out.println("Columns present");
-            List<com.facebook.presto.sql.tree.Identifier> columnNames = insert.getColumns().get();
+            // The INSERT statement has defined its own column names, use these to populate the columns.
+            List<String> columnNames =
+                    insert.getColumns().get().stream().map(Identifier::getValue).collect(Collectors.toList());
+
+            // Iterate through each of the designated (by the INSERT statement) columns.
             for (int i = 0; i < columnNames.size(); ++i) {
-                Column column = new Column(columnNames.get(i).getValue());
-                if (hasSource && columnEquivalent) {
+                Column column = new Column(columnNames.get(i));
+
+                // If there is a 1:1 mapping of columns with the source table, we can safely draw
+                // lineage between each of those columns.
+                if (source != null && insertAndSourceAreColumnEquivalent) {
                     column.addSource(DataLineage.makeId(source.getName(),
                             source.getColumns().get(i).getName()));
+                } else {
+                    // TODO: Define this behaviour. Group discussion required.
                 }
+
                 target.addColumn(column);
             }
-        } else if (hasSource) {
-            // Just want every column from the source table.
-            for (Column sourceColumn : source.getColumns()) {
-                    Column column = new Column(sourceColumn.getName());
-                    column.addSource(DataLineage.makeId(source.getName(), column.getName()));
-                    target.addColumn(column);
-            }
+        } else if (source != null) {
+            copyEveryColumnFromSource(target, source);
         }
 
         lineageNodes.add(target);
