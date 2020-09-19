@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.facebook.presto.sql.parser.StatementSplitter;
 
 public class TestRunner {
 
@@ -550,5 +551,92 @@ public class TestRunner {
         Assertions.assertEquals(2, nodeList.size());
         Assertions.assertTrue(sourceTable.equals(nodeList.get(0)));
         Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
+    }
+
+    @Test
+    @DisplayName("testLiteralInlineTable")
+    void testLiteralInlineTables() {
+
+        String sql = "SELECT b FROM ( " +
+                "VALUES " +
+                "(1, 'a')," +
+                "(2, 'b')," +
+                "(3, 'c')" +
+                ")###";
+
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Inline literal table.
+        LineageNode inlineLiteral = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column b = new Column("b");
+        inlineLiteral.addColumn(b);
+
+        // Anonymous table (from select statement).
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous1");
+        b.addSource("Anonymous0::b");
+        anonymous.addColumn(b);
+
+        Assertions.assertEquals(2, nodeList.size());
+        inlineLiteral.equals(nodeList.get(0));
+        anonymous.equals(nodeList.get(1));
+    }
+
+    @Test
+    @DisplayName("testLiteralInlineTableWithAlias")
+    void testLiteralInlineTablesWithAlias() {
+
+        String sql = "SELECT b FROM ( " +
+                "VALUES " +
+                "(1, 'a')," +
+                "(2, 'b')," +
+                "(3, 'c')" +
+                ") AS a###";
+
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Inline literal table.
+        LineageNode inlineLiteral = new LineageNode("ANONYMOUS", "Anonymous0", "a");
+        Column b = new Column("b");
+        inlineLiteral.addColumn(b);
+
+        // Anonymous table (from select statement).
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous1");
+        b.addSource("Anonymous0::b");
+        anonymous.addColumn(b);
+
+        Assertions.assertEquals(2, nodeList.size());
+        inlineLiteral.equals(nodeList.get(0));
+        anonymous.equals(nodeList.get(1));
+    }
+
+    @Test
+    @DisplayName("testLiteralInlineTableWithAliasAndColumnLabels")
+    void testLiteralInlineTablesWithAliasAndColumnLabels() {
+
+        String sql = "SELECT b FROM ( " +
+                         "VALUES " +
+                             "(1, 'a')," +
+                             "(2, 'b')," +
+                             "(3, 'c')" +
+                     ") AS a (b, c)###";
+
+        List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
+        SivtParser.printAstOfFirstStatement(statements);
+
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Inline literal table.
+        LineageNode inlineLiteral = new LineageNode("ANONYMOUS", "Anonymous0", "a");
+        Column b = new Column("b");
+        inlineLiteral.addListOfColumns(Arrays.asList(b, new Column("c")));
+
+        // Anonymous table (from select statement).
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous1");
+        b.addSource("Anonymous0::b");
+        anonymous.addColumn(b);
+
+        Assertions.assertEquals(2, nodeList.size());
+        inlineLiteral.equals(nodeList.get(0));
+        anonymous.equals(nodeList.get(1));
     }
 }
