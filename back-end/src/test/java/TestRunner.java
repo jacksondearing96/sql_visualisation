@@ -551,6 +551,19 @@ public class TestRunner {
     }
 
     @Test
+    @DisplayName("testStandAloneLiteralTable")
+    void testStandAloneLiteralTable() {
+        String sql = "VALUES " +
+                        "(1, 'a')," +
+                        "(2, 'b')," +
+                        "(3, 'c')###";
+
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        Assertions.assertEquals(0, nodeList.size());
+    }
+
+    @Test
     @DisplayName("testLiteralInlineTable")
     void testLiteralInlineTables() {
 
