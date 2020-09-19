@@ -695,16 +695,12 @@ public class TestRunner {
         String sql = "INSERT INTO existingTable (a, b, c) VALUES d, e, f###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
-        // Anonymous literal inline table.
-        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
-
         // The existing table that is having values inserted.
         LineageNode existingTable = new LineageNode("TABLE", "existingtable");
         existingTable.addListOfColumns(Arrays.asList(new Column("a"), new Column("b"), new Column("c")));
 
-        Assertions.assertEquals(2, nodeList.size());
-        anonymous.equals(nodeList.get(0));
-        existingTable.equals(nodeList.get(1));
+        Assertions.assertEquals(1, nodeList.size());
+        existingTable.equals(nodeList.get(0));
     }
 
     @Test
@@ -714,7 +710,7 @@ public class TestRunner {
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
         // Source table.
-        LineageNode sourceTable = new LineageNode("TABLE", "sourceTable");
+        LineageNode sourceTable = new LineageNode("TABLE", "sourcetable");
         Column d = new Column("d");
         Column e = new Column("e");
         Column f = new Column("f");

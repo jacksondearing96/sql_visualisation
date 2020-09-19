@@ -117,7 +117,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
             }
         } else {
             System.out.println("Columns NOT present");
-            // This implies it means all columns.
+            // This implies it intends to inherit all columns from the source table.
         }
 
         switch (sourcesStack.peek().size()) {
@@ -126,6 +126,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
                 lineageNodes.add(source);
                 break;
             case 0:
+                // The valid case in which there is no generated source table.
                 break;
             default:
                 Logger.warning("INSERT statement is deriving from a non-single source");
