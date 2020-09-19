@@ -344,7 +344,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     @Override
     protected R visitValues(Values values, C context) {
 
-        sourcesStack.peek().add(new LineageNode("ANONYMOUS", Util.getNextAnonymousTableName()));
+        if (isCurrentlyInside(TableSubquery.class)) {
+            sourcesStack.peek().add(new LineageNode("ANONYMOUS", Util.getNextAnonymousTableName()));
+        }
 
         currentlyInside.push(Values.class);
         R node = visitQueryBody(values, context);
