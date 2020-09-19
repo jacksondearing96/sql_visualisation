@@ -13,8 +13,8 @@ public class Util {
      * Returns the next ID used for allocating unique names to anonymous tables.
      * @return The next unique ID.
      */
-    public static int getNextAnonymousTableId() {
-        return ++anonymousTableCount;
+    public static String getNextAnonymousTableName() {
+        return "Anonymous".concat(Integer.toString(++anonymousTableCount));
     }
 
     public static void resetAnonymousTableCount() { anonymousTableCount = -1; }
