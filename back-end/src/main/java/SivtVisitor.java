@@ -100,43 +100,6 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
-     * Get the source table that is used as content for INSERT statements.
-     * @return The source table.
-     */
-    LineageNode getSourceForInsertStatement() {
-        LineageNode source = null;
-        ArrayList<LineageNode> sources = sourcesStack.pop();
-
-        switch (sources.size()) {
-            case 1:
-                // Standard case of a single source table.
-                source = sources.get(0);
-                lineageNodes.add(source);
-                break;
-            case 0:
-                // The valid case in which there is no generated source table.
-                break;
-            default:
-                Logger.warning("INSERT statement is deriving from a non-single source");
-        }
-        return source;
-    }
-
-    /**
-     * Copies every column from source into target.
-     * @param target The target lineage node.
-     * @param source The source lineage node.
-     */
-    void copyEveryColumnFromSource(LineageNode target, LineageNode source) {
-        // Just want every column from the source table.
-        for (Column sourceColumn : source.getColumns()) {
-            Column column = new Column(sourceColumn.getName());
-            column.addSource(DataLineage.makeId(source.getName(), column.getName()));
-            target.addColumn(column);
-        }
-    }
-
-    /**
      * Visit an Insert node in the AST.
      *
      * @param insert The Insert node.
@@ -146,9 +109,6 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     @Override
     protected R visitInsert(Insert insert, C context) {
 
-        // Create a new lineage node for the table that will have values inserted into it.
-        LineageNode target = new LineageNode("TABLE", insert.getTarget().getSuffix());
-
         // Make room for the sources table which contains the insert values.
         sourcesStack.push(new ArrayList<>());
 
@@ -156,40 +116,15 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         R node = visitStatement(insert, context);
         currentlyInside.pop();
 
-        LineageNode source = getSourceForInsertStatement();
+        // Get the lineage nodes that result from the INSERT statement.
+        InsertStatement insertStatement = new InsertStatement(insert, sourcesStack.pop());
+        ArrayList<LineageNode> nodes = insertStatement.getLineageNodes();
 
-        // Flags to track what kind of INSERT statement this is.
-        boolean insertHasColumns = insert.getColumns().isPresent();
-        boolean insertAndSourceAreColumnEquivalent =
-                source != null
-                && insertHasColumns
-                && source.getColumns().size() == insert.getColumns().get().size();
+        // Add the source node (if exists).
+        if (nodes.size() > 1) lineageNodes.add(nodes.get(1));
 
-        if (insertHasColumns) {
-            // The INSERT statement has defined its own column names, use these to populate the columns.
-            List<String> columnNames =
-                    insert.getColumns().get().stream().map(Identifier::getValue).collect(Collectors.toList());
-
-            // Iterate through each of the designated (by the INSERT statement) columns.
-            for (int i = 0; i < columnNames.size(); ++i) {
-                Column column = new Column(columnNames.get(i));
-
-                // If there is a 1:1 mapping of columns with the source table, we can safely draw
-                // lineage between each of those columns.
-                if (source != null && insertAndSourceAreColumnEquivalent) {
-                    column.addSource(DataLineage.makeId(source.getName(),
-                            source.getColumns().get(i).getName()));
-                } else {
-                    // TODO: Define this behaviour. Group discussion required.
-                }
-
-                target.addColumn(column);
-            }
-        } else if (source != null) {
-            copyEveryColumnFromSource(target, source);
-        }
-
-        lineageNodes.add(target);
+        // Add the target node.
+        lineageNodes.add(nodes.get(0));
 
         return node;
     }
