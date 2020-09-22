@@ -1,19 +1,5 @@
 /* eslint-disable no-undef */
 
-function error(message) {
-  console.error(message);
-  throw new Error(message);
-}
-
-let logCount = 0;
-const loggingCountThreshold = 50;
-function log(message) {
-  if (logCount < loggingCountThreshold) console.log(message);
-  if (logCount === loggingCountThreshold)
-    console.error("Logging capacity exceeded!");
-  ++logCount;
-}
-
 const canvasWidth = 2000;
 const canvasHeight = 1000;
 
@@ -38,6 +24,20 @@ const tablePaddingHorizontal = 10;
 const tablePaddingVertical = 25;
 const tableDefaultBackgroundColor = "blue";
 const tableDefaultTextColor = "black";
+
+function error(message) {
+  console.error(message);
+  throw new Error(message);
+}
+
+let logCount = 0;
+const loggingCountThreshold = 50;
+function log(message) {
+  if (logCount < loggingCountThreshold) console.log(message);
+  if (logCount === loggingCountThreshold)
+    console.error("Logging capacity exceeded!");
+  ++logCount;
+}
 
 var nodes = [
   {
@@ -516,3 +516,6 @@ function ticked() {
       return columnY + columnHeight / 2;
     });
 }
+
+$("#container").scrollTop(canvasHeight / 2 - 200);
+$("#container").scrollLeft(canvasWidth / 2 - 100);
