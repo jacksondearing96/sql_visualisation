@@ -14,6 +14,8 @@ const fontSize = 15;
 const fontSizeToCharacterWidthRatio = 0.6;
 
 const labelPaddingHorizontal = 15;
+const labelOffsetToReachCenter = 4;
+
 const tablePaddingHorizontal = 10;
 const tablePaddingVertical = 25;
 
@@ -140,14 +142,15 @@ svg
   .attr("orient", "auto-start-reverse")
   .append("path")
   .attr("d", d3.line()(arrowPoints))
-  .attr("stroke", "black");
+  .attr("stroke", "grey")
+  .attr("fill", "grey");
 
 var linkSelection = svg
   .selectAll("line")
   .data(links)
   .enter()
   .append("line")
-  .attr("stroke", "black")
+  .attr("stroke", "grey")
   .attr("fill", "none")
   .attr("marker-end", "url(#arrow)")
   .attr("stroke-width", 1);
@@ -177,13 +180,14 @@ simulation
 function ticked() {
   nodeSelection.attr("x", (d) => getNodeX(d)).attr("y", (d) => getNodeY(d));
 
-  const offsetToCenterText = 4;
-
   lables
     .attr("x", (d) => {
       return getNodeX(d) + labelPaddingHorizontal;
     })
-    .attr("y", (d) => getNodeY(d) + columnHeight / 2 + offsetToCenterText);
+    .attr(
+      "y",
+      (d) => getNodeY(d) + columnHeight / 2 + labelOffsetToReachCenter
+    );
 
   linkSelection
     .attr("x1", (d) => {
@@ -193,7 +197,7 @@ function ticked() {
     })
     .attr("y1", (d) => {
       let columnY = getNodeY(d.source);
-      return columnY + columnHeight / 2 + offsetToCenterText;
+      return columnY + columnHeight / 2;
     })
     .attr("x2", (d) => {
       let columnX = getNodeX(d.target);
@@ -201,7 +205,7 @@ function ticked() {
     })
     .attr("y2", (d) => {
       let columnY = getNodeY(d.target);
-      return columnY + columnHeight / 2 + offsetToCenterText;
+      return columnY + columnHeight / 2;
     });
 }
 
