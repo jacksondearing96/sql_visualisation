@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+
 function error(message) {
   console.error(message);
   throw new Error(message);
@@ -8,6 +10,11 @@ const canvasHeight = 600;
 
 const columnWidth = 70;
 const columnHeight = 20;
+
+const fontSize = 15;
+const fontSizeToCharacterWidthRatio = 0.6;
+
+const labelPaddingHorizontal = 15;
 
 var nodes = [
   { color: "grey", group: "1", tag: "table" },
@@ -28,7 +35,6 @@ var links = [
   { source: "green", target: "blue", tag: "" }
 ];
 
-
 function getNode(color) {
   for (let node of nodes) {
     if (color === node.color) return node;
@@ -46,7 +52,7 @@ function countColumns(group) {
 
 function calculateNodeWidth(node) {
   if (node.tag === "table") return columnWidth + columnWidth / 3;
-  return columnWidth;
+  return calculateTextWidth(node.color);
 }
 
 function calculateNodeHeight(node) {
@@ -79,6 +85,12 @@ function getNodeY(node) {
   return y + (parseInt(node.order, 10) + 1) * columnHeight;
 }
 
+function calculateTextWidth(text) {
+  let numberOfCharacters = text.length;
+  let width = fontSize * fontSizeToCharacterWidthRatio * numberOfCharacters;
+  return width + 2 * labelPaddingHorizontal;
+}
+
 var svg = d3
   .select("svg")
   .attr("width", canvasWidth)
@@ -93,7 +105,6 @@ var nodeSelection = svg
   .attr("width", (d) => calculateNodeWidth(d))
   .attr("height", (d) => calculateNodeHeight(d))
   .attr("fill", (d) => d.color)
-  .attr("transform", 100)
   .call(d3.drag().on("start", dragStart).on("drag", drag).on("end", dragEnd));
 
 var linkSelection = svg
@@ -108,6 +119,8 @@ var lables = svg
   .selectAll("g")
   .append("text")
   .attr("color", "black")
+  .attr("font-size", fontSize)
+  .attr("font-family", "courier new")
   .text((d) => d.color);
 
 var simulation = d3.forceSimulation(nodes);
@@ -133,7 +146,7 @@ function ticked() {
 
   lables
     .attr("x", (d) => {
-      return getNodeX(d) + 15;
+      return getNodeX(d) + labelPaddingHorizontal;
     })
     .attr("y", (d) => getNodeY(d) + columnHeight / 2 + offsetToCenterText);
 
