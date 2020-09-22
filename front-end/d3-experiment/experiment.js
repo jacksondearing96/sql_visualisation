@@ -34,6 +34,8 @@ var nodes = [
     id: "%(crm)s_task::",
     name: "%(crm)s_task",
     group: "%(crm)s_task",
+    incoming: [],
+    outgoing: [],
     type: "table"
   },
   {
@@ -41,6 +43,8 @@ var nodes = [
     name: "accountid",
     group: "%(crm)s_task",
     order: "0",
+    incoming: [],
+    outgoing: [],
     type: "column"
   },
   {
@@ -48,6 +52,8 @@ var nodes = [
     name: "ownerid",
     group: "%(crm)s_task",
     order: "1",
+    incoming: [],
+    outgoing: [],
     type: "column"
   },
   {
@@ -55,6 +61,8 @@ var nodes = [
     name: "status",
     group: "%(crm)s_task",
     order: "2",
+    incoming: [],
+    outgoing: [],
     type: "column"
   },
   {
@@ -62,6 +70,8 @@ var nodes = [
     name: "activitydate",
     group: "%(crm)s_task",
     order: "3",
+    incoming: [],
+    outgoing: [],
     type: "column"
   },
 
@@ -69,6 +79,8 @@ var nodes = [
     id: "customer_insight::",
     name: "customer_insight",
     group: "customer_insight",
+    incoming: [],
+    outgoing: [],
     type: "table"
   },
   {
@@ -76,6 +88,8 @@ var nodes = [
     name: "acct_sf_id",
     group: "customer_insight",
     order: "0",
+    incoming: [],
+    outgoing: [],
     type: "column"
   },
   {
@@ -83,6 +97,8 @@ var nodes = [
     name: "user_sf_id",
     group: "customer_insight",
     order: "1",
+    incoming: [],
+    outgoing: [],
     type: "column"
   },
 
@@ -90,6 +106,8 @@ var nodes = [
     id: "note_count_by_agent::",
     name: "note_count_by_agent",
     group: "note_count_by_agent",
+    incoming: [],
+    outgoing: [],
     type: "view"
   },
   {
@@ -97,6 +115,8 @@ var nodes = [
     name: "acct_sf_id",
     group: "note_count_by_agent",
     order: "0",
+    incoming: [],
+    outgoing: [],
     type: "column"
   },
   {
@@ -104,6 +124,8 @@ var nodes = [
     name: "user_sf_id",
     group: "note_count_by_agent",
     order: "1",
+    incoming: [],
+    outgoing: [],
     type: "column"
   },
   {
@@ -111,11 +133,17 @@ var nodes = [
     name: "cnt",
     group: "note_count_by_agent",
     order: "2",
+    incoming: [],
+    outgoing: [],
     type: "column"
   }
 ];
 
 var links = [
+  {
+    source: "%(crm)s_task::ownerid",
+    target: "customer_insight::acct_sf_id"
+  },
   {
     source: "customer_insight::acct_sf_id",
     target: "note_count_by_agent::acct_sf_id"
@@ -125,6 +153,13 @@ var links = [
     target: "note_count_by_agent::user_sf_id"
   }
 ];
+
+function getNodeById(id) {
+  for (let node of nodes) {
+    if (node.id === id) return node;
+  }
+  error("Couldn't find node with id: " + id);
+}
 
 function isTopLevelNode(node) {
   if (typeof node === "string") {
@@ -226,6 +261,76 @@ function setGroupClass(node) {
   return classes;
 }
 
+// TODO
+function setLinkClass(link) {
+  return "link";
+}
+
+function labelMouseOver() {
+  if (isTopLevelNode($(this).text())) return;
+  $(this.parentElement).find("rect").attr("fill", "red");
+}
+
+function labelMouseOut() {
+  $(this.parentElement).find("rect").attr("fill", "dodgerblue");
+}
+
+function allocateIncomingAndOutgoingLinks() {
+  for (let link of links) {
+    getNodeById(link.source).outgoing.push(link);
+    getNodeById(link.target).incoming.push(link);
+  }
+}
+
+allocateIncomingAndOutgoingLinks();
+
+function getAllSourceSiblings(id) {
+  let column = getNodeById(id);
+
+  let sourceColumnIds = [];
+  for (let incomingLink of column.incoming) {
+    sourceColumnIds.push(...getAllSourceSiblings(incomingLink.source.id));
+  }
+
+  let sourceSiblings = [];
+  sourceSiblings.push(id);
+  sourceSiblings.push(...sourceColumnIds);
+  return sourceSiblings;
+}
+
+function getAllTargetSiblings(id) {
+  let column = getNodeById(id);
+
+  let targetColumnIds = [];
+  for (let outgoingLink of column.outgoing) {
+    targetColumnIds.push(...getAllTargetSiblings(outgoingLink.target.id));
+  }
+
+  let targetSiblings = [];
+  targetSiblings.push(id);
+  targetSiblings.push(...targetColumnIds);
+  return targetSiblings;
+}
+
+function getAllLineageSiblingIds(id) {
+  log(id);
+
+  let siblingIds = [];
+  siblingIds.push(id);
+  siblingIds.push(...getAllSourceSiblings(id));
+  siblingIds.push(...getAllTargetSiblings(id));
+
+  log(siblingIds);
+
+  // Filter out duplicate elements.
+  siblingIds = siblingIds.filter(
+    (id, index) => siblingIds.indexOf(id) === index
+  );
+
+  log(siblingIds);
+  return siblingIds;
+}
+
 var svg = d3
   .select("svg")
   .attr("width", canvasWidth)
@@ -242,7 +347,8 @@ var nodeSelection = svg
   .attr("fill", (d) => determineNodeColor(d))
   .attr("opacity", (d) => (isTopLevelNode(d) ? 0.2 : 1))
   .attr("class", (d) => setGroupClass(d))
-  .call(d3.drag().on("start", dragStart).on("drag", drag).on("end", dragEnd));
+  .call(d3.drag().on("start", dragStart).on("drag", drag).on("end", dragEnd))
+  .on("click", (d) => getAllLineageSiblingIds(d.id));
 
 // Add the arrowhead marker definition to the svg element
 const arrowSize = 10;
@@ -270,7 +376,8 @@ svg
   .append("path")
   .attr("d", d3.line()(arrowPoints))
   .attr("stroke", "grey")
-  .attr("fill", "grey");
+  .attr("fill", "grey")
+  .attr("class", "link");
 
 var linkSelection = svg
   .selectAll("line")
@@ -280,7 +387,8 @@ var linkSelection = svg
   .attr("stroke", "grey")
   .attr("fill", "none")
   .attr("marker-end", "url(#arrow)")
-  .attr("stroke-width", 1);
+  .attr("stroke-width", 1)
+  .attr("class", (d) => setLinkClass(d));
 
 var lables = svg
   .selectAll("g")
@@ -289,7 +397,9 @@ var lables = svg
   .attr("font-size", fontSize)
   .attr("font-family", "courier new")
   .attr("class", "label")
-  .text((d) => d.name);
+  .text((d) => d.name)
+  .on("mouseover", labelMouseOver)
+  .on("mouseout", labelMouseOut);
 
 var simulation = d3.forceSimulation(nodes);
 
@@ -354,15 +464,3 @@ function dragEnd(d) {
   d.fx = null;
   d.fy = null;
 }
-
-// Promote hover events from the text within a column to the
-// rect element so that it can update it's color accordingly.
-$(".label").hover(
-  function () {
-    if (isTopLevelNode($(this).text())) return;
-    $(this.parentElement).find("rect").attr("fill", "red");
-  },
-  function () {
-    $(this.parentElement).find("rect").attr("fill", "dodgerblue");
-  }
-);
