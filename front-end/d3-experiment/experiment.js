@@ -16,27 +16,110 @@ const fontSizeToCharacterWidthRatio = 0.6;
 const labelPaddingHorizontal = 15;
 const labelOffsetToReachCenter = 4;
 
+// TODO: this should be calculated based on the table width.
 const tablePaddingHorizontal = 10;
 const tablePaddingVertical = 25;
 
 var nodes = [
-  { color: "red", group: "1", order: "0", tag: "column" },
-  { color: "orange", group: "1", order: "1", tag: "column" },
-  { color: "green", group: "1", order: "2", tag: "column" },
-  { color: "grey", group: "1", tag: "table" },
+  {
+    id: "%(crm)s_task::accountid",
+    name: "accountid",
+    group: "%(crm)s_task",
+    order: "0",
+    type: "column"
+  },
+  {
+    id: "%(crm)s_task::ownerid",
+    name: "ownerid",
+    group: "%(crm)s_task",
+    order: "1",
+    type: "column"
+  },
+  {
+    id: "%(crm)s_task::status",
+    name: "status",
+    group: "%(crm)s_task",
+    order: "2",
+    type: "column"
+  },
+  {
+    id: "%(crm)s_task::activitydate",
+    name: "activitydate",
+    group: "%(crm)s_task",
+    order: "3",
+    type: "column"
+  },
+  {
+    id: "%(crm)s_task::",
+    name: "%(crm)s_task",
+    group: "%(crm)s_task",
+    type: "table"
+  },
 
-  { color: "yellow", group: "3", order: "0", tag: "column" },
-  { color: "grey", group: "3", tag: "table" },
+  {
+    id: "customer_insight::acct_sf_id",
+    name: "acct_sf_id",
+    group: "customer_insight",
+    order: "0",
+    type: "column"
+  },
+  {
+    id: "customer_insight::user_sf_id",
+    name: "user_sf_id",
+    group: "customer_insight",
+    order: "1",
+    type: "column"
+  },
+  {
+    id: "customer_insight::",
+    name: "customer_insight",
+    group: "customer_insight",
+    type: "table"
+  },
 
-  { color: "blue", group: "2", order: "0", tag: "column" },
-  { color: "purple", group: "2", order: "1", tag: "column" },
-  { color: "grey", group: "2", tag: "table" }
+  {
+    id: "note_count_by_agent::acct_sf_id",
+    name: "acct_sf_id",
+    group: "note_count_by_agent",
+    order: "0",
+    type: "column"
+  },
+  {
+    id: "note_count_by_agent::user_sf_id",
+    name: "user_sf_id",
+    group: "note_count_by_agent",
+    order: "1",
+    type: "column"
+  },
+  {
+    id: "note_count_by_agent::cnt",
+    name: "cnt",
+    group: "note_count_by_agent",
+    order: "2",
+    type: "column"
+  },
+  {
+    id: "note_count_by_agent::",
+    name: "note_count_by_agent",
+    group: "note_count_by_agent",
+    type: "view"
+  }
 ];
 
 var links = [
-  { source: "yellow", target: "red", tag: "" },
-  { source: "green", target: "blue", tag: "" }
+  {
+    source: "customer_insight::acct_sf_id",
+    target: "note_count_by_agent::acct_sf_id"
+  },
+  {
+    source: "customer_insight::user_sf_id",
+    target: "note_count_by_agent::user_sf_id"
+  }
 ];
+
+function isTopLevelNode(node) {
+  return node.type === "table" || node.type === "view";
+}
 
 function countColumns(group) {
   let count = 0;
@@ -55,8 +138,12 @@ function calculateTextWidth(text) {
 function maxColumnWidthForGroup(group) {
   let maxWidth = 0;
   for (let node of nodes) {
-    let nodeWidth = calculateTextWidth(node.color);
-    if (node.group === group && node.tag === "column" && nodeWidth > maxWidth) {
+    let nodeWidth = calculateTextWidth(node.name);
+    if (
+      node.group === group &&
+      node.type === "column" &&
+      nodeWidth > maxWidth
+    ) {
       maxWidth = nodeWidth;
     }
   }
@@ -65,19 +152,25 @@ function maxColumnWidthForGroup(group) {
 
 function calculateNodeWidth(node) {
   let maxColumnWidth = maxColumnWidthForGroup(node.group);
-  if (node.tag === "table") return maxColumnWidth + 2 * tablePaddingHorizontal;
+  if (isTopLevelNode(node)) {
+    return Math.max(
+      maxColumnWidth + 2 * tablePaddingHorizontal,
+      calculateTextWidth(node.name)
+    );
+  }
   return maxColumnWidth;
 }
 
 function calculateNodeHeight(node) {
-  if (node.tag === "table")
+  // TODO: use a buffer constant here instead.
+  if (isTopLevelNode(node))
     return columnHeight * (countColumns(node.group) + 1);
   return columnHeight;
 }
 
 function getParentTable(node) {
   for (let other of nodes) {
-    if (other.tag === "table" && other.group === node.group) {
+    if (isTopLevelNode(other) && other.group === node.group) {
       return other;
     }
   }
@@ -86,15 +179,21 @@ function getParentTable(node) {
 }
 
 function getNodeX(node) {
-  if (node.tag === "table") return node.x;
+  if (isTopLevelNode(node)) return node.x;
   let x = getNodeX(getParentTable(node));
+  // TODO: use buffer constant.
   return x + 10;
 }
 
 function getNodeY(node) {
-  if (node.tag === "table") return node.y;
+  if (isTopLevelNode(node)) return node.y;
   let y = getNodeY(getParentTable(node));
   return y + parseInt(node.order, 10) * columnHeight + tablePaddingVertical;
+}
+
+function determineNodeColor(node) {
+  if (isTopLevelNode(node)) return "grey";
+  return "grey";
 }
 
 var svg = d3
@@ -110,11 +209,8 @@ var nodeSelection = svg
   .append("rect")
   .attr("width", (d) => calculateNodeWidth(d))
   .attr("height", (d) => calculateNodeHeight(d))
-  .attr("fill", (d) => d.color)
-  .attr("opacity", (d) => {
-    if (d.tag === "table") return 0.2;
-    return 1;
-  })
+  .attr("fill", (d) => determineNodeColor(d))
+  .attr("opacity", (d) => (isTopLevelNode(d) ? 0.2 : 1))
   .call(d3.drag().on("start", dragStart).on("drag", drag).on("end", dragEnd));
 
 // Add the arrowhead marker definition to the svg element
@@ -161,7 +257,7 @@ var lables = svg
   .attr("color", "black")
   .attr("font-size", fontSize)
   .attr("font-family", "courier new")
-  .text((d) => d.color);
+  .text((d) => d.name);
 
 var simulation = d3.forceSimulation(nodes);
 
@@ -172,7 +268,7 @@ simulation
     "links",
     d3
       .forceLink(links)
-      .id((d) => d.color)
+      .id((d) => d.id)
       .strength(1)
   )
   .on("tick", ticked);
