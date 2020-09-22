@@ -15,6 +15,7 @@ const fontSize = 15;
 const fontSizeToCharacterWidthRatio = 0.6;
 
 const labelPaddingHorizontal = 15;
+const tablePaddingHorizontal = 10;
 
 var nodes = [
   { color: "grey", group: "1", tag: "table" },
@@ -50,9 +51,28 @@ function countColumns(group) {
   return count;
 }
 
+function calculateTextWidth(text) {
+  let numberOfCharacters = text.length;
+  let width = fontSize * fontSizeToCharacterWidthRatio * numberOfCharacters;
+  return width + 2 * labelPaddingHorizontal;
+}
+
+function maxColumnWidthForGroup(group) {
+  let maxWidth = 0;
+  for (let node of nodes) {
+    let nodeWidth = calculateTextWidth(node.color);
+    if (node.group === group && node.tag === "column" && nodeWidth > maxWidth) {
+      maxWidth = nodeWidth;
+    }
+  }
+  console.log(maxWidth);
+  return maxWidth;
+}
+
 function calculateNodeWidth(node) {
-  if (node.tag === "table") return columnWidth + columnWidth / 3;
-  return calculateTextWidth(node.color);
+  let maxColumnWidth = maxColumnWidthForGroup(node.group);
+  if (node.tag === "table") return maxColumnWidth + 2 * tablePaddingHorizontal;
+  return maxColumnWidth;
 }
 
 function calculateNodeHeight(node) {
@@ -83,12 +103,6 @@ function getNodeY(node) {
 
   let y = getNodeY(getParentTable(node));
   return y + (parseInt(node.order, 10) + 1) * columnHeight;
-}
-
-function calculateTextWidth(text) {
-  let numberOfCharacters = text.length;
-  let width = fontSize * fontSizeToCharacterWidthRatio * numberOfCharacters;
-  return width + 2 * labelPaddingHorizontal;
 }
 
 var svg = d3
