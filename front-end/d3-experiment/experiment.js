@@ -18,6 +18,9 @@ const canvasWidth = 600;
 const canvasHeight = 600;
 
 const columnHeight = 20;
+const columnDefaultBackgroundColor = "dodgerblue";
+const columnHighlightBackgroundColor = "red";
+const columnDefaultTextColor = "white";
 
 const fontSize = 15;
 const fontSizeToCharacterWidthRatio = 0.6;
@@ -28,6 +31,8 @@ const labelOffsetToReachCenter = 4;
 // TODO: this should be calculated based on the table width.
 const tablePaddingHorizontal = 10;
 const tablePaddingVertical = 25;
+const tableDefaultBackgroundColor = "blue";
+const tableDefaultTextColor = "black";
 
 var nodes = [
   {
@@ -243,13 +248,13 @@ function getNodeY(node) {
 }
 
 function determineNodeColor(node) {
-  if (isTopLevelNode(node)) return "blue";
-  return "dodgerblue";
+  if (isTopLevelNode(node)) return tableDefaultBackgroundColor;
+  return columnDefaultBackgroundColor;
 }
 
 function determineTextColor(node) {
-  if (isTopLevelNode(node)) return "black";
-  return "white";
+  if (isTopLevelNode(node)) return tableDefaultTextColor;
+  return columnDefaultTextColor;
 }
 
 function setGroupClass(node) {
@@ -266,13 +271,40 @@ function setLinkClass(link) {
   return "link";
 }
 
+function highlightIds(ids) {
+  let columns = $("rect");
+  for (let column of columns) {
+    if (ids.includes(column.id)) {
+      $(column).attr("fill", columnHighlightBackgroundColor);
+    }
+  }
+}
+
+function unHighlightIds(ids) {
+  let columns = $("rect");
+  for (let column of columns) {
+    if (ids.includes(column.id)) {
+      $(column).attr("fill", columnDefaultBackgroundColor);
+    }
+  }
+}
+
+function columnMouseOver(id) {
+  highlightIds(getAllLineageSiblingIds(id));
+}
+
+function columnMouseOut(id) {
+  unHighlightIds(getAllLineageSiblingIds(id));
+}
+
 function labelMouseOver() {
-  if (isTopLevelNode($(this).text())) return;
-  $(this.parentElement).find("rect").attr("fill", "red");
+  let columnId = $(this.parentElement).find("rect").attr("id");
+  columnMouseOver(columnId);
 }
 
 function labelMouseOut() {
-  $(this.parentElement).find("rect").attr("fill", "dodgerblue");
+  let columnId = $(this.parentElement).find("rect").attr("id");
+  columnMouseOut(columnId);
 }
 
 function allocateIncomingAndOutgoingLinks() {
@@ -313,21 +345,17 @@ function getAllTargetSiblings(id) {
 }
 
 function getAllLineageSiblingIds(id) {
-  log(id);
-
   let siblingIds = [];
   siblingIds.push(id);
   siblingIds.push(...getAllSourceSiblings(id));
   siblingIds.push(...getAllTargetSiblings(id));
-
-  log(siblingIds);
 
   // Filter out duplicate elements.
   siblingIds = siblingIds.filter(
     (id, index) => siblingIds.indexOf(id) === index
   );
 
-  log(siblingIds);
+  highlightIds(siblingIds);
   return siblingIds;
 }
 
@@ -347,8 +375,12 @@ var nodeSelection = svg
   .attr("fill", (d) => determineNodeColor(d))
   .attr("opacity", (d) => (isTopLevelNode(d) ? 0.2 : 1))
   .attr("class", (d) => setGroupClass(d))
+  // note: can bubble up this ID to the 'g' element if req. Put here for conveinence now.
+  .attr("id", (d) => d.id)
   .call(d3.drag().on("start", dragStart).on("drag", drag).on("end", dragEnd))
-  .on("click", (d) => getAllLineageSiblingIds(d.id));
+  .on("click", (d) => getAllLineageSiblingIds(d.id))
+  .on("mouseover", (d) => columnMouseOver(d.id))
+  .on("mouseout", (d) => columnMouseOut(d.id));
 
 // Add the arrowhead marker definition to the svg element
 const arrowSize = 10;
