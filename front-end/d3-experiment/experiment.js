@@ -18,17 +18,17 @@ const tablePaddingHorizontal = 10;
 const tablePaddingVertical = 25;
 
 var nodes = [
-  { color: "grey", group: "1", tag: "table" },
   { color: "red", group: "1", order: "0", tag: "column" },
   { color: "orange", group: "1", order: "1", tag: "column" },
   { color: "green", group: "1", order: "2", tag: "column" },
+  { color: "grey", group: "1", tag: "table" },
 
-  { color: "grey", group: "3", tag: "table" },
   { color: "yellow", group: "3", order: "0", tag: "column" },
+  { color: "grey", group: "3", tag: "table" },
 
-  { color: "grey", group: "2", tag: "table" },
   { color: "blue", group: "2", order: "0", tag: "column" },
-  { color: "purple", group: "2", order: "1", tag: "column" }
+  { color: "purple", group: "2", order: "1", tag: "column" },
+  { color: "grey", group: "2", tag: "table" }
 ];
 
 var links = [
@@ -109,6 +109,10 @@ var nodeSelection = svg
   .attr("width", (d) => calculateNodeWidth(d))
   .attr("height", (d) => calculateNodeHeight(d))
   .attr("fill", (d) => d.color)
+  .attr("opacity", (d) => {
+    if (d.tag === "table") return 0.2;
+    return 1;
+  })
   .call(d3.drag().on("start", dragStart).on("drag", drag).on("end", dragEnd));
 
 // Add the arrowhead marker definition to the svg element
@@ -160,15 +164,13 @@ var simulation = d3.forceSimulation(nodes);
 
 simulation
   .force("center", d3.forceCenter(canvasWidth / 2, canvasHeight / 2))
-  .force("nodes", d3.forceManyBody().strength(30))
-  .force("charge", (node) => -30)
+  .force("nodes", d3.forceManyBody().strength(-30))
   .force(
     "links",
     d3
       .forceLink(links)
       .id((d) => d.color)
-      .distance(200)
-      .strength(0.1)
+      .strength(1)
   )
   .on("tick", ticked);
 
