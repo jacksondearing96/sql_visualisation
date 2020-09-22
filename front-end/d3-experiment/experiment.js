@@ -14,8 +14,8 @@ function log(message) {
   ++logCount;
 }
 
-const canvasWidth = 600;
-const canvasHeight = 600;
+const canvasWidth = 2000;
+const canvasHeight = 1000;
 
 const columnHeight = 20;
 const columnDefaultBackgroundColor = "dodgerblue";
@@ -181,7 +181,6 @@ function isTopLevelNode(node) {
     }
     return false;
   }
-
   return node.type === "table" || node.type === "view";
 }
 
@@ -381,6 +380,23 @@ function getAllLineageSiblingIds(id) {
   return siblingIds;
 }
 
+function dragStart(d) {
+  simulation.alphaTarget(0.5).restart();
+  d.fx = d.x;
+  d.fy = d.y;
+}
+
+function drag(d) {
+  d.fx = d3.event.x;
+  d.fy = d3.event.y;
+}
+
+function dragEnd(d) {
+  simulation.alphaTarget(0);
+  d.fx = null;
+  d.fy = null;
+}
+
 var svg = d3
   .select("svg")
   .attr("width", canvasWidth)
@@ -475,9 +491,7 @@ function ticked() {
   nodeSelection.attr("x", (d) => getNodeX(d)).attr("y", (d) => getNodeY(d));
 
   lables
-    .attr("x", (d) => {
-      return getNodeX(d) + labelPaddingHorizontal;
-    })
+    .attr("x", (d) => getNodeX(d) + labelPaddingHorizontal)
     .attr(
       "y",
       (d) => getNodeY(d) + columnHeight / 2 + labelOffsetToReachCenter
@@ -501,21 +515,4 @@ function ticked() {
       let columnY = getNodeY(d.target);
       return columnY + columnHeight / 2;
     });
-}
-
-function dragStart(d) {
-  simulation.alphaTarget(0.5).restart();
-  d.fx = d.x;
-  d.fy = d.y;
-}
-
-function drag(d) {
-  d.fx = d3.event.x;
-  d.fy = d3.event.y;
-}
-
-function dragEnd(d) {
-  simulation.alphaTarget(0);
-  d.fx = null;
-  d.fy = null;
 }

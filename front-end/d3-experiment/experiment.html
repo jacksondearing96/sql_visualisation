@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Dragging Nodes and Alpha Values</title>
+  <style>
+    svg {
+      margin: 0 auto;
+      display: block;
+      overflow: auto;
+    }
+
+    #container {
+      border: 1px solid grey;
+      box-shadow: 5px 5px 5px grey;
+      width: 600px;
+      height: 400px;
+      overflow: auto;
+    }
+
+    #arrow,
+    .arrow {
+      font-size: 15px !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <script src="https://d3js.org/d3.v4.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="graph.js"></script>
+</body>
+
+</html>
