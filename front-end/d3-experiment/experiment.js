@@ -24,6 +24,56 @@ var links = [
 ];
 
 
+function getNode(color) {
+  for (let node of nodes) {
+    if (color === node.color) return node;
+  }
+  error("Could not find node (color = " + color + ")");
+}
+
+function countColumns(group) {
+  let count = 0;
+  for (let node of nodes) {
+    if (node.group === group) ++count;
+  }
+  return count;
+}
+
+function calculateNodeWidth(node) {
+  if (node.tag === "table") return columnWidth + columnWidth / 3;
+  return columnWidth;
+}
+
+function calculateNodeHeight(node) {
+  if (node.tag === "table")
+    return columnHeight * (countColumns(node.group) + 1);
+  return columnHeight;
+}
+
+function getParentTable(node) {
+  for (let other of nodes) {
+    if (other.tag === "table" && other.group === node.group) {
+      return other;
+    }
+  }
+  error("Could not find parent table.");
+  return null;
+}
+
+function getNodeX(node) {
+  if (node.tag === "table") return node.x;
+
+  let x = getNodeX(getParentTable(node));
+  return x + 10;
+}
+
+function getNodeY(node) {
+  if (node.tag === "table") return node.y;
+
+  let y = getNodeY(getParentTable(node));
+  return y + (parseInt(node.order, 10) + 1) * columnHeight;
+}
+
 var svg = d3
   .select("svg")
   .attr("width", canvasWidth)
