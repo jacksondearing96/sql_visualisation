@@ -5,6 +5,15 @@ function error(message) {
   throw new Error(message);
 }
 
+let logCount = 0;
+const loggingCountThreshold = 50;
+function log(message) {
+  if (logCount < loggingCountThreshold) console.log(message);
+  if (logCount === loggingCountThreshold)
+    console.error("Logging capacity exceeded!");
+  ++logCount;
+}
+
 const canvasWidth = 600;
 const canvasHeight = 600;
 
@@ -118,6 +127,13 @@ var links = [
 ];
 
 function isTopLevelNode(node) {
+  if (typeof node === "string") {
+    for (let existing of nodes) {
+      if (isTopLevelNode(existing) && node === existing.name) return true;
+    }
+    return false;
+  }
+
   return node.type === "table" || node.type === "view";
 }
 
@@ -343,6 +359,7 @@ function dragEnd(d) {
 // rect element so that it can update it's color accordingly.
 $(".label").hover(
   function () {
+    if (isTopLevelNode($(this).text())) return;
     $(this.parentElement).find("rect").attr("fill", "red");
   },
   function () {
