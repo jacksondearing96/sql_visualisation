@@ -8,7 +8,6 @@ function error(message) {
 const canvasWidth = 600;
 const canvasHeight = 600;
 
-const columnWidth = 70;
 const columnHeight = 20;
 
 const fontSize = 15;
@@ -16,6 +15,7 @@ const fontSizeToCharacterWidthRatio = 0.6;
 
 const labelPaddingHorizontal = 15;
 const tablePaddingHorizontal = 10;
+const tablePaddingVertical = 25;
 
 var nodes = [
   { color: "grey", group: "1", tag: "table" },
@@ -35,13 +35,6 @@ var links = [
   { source: "yellow", target: "red", tag: "" },
   { source: "green", target: "blue", tag: "" }
 ];
-
-function getNode(color) {
-  for (let node of nodes) {
-    if (color === node.color) return node;
-  }
-  error("Could not find node (color = " + color + ")");
-}
 
 function countColumns(group) {
   let count = 0;
@@ -92,16 +85,14 @@ function getParentTable(node) {
 
 function getNodeX(node) {
   if (node.tag === "table") return node.x;
-
   let x = getNodeX(getParentTable(node));
   return x + 10;
 }
 
 function getNodeY(node) {
   if (node.tag === "table") return node.y;
-
   let y = getNodeY(getParentTable(node));
-  return y + (parseInt(node.order, 10) + 1) * columnHeight;
+  return y + parseInt(node.order, 10) * columnHeight + tablePaddingVertical;
 }
 
 var svg = d3
@@ -120,12 +111,41 @@ var nodeSelection = svg
   .attr("fill", (d) => d.color)
   .call(d3.drag().on("start", dragStart).on("drag", drag).on("end", dragEnd));
 
+// Add the arrowhead marker definition to the svg element
+const arrowSize = 10;
+const markerBoxWidth = arrowSize;
+const markerBoxHeight = arrowSize;
+const refX = markerBoxWidth / 2;
+const refY = markerBoxHeight / 2;
+const arrowPoints = [
+  [0, 0],
+  [0, arrowSize],
+  [arrowSize, arrowSize / 2]
+];
+
+// Definition for arrow head.
+svg
+  .append("defs")
+  .append("marker")
+  .attr("id", "arrow")
+  .attr("viewBox", [0, 0, markerBoxWidth, markerBoxHeight])
+  .attr("refX", refX)
+  .attr("refY", refY)
+  .attr("markerWidth", markerBoxWidth)
+  .attr("markerHeight", markerBoxHeight)
+  .attr("orient", "auto-start-reverse")
+  .append("path")
+  .attr("d", d3.line()(arrowPoints))
+  .attr("stroke", "black");
+
 var linkSelection = svg
   .selectAll("line")
   .data(links)
   .enter()
   .append("line")
   .attr("stroke", "black")
+  .attr("fill", "none")
+  .attr("marker-end", "url(#arrow)")
   .attr("stroke-width", 1);
 
 var lables = svg
