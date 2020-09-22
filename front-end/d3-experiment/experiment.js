@@ -1,3 +1,8 @@
+function error(message) {
+  console.error(message);
+  throw new Error(message);
+}
+
 const canvasWidth = 600;
 const canvasHeight = 600;
 
