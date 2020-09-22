@@ -65,7 +65,6 @@ function maxColumnWidthForGroup(group) {
       maxWidth = nodeWidth;
     }
   }
-  console.log(maxWidth);
   return maxWidth;
 }
 
@@ -168,7 +167,7 @@ function ticked() {
     .attr("x1", (d) => {
       let columnX = getNodeX(d.source);
 
-      return columnX + columnWidth;
+      return columnX + maxColumnWidthForGroup(d.source.group);
     })
     .attr("y1", (d) => {
       let columnY = getNodeY(d.source);
