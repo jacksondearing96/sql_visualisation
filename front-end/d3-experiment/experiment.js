@@ -70,3 +70,20 @@ simulation
       .strength(0.1)
   )
   .on("tick", ticked);
+
+function dragStart(d) {
+  simulation.alphaTarget(0.5).restart();
+  d.fx = d.x;
+  d.fy = d.y;
+}
+
+function drag(d) {
+  d.fx = d3.event.x;
+  d.fy = d3.event.y;
+}
+
+function dragEnd(d) {
+  simulation.alphaTarget(0);
+  d.fx = null;
+  d.fy = null;
+}
