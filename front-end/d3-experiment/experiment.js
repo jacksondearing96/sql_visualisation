@@ -71,6 +71,37 @@ simulation
   )
   .on("tick", ticked);
 
+function ticked() {
+  nodeSelection.attr("x", (d) => getNodeX(d)).attr("y", (d) => getNodeY(d));
+
+  const offsetToCenterText = 4;
+
+  lables
+    .attr("x", (d) => {
+      return getNodeX(d) + 15;
+    })
+    .attr("y", (d) => getNodeY(d) + columnHeight / 2 + offsetToCenterText);
+
+  linkSelection
+    .attr("x1", (d) => {
+      let columnX = getNodeX(d.source);
+
+      return columnX + columnWidth;
+    })
+    .attr("y1", (d) => {
+      let columnY = getNodeY(d.source);
+      return columnY + columnHeight / 2 + offsetToCenterText;
+    })
+    .attr("x2", (d) => {
+      let columnX = getNodeX(d.target);
+      return columnX;
+    })
+    .attr("y2", (d) => {
+      let columnY = getNodeY(d.target);
+      return columnY + columnHeight / 2 + offsetToCenterText;
+    });
+}
+
 function dragStart(d) {
   simulation.alphaTarget(0.5).restart();
   d.fx = d.x;
