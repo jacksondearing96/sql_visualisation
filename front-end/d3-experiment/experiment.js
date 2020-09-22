@@ -22,6 +22,12 @@ const tablePaddingVertical = 25;
 
 var nodes = [
   {
+    id: "%(crm)s_task::",
+    name: "%(crm)s_task",
+    group: "%(crm)s_task",
+    type: "table"
+  },
+  {
     id: "%(crm)s_task::accountid",
     name: "accountid",
     group: "%(crm)s_task",
@@ -49,13 +55,13 @@ var nodes = [
     order: "3",
     type: "column"
   },
+
   {
-    id: "%(crm)s_task::",
-    name: "%(crm)s_task",
-    group: "%(crm)s_task",
+    id: "customer_insight::",
+    name: "customer_insight",
+    group: "customer_insight",
     type: "table"
   },
-
   {
     id: "customer_insight::acct_sf_id",
     name: "acct_sf_id",
@@ -70,13 +76,13 @@ var nodes = [
     order: "1",
     type: "column"
   },
-  {
-    id: "customer_insight::",
-    name: "customer_insight",
-    group: "customer_insight",
-    type: "table"
-  },
 
+  {
+    id: "note_count_by_agent::",
+    name: "note_count_by_agent",
+    group: "note_count_by_agent",
+    type: "view"
+  },
   {
     id: "note_count_by_agent::acct_sf_id",
     name: "acct_sf_id",
@@ -97,12 +103,6 @@ var nodes = [
     group: "note_count_by_agent",
     order: "2",
     type: "column"
-  },
-  {
-    id: "note_count_by_agent::",
-    name: "note_count_by_agent",
-    group: "note_count_by_agent",
-    type: "view"
   }
 ];
 
@@ -192,8 +192,22 @@ function getNodeY(node) {
 }
 
 function determineNodeColor(node) {
-  if (isTopLevelNode(node)) return "grey";
-  return "grey";
+  if (isTopLevelNode(node)) return "blue";
+  return "dodgerblue";
+}
+
+function determineTextColor(node) {
+  if (isTopLevelNode(node)) return "black";
+  return "white";
+}
+
+function setGroupClass(node) {
+  let classes = node.group;
+
+  if (!isTopLevelNode(node)) classes += " column";
+  else classes += " top-level-node";
+
+  return classes;
 }
 
 var svg = d3
@@ -211,6 +225,7 @@ var nodeSelection = svg
   .attr("height", (d) => calculateNodeHeight(d))
   .attr("fill", (d) => determineNodeColor(d))
   .attr("opacity", (d) => (isTopLevelNode(d) ? 0.2 : 1))
+  .attr("class", (d) => setGroupClass(d))
   .call(d3.drag().on("start", dragStart).on("drag", drag).on("end", dragEnd));
 
 // Add the arrowhead marker definition to the svg element
@@ -254,9 +269,10 @@ var linkSelection = svg
 var lables = svg
   .selectAll("g")
   .append("text")
-  .attr("color", "black")
+  .attr("fill", (d) => determineTextColor(d))
   .attr("font-size", fontSize)
   .attr("font-family", "courier new")
+  .attr("class", "label")
   .text((d) => d.name);
 
 var simulation = d3.forceSimulation(nodes);
@@ -269,7 +285,8 @@ simulation
     d3
       .forceLink(links)
       .id((d) => d.id)
-      .strength(1)
+      .distance(50)
+      .strength(0.1)
   )
   .on("tick", ticked);
 
@@ -321,3 +338,14 @@ function dragEnd(d) {
   d.fx = null;
   d.fy = null;
 }
+
+// Promote hover events from the text within a column to the
+// rect element so that it can update it's color accordingly.
+$(".label").hover(
+  function () {
+    $(this.parentElement).find("rect").attr("fill", "red");
+  },
+  function () {
+    $(this.parentElement).find("rect").attr("fill", "dodgerblue");
+  }
+);
