@@ -22,6 +22,11 @@ const columnDefaultBackgroundColor = "dodgerblue";
 const columnHighlightBackgroundColor = "red";
 const columnDefaultTextColor = "white";
 
+const linkDefaultColor = "grey";
+const linkHighlightColor = "red";
+const linkDefaultWidth = "1";
+const linkHighlightWidth = "5";
+
 const fontSize = 15;
 const fontSizeToCharacterWidthRatio = 0.6;
 
@@ -147,15 +152,18 @@ var nodes = [
 var links = [
   {
     source: "%(crm)s_task::ownerid",
-    target: "customer_insight::acct_sf_id"
+    target: "customer_insight::acct_sf_id",
+    id: "link0"
   },
   {
     source: "customer_insight::acct_sf_id",
-    target: "note_count_by_agent::acct_sf_id"
+    target: "note_count_by_agent::acct_sf_id",
+    id: "link1"
   },
   {
     source: "customer_insight::user_sf_id",
-    target: "note_count_by_agent::user_sf_id"
+    target: "note_count_by_agent::user_sf_id",
+    id: "link2"
   }
 ];
 
@@ -266,16 +274,20 @@ function setGroupClass(node) {
   return classes;
 }
 
-// TODO
-function setLinkClass(link) {
-  return "link";
-}
-
 function highlightIds(ids) {
   let columns = $("rect");
   for (let column of columns) {
     if (ids.includes(column.id)) {
       $(column).attr("fill", columnHighlightBackgroundColor);
+    }
+  }
+  let links = $(".link");
+  for (let link of links) {
+    if (ids.includes(link.id)) {
+      $(link).attr("stroke", linkHighlightColor);
+      $(link).attr("fill", linkHighlightColor);
+      $(link).attr("stroke-width", linkHighlightWidth);
+      $(".arrow").attr("stroke-width", linkDefaultWidth);
     }
   }
 }
@@ -285,6 +297,14 @@ function unHighlightIds(ids) {
   for (let column of columns) {
     if (ids.includes(column.id)) {
       $(column).attr("fill", columnDefaultBackgroundColor);
+    }
+  }
+  let links = $(".link");
+  for (let link of links) {
+    if (ids.includes(link.id)) {
+      $(link).attr("stroke", linkDefaultColor);
+      $(link).attr("fill", linkDefaultColor);
+      $(link).attr("stroke-width", linkDefaultWidth);
     }
   }
 }
@@ -327,6 +347,7 @@ function getAllSourceSiblings(id) {
   let sourceSiblings = [];
   sourceSiblings.push(id);
   sourceSiblings.push(...sourceColumnIds);
+  sourceSiblings.push(...column.incoming.map((v) => v.id));
   return sourceSiblings;
 }
 
@@ -341,6 +362,7 @@ function getAllTargetSiblings(id) {
   let targetSiblings = [];
   targetSiblings.push(id);
   targetSiblings.push(...targetColumnIds);
+  targetSiblings.push(...column.outgoing.map((v) => v.id));
   return targetSiblings;
 }
 
@@ -407,20 +429,21 @@ svg
   .attr("orient", "auto-start-reverse")
   .append("path")
   .attr("d", d3.line()(arrowPoints))
-  .attr("stroke", "grey")
-  .attr("fill", "grey")
-  .attr("class", "link");
+  .attr("stroke", linkDefaultColor)
+  .attr("fill", linkDefaultColor)
+  .attr("class", "arrow"); // TODO: delete me if unused.
 
 var linkSelection = svg
   .selectAll("line")
   .data(links)
   .enter()
   .append("line")
-  .attr("stroke", "grey")
+  .attr("stroke", linkDefaultColor)
   .attr("fill", "none")
-  .attr("marker-end", "url(#arrow)")
-  .attr("stroke-width", 1)
-  .attr("class", (d) => setLinkClass(d));
+  // .attr("marker-end", "url(#arrow)")
+  .attr("stroke-width", linkDefaultWidth)
+  .attr("id", (d) => d.id)
+  .attr("class", "link");
 
 var lables = svg
   .selectAll("g")
