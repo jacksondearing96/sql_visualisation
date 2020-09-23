@@ -25,6 +25,10 @@ const tablePaddingVertical = 25;
 const tableDefaultBackgroundColor = "blue";
 const tableDefaultTextColor = "black";
 
+const tableType = "TABLE";
+const viewType = "VIEW";
+const columnType = "COLUMN";
+
 function error(message) {
   console.error(message);
   throw new Error(message);
@@ -46,7 +50,7 @@ var nodes = [
     group: "%(crm)s_task",
     incoming: [],
     outgoing: [],
-    type: "table"
+    type: "TABLE"
   },
   {
     id: "%(crm)s_task::accountid",
@@ -55,7 +59,7 @@ var nodes = [
     order: "0",
     incoming: [],
     outgoing: [],
-    type: "column"
+    type: "COLUMN"
   },
   {
     id: "%(crm)s_task::ownerid",
@@ -64,7 +68,7 @@ var nodes = [
     order: "1",
     incoming: [],
     outgoing: [],
-    type: "column"
+    type: "COLUMN"
   },
   {
     id: "%(crm)s_task::status",
@@ -73,7 +77,7 @@ var nodes = [
     order: "2",
     incoming: [],
     outgoing: [],
-    type: "column"
+    type: "COLUMN"
   },
   {
     id: "%(crm)s_task::activitydate",
@@ -82,7 +86,7 @@ var nodes = [
     order: "3",
     incoming: [],
     outgoing: [],
-    type: "column"
+    type: "COLUMN"
   },
 
   {
@@ -91,7 +95,7 @@ var nodes = [
     group: "customer_insight",
     incoming: [],
     outgoing: [],
-    type: "table"
+    type: "TABLE"
   },
   {
     id: "customer_insight::acct_sf_id",
@@ -100,7 +104,7 @@ var nodes = [
     order: "0",
     incoming: [],
     outgoing: [],
-    type: "column"
+    type: "COLUMN"
   },
   {
     id: "customer_insight::user_sf_id",
@@ -109,7 +113,7 @@ var nodes = [
     order: "1",
     incoming: [],
     outgoing: [],
-    type: "column"
+    type: "COLUMN"
   },
 
   {
@@ -118,7 +122,7 @@ var nodes = [
     group: "note_count_by_agent",
     incoming: [],
     outgoing: [],
-    type: "view"
+    type: "VIEW"
   },
   {
     id: "note_count_by_agent::acct_sf_id",
@@ -127,7 +131,7 @@ var nodes = [
     order: "0",
     incoming: [],
     outgoing: [],
-    type: "column"
+    type: "COLUMN"
   },
   {
     id: "note_count_by_agent::user_sf_id",
@@ -136,7 +140,7 @@ var nodes = [
     order: "1",
     incoming: [],
     outgoing: [],
-    type: "column"
+    type: "COLUMN"
   },
   {
     id: "note_count_by_agent::cnt",
@@ -145,7 +149,7 @@ var nodes = [
     order: "2",
     incoming: [],
     outgoing: [],
-    type: "column"
+    type: "COLUMN"
   }
 ];
 
@@ -181,7 +185,7 @@ function isTopLevelNode(node) {
     }
     return false;
   }
-  return node.type === "table" || node.type === "view";
+  return node.type === tableType || node.type === viewType;
 }
 
 function countColumns(group) {
@@ -204,7 +208,7 @@ function maxColumnWidthForGroup(group) {
     let nodeWidth = calculateTextWidth(node.name);
     if (
       node.group === group &&
-      node.type === "column" &&
+      node.type === columnType &&
       nodeWidth > maxWidth
     ) {
       maxWidth = nodeWidth;
@@ -280,6 +284,7 @@ function highlightIds(ids) {
       $(column).attr("fill", columnHighlightBackgroundColor);
     }
   }
+
   let links = $(".link");
   for (let link of links) {
     if (ids.includes(link.id)) {
@@ -500,7 +505,6 @@ function ticked() {
   linkSelection
     .attr("x1", (d) => {
       let columnX = getNodeX(d.source);
-
       return columnX + maxColumnWidthForGroup(d.source.group);
     })
     .attr("y1", (d) => {
