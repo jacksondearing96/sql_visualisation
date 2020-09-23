@@ -271,38 +271,34 @@ function calculateNodeWidth(node) {
 }
 
 function calculateNodeHeight(node) {
-  // TODO: use a buffer constant here instead.
-  if (isTopLevelNode(node))
-    return columnHeight * (countColumnsInGroup(node.group) + 1);
-  return columnHeight;
+  return isTopLevelNode(node)
+    ? columnHeight * countColumnsInGroup(node.group) + tablePaddingVertical
+    : columnHeight;
 }
 
 function getParentTable(node) {
-  for (let other of nodes) {
-    if (isTopLevelNode(other) && other.group === node.group) {
-      return other;
-    }
-  }
-  error("Could not find parent table.");
-  return null;
+  let parent = nodes.filter((n) => isTopLevelNode(n) && n.group === node.group);
+  if (parent.length !== 1) error("Could not find parent table.");
+  return parent[0];
 }
 
 function getNodeX(node) {
   if (isTopLevelNode(node)) return node.x;
-  let x = getNodeX(getParentTable(node));
-  // TODO: use buffer constant.
-  return x + 10;
+  return getNodeX(getParentTable(node)) + tablePaddingHorizontal;
 }
 
 function getNodeY(node) {
   if (isTopLevelNode(node)) return node.y;
-  let y = getNodeY(getParentTable(node));
-  return y + parseInt(node.order, 10) * columnHeight + tablePaddingVertical;
+  let parentY = getNodeY(getParentTable(node));
+  return (
+    parentY + parseInt(node.order, 10) * columnHeight + tablePaddingVertical
+  );
 }
 
 function determineNodeColor(node) {
-  if (isTopLevelNode(node)) return tableDefaultBackgroundColor;
-  return columnDefaultBackgroundColor;
+  return isTopLevelNode(node)
+    ? tableDefaultBackgroundColor
+    : columnDefaultBackgroundColor;
 }
 
 function determineNodeOpacity(node) {
@@ -310,17 +306,11 @@ function determineNodeOpacity(node) {
 }
 
 function determineTextColor(node) {
-  if (isTopLevelNode(node)) return tableDefaultTextColor;
-  return columnDefaultTextColor;
+  return isTopLevelNode(node) ? tableDefaultTextColor : columnDefaultTextColor;
 }
 
 function setGroupClass(node) {
-  let classes = node.group;
-
-  if (!isTopLevelNode(node)) classes += " column";
-  else classes += " top-level-node";
-
-  return classes;
+  return node.group + isTopLevelNode(node) ? " top-level-node" : " column";
 }
 
 function highlightIds(ids) {
@@ -386,6 +376,14 @@ function unHighlightIds(ids) {
   }
 }
 
+function linkMouseOver(id) {
+  highlightIds(getAllLineageSiblingIds(id));
+}
+
+function linkMouseOut(id) {
+  unHighlightIds(getAllLineageSiblingIds(id));
+}
+
 function columnMouseOver(id) {
   highlightIds(getAllLineageSiblingIds(id));
 }
@@ -442,7 +440,7 @@ function getAllSourceSiblings(id) {
   let sourceSiblings = [];
   sourceSiblings.push(id);
   sourceSiblings.push(...sourceColumnIds);
-  sourceSiblings.push(...column.incoming.map((v) => v.id));
+  sourceSiblings.push(...column.incoming.map((link) => link.id));
   return sourceSiblings;
 }
 
@@ -463,7 +461,7 @@ function getAllTargetSiblings(id) {
   let targetSiblings = [];
   targetSiblings.push(id);
   targetSiblings.push(...targetColumnIds);
-  targetSiblings.push(...column.outgoing.map((v) => v.id));
+  targetSiblings.push(...column.outgoing.map((link) => link.id));
   return targetSiblings;
 }
 
@@ -560,7 +558,9 @@ var linkSelection = svg
   // .attr("marker-end", "url(#arrow)")
   .attr("stroke-width", linkDefaultWidth)
   .attr("id", (d) => d.id)
-  .attr("class", "link");
+  .attr("class", "link")
+  .on("mouseover", (d) => linkMouseOver(d.source.id))
+  .on("mouseout", (d) => linkMouseOut(d.source.id));
 
 var lables = svg
   .selectAll("g")
@@ -610,7 +610,7 @@ function ticked() {
         );
       }
       let columnX = getNodeX(d.source);
-      return columnX + maxColumnWidthForGroup(d.source.group);
+      return columnX + calculateNodeWidth(d.source);
     })
     .attr("y1", (d) => {
       if (isTopLevelId(d.source.id)) {
