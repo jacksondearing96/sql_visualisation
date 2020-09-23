@@ -26,7 +26,6 @@ const labelPaddingHorizontal = 15;
 const labelOffsetToReachCenter = 4;
 const labelHighlightTextColor = "white";
 
-// TODO: this should be calculated based on the table width.
 const tablePaddingHorizontal = 10;
 const tablePaddingVertical = 25;
 const tableDefaultBackgroundColor = "blue";
@@ -43,13 +42,14 @@ const columnType = "COLUMN";
 
 const idDelimiter = "::";
 
+const containerWindowWidthRatio = 0.9;
+const containerWindowHeightRatio = 0.9;
+
 const loggingCountThreshold = 50;
 
 $(document).ready(() => {
-  $("#container").css("width", $(window).width() * 0.9);
-  $("#container").css("height", $(window).height() * 0.9);
-  $("#container").scrollTop(canvasHeight / 2 - 100);
-  $("#container").scrollLeft(canvasWidth / 2 - 100);
+  setContainerDimensions();
+  setContainerScrollPosition();
 });
 
 function error(message) {
@@ -212,6 +212,16 @@ var links = [
   }
 ];
 
+function setContainerDimensions() {
+  $("#container").css("width", $(window).width() * containerWindowWidthRatio);
+  $("#container").css("height", $(window).height() * containerWindowHeightRatio);
+}
+
+function setContainerScrollPosition() {
+  $("#container").scrollTop(canvasHeight / 2 - 100);
+  $("#container").scrollLeft(canvasWidth / 2 - 100);
+}
+
 function getNodeById(id) {
   for (let node of nodes) {
     if (node.id === id) return node;
@@ -350,67 +360,73 @@ function setGroupClasses(node) {
   return node.group + isTopLevelNode(node) ? " top-level-node" : " column";
 }
 
+function columnOfLabel(label) {
+  if (!label.id.includes("label-")) error("Invalid label ID: " + label.id);
+  return label.id.split("label-")[1];
+}
+
+function highlightColumns(columns) {
+  $(columns).attr({
+    fill: columnHighlightBackgroundColor,
+    opacity: highlightOpacity
+  });
+}
+
+function highlightLabels(labels) {
+  $(labels).attr("fill", labelHighlightTextColor);
+}
+
+function highlightLinks(links) {
+  $(links).attr({
+    stroke: linkHighlightColor,
+    fill: linkHighlightColor,
+    "stroke-width": linkHighlightWidth
+  });
+}
+
+function unHighlightColumns(columns) {
+  columns
+    .attr("fill", columnDefaultBackgroundColor)
+    .filter((index, column) => isTopLevelId(column.id))
+    .attr("opacity", topLevelNodeOpacity);
+}
+
+function unHighlightLabels(labels) {
+  $(labels)
+    .filter((index, label) => isTopLevelId(columnOfLabel(label)))
+    .attr("fill", tableDefaultTextColor);
+}
+
+function unHighlightLinks(links) {
+  $(links).attr({
+    stroke: linkDefaultColor,
+    fill: linkDefaultColor,
+    "stroke-width": linkDefaultWidth
+  });
+}
+
 function highlightIds(ids) {
-  let columns = $("rect");
-  for (let column of columns) {
-    if (ids.includes(column.id)) {
-      $(column).attr({
-        fill: columnHighlightBackgroundColor,
-        opacity: highlightOpacity
-      });
-    }
-  }
+  highlightColumns(
+    $("rect").filter((index, column) => ids.includes(column.id))
+  );
 
-  let labels = $(".label");
-  for (let label of labels) {
-    if (!label.id.includes("label-")) error("Invalid label ID: " + label.id);
-    let associatedColumnId = label.id.split("label-")[1];
-    if (ids.includes(associatedColumnId)) {
-      $(label).attr("fill", labelHighlightTextColor);
-    }
-  }
+  highlightLabels(
+    $(".label").filter((index, label) => ids.includes(columnOfLabel(label)))
+  );
 
-  let links = $(".link");
-  for (let link of links) {
-    if (ids.includes(link.id)) {
-      $(link).attr({
-        stroke: linkHighlightColor,
-        fill: linkHighlightColor,
-        "stroke-width": linkHighlightWidth
-      });
-      $(".arrow").attr("stroke-width", linkDefaultWidth);
-    }
-  }
+  highlightLinks($(".link").filter((index, link) => ids.includes(link.id)));
 }
 
 function unHighlightIds(ids) {
-  let columns = $("rect");
-  for (let column of columns) {
-    if (ids.includes(column.id)) {
-      $(column).attr("fill", columnDefaultBackgroundColor);
-      if (isTopLevelId(column.id)) {
-        $(column).attr("opacity", topLevelNodeOpacity);
-      }
-    }
-  }
+  unHighlightColumns(
+    $("rect").filter((index, column) => ids.includes(column.id))
+  );
 
-  let labels = $(".label");
-  for (let label of labels) {
-    if (!label.id.includes("label-")) error("Invalid label ID: " + label.id);
-    let associatedColumnId = label.id.split("label-")[1];
-    if (ids.includes(associatedColumnId) && isTopLevelId(associatedColumnId)) {
-      $(label).attr("fill", tableDefaultTextColor);
-    }
-  }
+  unHighlightLabels(
+    $(".label").filter((index, label) => ids.includes(columnOfLabel(label)))
+  );
 
-  let links = $(".link");
-  for (let link of links) {
-    if (ids.includes(link.id)) {
-      $(link).attr("stroke", linkDefaultColor);
-      $(link).attr("fill", linkDefaultColor);
-      $(link).attr("stroke-width", linkDefaultWidth);
-    }
-  }
+  unHighlightLinks($(".link").filter((index, link) => ids.includes(link.id)));
 }
 
 function linkMouseOver(link) {
@@ -448,24 +464,20 @@ function labelMouseOut() {
 }
 
 function allocateIncomingAndOutgoingLinks() {
-  for (let link of links) {
+  links.forEach((link) => {
     getNodeById(link.source).outgoing.push(link);
     getNodeById(link.target).incoming.push(link);
-  }
+  });
 }
 
 allocateIncomingAndOutgoingLinks();
 
 function getAllChildColumnIdsFromTopLevelId(id) {
-  let topLevelNode = getNodeById(id);
-  let group = topLevelNode.group;
-  let columnIds = [];
-  for (let node of nodes) {
-    if (node.group === group && node.type === columnType) {
-      columnIds.push(node.id);
-    }
-  }
-  return columnIds;
+  return nodes
+    .filter(
+      (node) => node.group === getNodeById(id).group && node.type === columnType
+    )
+    .map((node) => node.id);
 }
 
 function getAllSourceSiblings(id) {
@@ -475,7 +487,7 @@ function getAllSourceSiblings(id) {
   for (let incomingLink of column.incoming) {
     sourceColumnIds.push(...getAllSourceSiblings(incomingLink.source.id));
   }
-  if (isTopLevelNode(getNodeById(id))) {
+  if (isTopLevelId(id)) {
     let allColumnsIds = getAllChildColumnIdsFromTopLevelId(id);
     for (let columnId of allColumnsIds) {
       sourceColumnIds.push(...getAllSourceSiblings(columnId));
@@ -496,7 +508,7 @@ function getAllTargetSiblings(id) {
   for (let outgoingLink of column.outgoing) {
     targetColumnIds.push(...getAllTargetSiblings(outgoingLink.target.id));
   }
-  if (isTopLevelNode(getNodeById(id))) {
+  if (isTopLevelId(id)) {
     let allColumnsIds = getAllChildColumnIdsFromTopLevelId(id);
     for (let columnId of allColumnsIds) {
       targetColumnIds.push(...getAllTargetSiblings(columnId));
