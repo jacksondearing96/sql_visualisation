@@ -519,35 +519,6 @@ var nodeSelection = svg
   .on("mouseover", (d) => columnMouseOver(d.id))
   .on("mouseout", (d) => columnMouseOut(d.id));
 
-// Add the arrowhead marker definition to the svg element
-const arrowSize = 10;
-const markerBoxWidth = arrowSize;
-const markerBoxHeight = arrowSize;
-const refX = markerBoxWidth / 2;
-const refY = markerBoxHeight / 2;
-const arrowPoints = [
-  [0, 0],
-  [0, arrowSize],
-  [arrowSize, arrowSize / 2]
-];
-
-// Definition for arrow head.
-svg
-  .append("defs")
-  .append("marker")
-  .attr("id", "arrow")
-  .attr("viewBox", [0, 0, markerBoxWidth, markerBoxHeight])
-  .attr("refX", refX)
-  .attr("refY", refY)
-  .attr("markerWidth", markerBoxWidth)
-  .attr("markerHeight", markerBoxHeight)
-  .attr("orient", "auto-start-reverse")
-  .append("path")
-  .attr("d", d3.line()(arrowPoints))
-  .attr("stroke", linkDefaultColor)
-  .attr("fill", linkDefaultColor)
-  .attr("class", "arrow"); // TODO: delete me if unused.
-
 var linkSelection = svg
   .selectAll("line")
   .data(links)
@@ -555,7 +526,6 @@ var linkSelection = svg
   .append("line")
   .attr("stroke", linkDefaultColor)
   .attr("fill", "none")
-  // .attr("marker-end", "url(#arrow)")
   .attr("stroke-width", linkDefaultWidth)
   .attr("id", (d) => d.id)
   .attr("class", "link")
