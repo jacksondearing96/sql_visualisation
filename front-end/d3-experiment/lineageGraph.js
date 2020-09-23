@@ -7,6 +7,7 @@ const columnHeight = 20;
 const columnDefaultBackgroundColor = "dodgerblue";
 const columnHighlightBackgroundColor = "red";
 const columnDefaultTextColor = "white";
+const columnOpacity = 1;
 
 const linkDefaultColor = "grey";
 const linkHighlightColor = "red";
@@ -18,6 +19,7 @@ const fontSizeToCharacterWidthRatio = 0.6;
 
 const labelPaddingHorizontal = 15;
 const labelOffsetToReachCenter = 4;
+const labelHighlightTextColor = "white";
 
 // TODO: this should be calculated based on the table width.
 const tablePaddingHorizontal = 10;
@@ -25,9 +27,19 @@ const tablePaddingVertical = 25;
 const tableDefaultBackgroundColor = "blue";
 const tableDefaultTextColor = "black";
 
+const topLevelNodeOpacity = 0.2;
+const highlightOpacity = 1;
+
 const tableType = "TABLE";
 const viewType = "VIEW";
 const columnType = "COLUMN";
+
+const loggingCountThreshold = 50;
+
+$(document).ready(() => {
+  $("#container").css("width", $(window).width() * 0.9);
+  $("#container").css("height", $(window).height() * 0.9);
+});
 
 function error(message) {
   console.error(message);
@@ -35,7 +47,6 @@ function error(message) {
 }
 
 let logCount = 0;
-const loggingCountThreshold = 50;
 function log(message) {
   if (logCount < loggingCountThreshold) console.log(message);
   if (logCount === loggingCountThreshold)
@@ -150,6 +161,15 @@ var nodes = [
     incoming: [],
     outgoing: [],
     type: "COLUMN"
+  },
+  {
+    id: "note_count_by_agent::*",
+    name: "*",
+    group: "note_count_by_agent",
+    order: "3",
+    incoming: [],
+    outgoing: [],
+    type: "COLUMN"
   }
 ];
 
@@ -168,6 +188,11 @@ var links = [
     source: "customer_insight::user_sf_id",
     target: "note_count_by_agent::user_sf_id",
     id: "link2"
+  },
+  {
+    source: "customer_insight::",
+    target: "note_count_by_agent::*",
+    id: "link3"
   }
 ];
 
@@ -282,6 +307,16 @@ function highlightIds(ids) {
   for (let column of columns) {
     if (ids.includes(column.id)) {
       $(column).attr("fill", columnHighlightBackgroundColor);
+      $(column).attr("opacity", highlightOpacity);
+    }
+  }
+
+  let labels = $(".label");
+  for (let label of labels) {
+    if (!label.id.includes("label-")) error("Invalid label ID: " + label.id);
+    let associatedColumnId = label.id.split("label-")[1];
+    if (ids.includes(associatedColumnId)) {
+      $(label).attr("fill", labelHighlightTextColor);
     }
   }
 
@@ -301,8 +336,21 @@ function unHighlightIds(ids) {
   for (let column of columns) {
     if (ids.includes(column.id)) {
       $(column).attr("fill", columnDefaultBackgroundColor);
+      if (column.id.endsWith("::")) {
+        $(column).attr("opacity", topLevelNodeOpacity);
+      }
     }
   }
+
+  let labels = $(".label");
+  for (let label of labels) {
+    if (!label.id.includes("label-")) error("Invalid label ID: " + label.id);
+    let associatedColumnId = label.id.split("label-")[1];
+    if (ids.includes(associatedColumnId) && associatedColumnId.endsWith("::")) {
+      $(label).attr("fill", tableDefaultTextColor);
+    }
+  }
+
   let links = $(".link");
   for (let link of links) {
     if (ids.includes(link.id)) {
@@ -381,6 +429,7 @@ function getAllLineageSiblingIds(id) {
     (id, index) => siblingIds.indexOf(id) === index
   );
 
+  log(siblingIds);
   highlightIds(siblingIds);
   return siblingIds;
 }
@@ -416,12 +465,13 @@ var nodeSelection = svg
   .attr("width", (d) => calculateNodeWidth(d))
   .attr("height", (d) => calculateNodeHeight(d))
   .attr("fill", (d) => determineNodeColor(d))
-  .attr("opacity", (d) => (isTopLevelNode(d) ? 0.2 : 1))
+  .attr("opacity", (d) =>
+    isTopLevelNode(d) ? topLevelNodeOpacity : columnOpacity
+  )
   .attr("class", (d) => setGroupClass(d))
   // note: can bubble up this ID to the 'g' element if req. Put here for conveinence now.
   .attr("id", (d) => d.id)
   .call(d3.drag().on("start", dragStart).on("drag", drag).on("end", dragEnd))
-  .on("click", (d) => getAllLineageSiblingIds(d.id))
   .on("mouseover", (d) => columnMouseOver(d.id))
   .on("mouseout", (d) => columnMouseOut(d.id));
 
@@ -473,6 +523,7 @@ var lables = svg
   .attr("font-size", fontSize)
   .attr("font-family", "courier new")
   .attr("class", "label")
+  .attr("id", (d) => "label-" + d.id)
   .text((d) => d.name)
   .on("mouseover", labelMouseOver)
   .on("mouseout", labelMouseOut);
@@ -504,10 +555,17 @@ function ticked() {
 
   linkSelection
     .attr("x1", (d) => {
+      log(d.source.id);
+      if (d.source.id.endsWith("::")) {
+        return getNodeX(d.source) + calculateTextWidth(d.source.name);
+      }
       let columnX = getNodeX(d.source);
       return columnX + maxColumnWidthForGroup(d.source.group);
     })
     .attr("y1", (d) => {
+      if (d.source.id.endsWith("::")) {
+        return getNodeY(d.source) + calculateNodeHeight(d.source) / 2;
+      }
       let columnY = getNodeY(d.source);
       return columnY + columnHeight / 2;
     })
