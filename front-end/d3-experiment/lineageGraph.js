@@ -48,6 +48,8 @@ const loggingCountThreshold = 50;
 $(document).ready(() => {
   $("#container").css("width", $(window).width() * 0.9);
   $("#container").css("height", $(window).height() * 0.9);
+  $("#container").scrollTop(canvasHeight / 2 - 100);
+  $("#container").scrollLeft(canvasWidth / 2 - 100);
 });
 
 function error(message) {
@@ -295,6 +297,41 @@ function getNodeY(node) {
   );
 }
 
+function getLabelX(node) {
+  return getNodeX(node) + labelPaddingHorizontal;
+}
+
+function getLabelY(node) {
+  return getNodeY(node) + columnHeight / 2 + labelOffsetToReachCenter;
+}
+
+function getLinkSourceX(link) {
+  if (isTopLevelId(link.source.id)) {
+    return (
+      getNodeX(link.source) + calculateTextWidthWithPadding(link.source.name)
+    );
+  }
+  return getNodeX(link.source) + calculateNodeWidth(link.source);
+}
+
+function getLinkSourceY(link) {
+  if (isTopLevelId(link.source.id)) {
+    return getNodeY(link.source) + calculateNodeHeight(link.source) / 2;
+  }
+  return getNodeY(link.source) + columnHeight / 2;
+}
+
+function getLinkTargetX(link) {
+  return getNodeX(link.target);
+}
+
+function getLinkTargetY(link) {
+  if (isTopLevelId(link.target.id)) {
+    return getNodeY(link.target) + calculateNodeHeight(link.target) / 2;
+  }
+  return getNodeY(link.target);
+}
+
 function determineNodeColor(node) {
   return isTopLevelNode(node)
     ? tableDefaultBackgroundColor
@@ -309,7 +346,7 @@ function determineTextColor(node) {
   return isTopLevelNode(node) ? tableDefaultTextColor : columnDefaultTextColor;
 }
 
-function setGroupClass(node) {
+function setGroupClasses(node) {
   return node.group + isTopLevelNode(node) ? " top-level-node" : " column";
 }
 
@@ -376,12 +413,20 @@ function unHighlightIds(ids) {
   }
 }
 
-function linkMouseOver(id) {
-  highlightIds(getAllLineageSiblingIds(id));
+function linkMouseOver(link) {
+  highlightIds([
+    link.id,
+    ...getAllSourceSiblings(link.source.id),
+    ...getAllTargetSiblings(link.target.id)
+  ]);
 }
 
-function linkMouseOut(id) {
-  unHighlightIds(getAllLineageSiblingIds(id));
+function linkMouseOut(link) {
+  highlightIds([
+    link.id,
+    ...getAllSourceSiblings(link.source.id),
+    ...getAllTargetSiblings(link.target.id)
+  ]);
 }
 
 function columnMouseOver(id) {
@@ -471,7 +516,6 @@ function getAllLineageSiblingIds(id) {
   siblingIds.push(...getAllSourceSiblings(id));
   siblingIds.push(...getAllTargetSiblings(id));
 
-  // Filter out duplicate elements.
   siblingIds = siblingIds.filter(
     (id, index) => siblingIds.indexOf(id) === index
   );
@@ -512,8 +556,7 @@ var nodeSelection = svg
   .attr("height", (d) => calculateNodeHeight(d))
   .attr("fill", (d) => determineNodeColor(d))
   .attr("opacity", (d) => determineNodeOpacity(d))
-  .attr("class", (d) => setGroupClass(d))
-  // note: can bubble up this ID to the 'g' element if req. Put here for conveinence now.
+  .attr("class", (d) => setGroupClasses(d))
   .attr("id", (d) => d.id)
   .call(d3.drag().on("start", dragStart).on("drag", drag).on("end", dragEnd))
   .on("mouseover", (d) => columnMouseOver(d.id))
@@ -529,8 +572,8 @@ var linkSelection = svg
   .attr("stroke-width", linkDefaultWidth)
   .attr("id", (d) => d.id)
   .attr("class", "link")
-  .on("mouseover", (d) => linkMouseOver(d.source.id))
-  .on("mouseout", (d) => linkMouseOut(d.source.id));
+  .on("mouseover", (d) => linkMouseOver(d))
+  .on("mouseout", (d) => linkMouseOut(d));
 
 var lables = svg
   .selectAll("g")
@@ -565,42 +608,11 @@ simulation
 function ticked() {
   nodeSelection.attr("x", (d) => getNodeX(d)).attr("y", (d) => getNodeY(d));
 
-  lables
-    .attr("x", (d) => getNodeX(d) + labelPaddingHorizontal)
-    .attr(
-      "y",
-      (d) => getNodeY(d) + columnHeight / 2 + labelOffsetToReachCenter
-    );
+  lables.attr("x", (d) => getLabelX(d)).attr("y", (d) => getLabelY(d));
 
   linkSelection
-    .attr("x1", (d) => {
-      if (isTopLevelId(d.source.id)) {
-        return (
-          getNodeX(d.source) + calculateTextWidthWithPadding(d.source.name)
-        );
-      }
-      let columnX = getNodeX(d.source);
-      return columnX + calculateNodeWidth(d.source);
-    })
-    .attr("y1", (d) => {
-      if (isTopLevelId(d.source.id)) {
-        return getNodeY(d.source) + calculateNodeHeight(d.source) / 2;
-      }
-      let columnY = getNodeY(d.source);
-      return columnY + columnHeight / 2;
-    })
-    .attr("x2", (d) => {
-      let columnX = getNodeX(d.target);
-      return columnX;
-    })
-    .attr("y2", (d) => {
-      if (isTopLevelId(d.target.id)) {
-        return getNodeY(d.target) + calculateNodeHeight(d.target) / 2;
-      }
-      let columnY = getNodeY(d.target);
-      return columnY + columnHeight / 2;
-    });
+    .attr("x1", (d) => getLinkSourceX(d))
+    .attr("y1", (d) => getLinkSourceY(d))
+    .attr("x2", (d) => getLinkTargetX(d))
+    .attr("y2", (d) => getLinkTargetY(d));
 }
-
-$("#container").scrollTop(canvasHeight / 2 - 200);
-$("#container").scrollLeft(canvasWidth / 2 - 100);
