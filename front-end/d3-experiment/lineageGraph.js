@@ -388,12 +388,30 @@ function allocateIncomingAndOutgoingLinks() {
 
 allocateIncomingAndOutgoingLinks();
 
+function getAllChildColumnIdsFromTopLevelId(id) {
+  let topLevelNode = getNodeById(id);
+  let group = topLevelNode.group;
+  let columnIds = [];
+  for (let node of nodes) {
+    if (node.group === group && node.type === columnType) {
+      columnIds.push(node.id);
+    }
+  }
+  return columnIds;
+}
+
 function getAllSourceSiblings(id) {
   let column = getNodeById(id);
 
   let sourceColumnIds = [];
   for (let incomingLink of column.incoming) {
     sourceColumnIds.push(...getAllSourceSiblings(incomingLink.source.id));
+  }
+  if (isTopLevelNode(getNodeById(id))) {
+    let allColumnsIds = getAllChildColumnIdsFromTopLevelId(id);
+    for (let columnId of allColumnsIds) {
+      sourceColumnIds.push(...getAllSourceSiblings(columnId));
+    }
   }
 
   let sourceSiblings = [];
