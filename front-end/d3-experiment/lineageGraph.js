@@ -3,16 +3,21 @@
 const canvasWidth = 2000;
 const canvasHeight = 1000;
 
+const nodeForceStrength = -30;
+
 const columnHeight = 20;
 const columnDefaultBackgroundColor = "dodgerblue";
 const columnHighlightBackgroundColor = "red";
 const columnDefaultTextColor = "white";
 const columnOpacity = 1;
+const columnFontWeight = "normal";
 
 const linkDefaultColor = "grey";
 const linkHighlightColor = "red";
 const linkDefaultWidth = "1";
 const linkHighlightWidth = "5";
+const linkPreferredDistance = 50;
+const linkStrength = 0.1;
 
 const fontSize = 15;
 const fontSizeToCharacterWidthRatio = 0.6;
@@ -28,11 +33,15 @@ const tableDefaultBackgroundColor = "blue";
 const tableDefaultTextColor = "black";
 
 const topLevelNodeOpacity = 0.2;
+const topLevelNodeFontWeight = "bold";
+
 const highlightOpacity = 1;
 
 const tableType = "TABLE";
 const viewType = "VIEW";
 const columnType = "COLUMN";
+
+const idDelimiter = "::";
 
 const loggingCountThreshold = 50;
 
@@ -209,41 +218,40 @@ function getNodeById(id) {
 }
 
 function isTopLevelNode(node) {
-  if (typeof node === "string") {
-    for (let existing of nodes) {
-      if (isTopLevelNode(existing) && node === existing.name) return true;
-    }
-    return false;
-  }
   return node.type === tableType || node.type === viewType;
 }
 
-function countColumns(group) {
+function isTopLevelId(id) {
+  return id.endsWith(idDelimiter);
+}
+
+function countColumnsInGroup(group) {
   let count = 0;
-  for (let node of nodes) {
-    if (node.group === group) ++count;
-  }
+  nodes.forEach((node) => (count += node.group === group));
   return count;
 }
 
 function calculateTextWidth(text) {
   let numberOfCharacters = text.length;
   let width = fontSize * fontSizeToCharacterWidthRatio * numberOfCharacters;
-  return width + 2 * labelPaddingHorizontal;
+  return width;
+}
+
+function calculateTextWidthWithPadding(text) {
+  return calculateTextWidth() + 2 * labelPaddingHorizontal;
 }
 
 function maxColumnWidthForGroup(group) {
   let maxWidth = 0;
-  for (let node of nodes) {
-    let nodeWidth = calculateTextWidth(node.name);
-    if (
-      node.group === group &&
-      node.type === columnType &&
-      nodeWidth > maxWidth
-    ) {
-      maxWidth = nodeWidth;
-    }
-  }
+  log(nodes.filter((node) => node.group === group && node.type === columnType));
+  nodes
+    .filter((node) => node.group === group)
+    .filter((node) => node.type === columnType)
+    .forEach((node) => {
+      maxWidth = Math.max(maxWidth, calculateTextWidthWithPadding(node.name));
+      log(maxWidth);
+    });
+  log("final: " + maxWidth);
   return maxWidth;
 }
 
@@ -252,7 +260,7 @@ function calculateNodeWidth(node) {
   if (isTopLevelNode(node)) {
     return Math.max(
       maxColumnWidth + 2 * tablePaddingHorizontal,
-      calculateTextWidth(node.name)
+      calculateTextWidthWithPadding(node.name)
     );
   }
   return maxColumnWidth;
@@ -261,7 +269,7 @@ function calculateNodeWidth(node) {
 function calculateNodeHeight(node) {
   // TODO: use a buffer constant here instead.
   if (isTopLevelNode(node))
-    return columnHeight * (countColumns(node.group) + 1);
+    return columnHeight * (countColumnsInGroup(node.group) + 1);
   return columnHeight;
 }
 
@@ -293,6 +301,10 @@ function determineNodeColor(node) {
   return columnDefaultBackgroundColor;
 }
 
+function determineNodeOpacity(node) {
+  return isTopLevelNode(node) ? topLevelNodeOpacity : columnOpacity;
+}
+
 function determineTextColor(node) {
   if (isTopLevelNode(node)) return tableDefaultTextColor;
   return columnDefaultTextColor;
@@ -311,8 +323,10 @@ function highlightIds(ids) {
   let columns = $("rect");
   for (let column of columns) {
     if (ids.includes(column.id)) {
-      $(column).attr("fill", columnHighlightBackgroundColor);
-      $(column).attr("opacity", highlightOpacity);
+      $(column).attr({
+        fill: columnHighlightBackgroundColor,
+        opacity: highlightOpacity
+      });
     }
   }
 
@@ -328,9 +342,11 @@ function highlightIds(ids) {
   let links = $(".link");
   for (let link of links) {
     if (ids.includes(link.id)) {
-      $(link).attr("stroke", linkHighlightColor);
-      $(link).attr("fill", linkHighlightColor);
-      $(link).attr("stroke-width", linkHighlightWidth);
+      $(link).attr({
+        stroke: linkHighlightColor,
+        fill: linkHighlightColor,
+        "stroke-width": linkHighlightWidth
+      });
       $(".arrow").attr("stroke-width", linkDefaultWidth);
     }
   }
@@ -341,7 +357,7 @@ function unHighlightIds(ids) {
   for (let column of columns) {
     if (ids.includes(column.id)) {
       $(column).attr("fill", columnDefaultBackgroundColor);
-      if (column.id.endsWith("::")) {
+      if (isTopLevelId(column.id)) {
         $(column).attr("opacity", topLevelNodeOpacity);
       }
     }
@@ -351,7 +367,7 @@ function unHighlightIds(ids) {
   for (let label of labels) {
     if (!label.id.includes("label-")) error("Invalid label ID: " + label.id);
     let associatedColumnId = label.id.split("label-")[1];
-    if (ids.includes(associatedColumnId) && associatedColumnId.endsWith("::")) {
+    if (ids.includes(associatedColumnId) && isTopLevelId(associatedColumnId)) {
       $(label).attr("fill", tableDefaultTextColor);
     }
   }
@@ -458,7 +474,6 @@ function getAllLineageSiblingIds(id) {
     (id, index) => siblingIds.indexOf(id) === index
   );
 
-  log(siblingIds);
   highlightIds(siblingIds);
   return siblingIds;
 }
@@ -494,9 +509,7 @@ var nodeSelection = svg
   .attr("width", (d) => calculateNodeWidth(d))
   .attr("height", (d) => calculateNodeHeight(d))
   .attr("fill", (d) => determineNodeColor(d))
-  .attr("opacity", (d) =>
-    isTopLevelNode(d) ? topLevelNodeOpacity : columnOpacity
-  )
+  .attr("opacity", (d) => determineNodeOpacity(d))
   .attr("class", (d) => setGroupClass(d))
   // note: can bubble up this ID to the 'g' element if req. Put here for conveinence now.
   .attr("id", (d) => d.id)
@@ -551,6 +564,9 @@ var lables = svg
   .attr("fill", (d) => determineTextColor(d))
   .attr("font-size", fontSize)
   .attr("font-family", "courier new")
+  .attr("font-weight", (d) =>
+    isTopLevelNode(d) ? topLevelNodeFontWeight : columnFontWeight
+  )
   .attr("class", "label")
   .attr("id", (d) => "label-" + d.id)
   .text((d) => d.name)
@@ -561,14 +577,14 @@ var simulation = d3.forceSimulation(nodes);
 
 simulation
   .force("center", d3.forceCenter(canvasWidth / 2, canvasHeight / 2))
-  .force("nodes", d3.forceManyBody().strength(-30))
+  .force("nodes", d3.forceManyBody().strength(nodeForceStrength))
   .force(
     "links",
     d3
       .forceLink(links)
       .id((d) => d.id)
-      .distance(50)
-      .strength(0.1)
+      .distance(linkPreferredDistance)
+      .strength(linkStrength)
   )
   .on("tick", ticked);
 
@@ -584,15 +600,16 @@ function ticked() {
 
   linkSelection
     .attr("x1", (d) => {
-      log(d.source.id);
-      if (d.source.id.endsWith("::")) {
-        return getNodeX(d.source) + calculateTextWidth(d.source.name);
+      if (isTopLevelId(d.source.id)) {
+        return (
+          getNodeX(d.source) + calculateTextWidthWithPadding(d.source.name)
+        );
       }
       let columnX = getNodeX(d.source);
       return columnX + maxColumnWidthForGroup(d.source.group);
     })
     .attr("y1", (d) => {
-      if (d.source.id.endsWith("::")) {
+      if (isTopLevelId(d.source.id)) {
         return getNodeY(d.source) + calculateNodeHeight(d.source) / 2;
       }
       let columnY = getNodeY(d.source);
@@ -603,7 +620,7 @@ function ticked() {
       return columnX;
     })
     .attr("y2", (d) => {
-      if (d.target.id.endsWith("::")) {
+      if (isTopLevelId(d.target.id)) {
         return getNodeY(d.target) + calculateNodeHeight(d.target) / 2;
       }
       let columnY = getNodeY(d.target);
