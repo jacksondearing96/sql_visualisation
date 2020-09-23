@@ -226,9 +226,7 @@ function isTopLevelId(id) {
 }
 
 function countColumnsInGroup(group) {
-  let count = 0;
-  nodes.forEach((node) => (count += node.group === group));
-  return count;
+  return nodes.filter((node) => node.group === group).length;
 }
 
 function calculateTextWidth(text) {
@@ -238,32 +236,38 @@ function calculateTextWidth(text) {
 }
 
 function calculateTextWidthWithPadding(text) {
-  return calculateTextWidth() + 2 * labelPaddingHorizontal;
+  return calculateTextWidth(text) + 2 * labelPaddingHorizontal;
 }
 
+Array.prototype.max = function () {
+  return Math.max.apply(null, this);
+};
+
 function maxColumnWidthForGroup(group) {
-  let maxWidth = 0;
-  log(nodes.filter((node) => node.group === group && node.type === columnType));
-  nodes
+  return nodes
     .filter((node) => node.group === group)
     .filter((node) => node.type === columnType)
-    .forEach((node) => {
-      maxWidth = Math.max(maxWidth, calculateTextWidthWithPadding(node.name));
-      log(maxWidth);
-    });
-  log("final: " + maxWidth);
-  return maxWidth;
+    .map((node) => calculateTextWidthWithPadding(node.name))
+    .max();
+}
+
+function topLevelWidthForGroup(group) {
+  return calculateTextWidthWithPadding(
+    nodes.filter((node) => isTopLevelNode(node) && node.group === group)[0].name
+  );
 }
 
 function calculateNodeWidth(node) {
   let maxColumnWidth = maxColumnWidthForGroup(node.group);
+  let topLevelWidth = topLevelWidthForGroup(node.group);
+
   if (isTopLevelNode(node)) {
     return Math.max(
       maxColumnWidth + 2 * tablePaddingHorizontal,
       calculateTextWidthWithPadding(node.name)
     );
   }
-  return maxColumnWidth;
+  return Math.max(maxColumnWidth, topLevelWidth - 2 * tablePaddingHorizontal);
 }
 
 function calculateNodeHeight(node) {
