@@ -422,7 +422,7 @@ function linkMouseOver(link) {
 }
 
 function linkMouseOut(link) {
-  highlightIds([
+  unHighlightIds([
     link.id,
     ...getAllSourceSiblings(link.source.id),
     ...getAllTargetSiblings(link.target.id)
@@ -483,9 +483,9 @@ function getAllSourceSiblings(id) {
   }
 
   let sourceSiblings = [];
-  sourceSiblings.push(id);
-  sourceSiblings.push(...sourceColumnIds);
-  sourceSiblings.push(...column.incoming.map((link) => link.id));
+  sourceSiblings.push(
+    ...[id, ...sourceColumnIds, ...column.incoming.map((link) => link.id)]
+  );
   return sourceSiblings;
 }
 
@@ -504,23 +504,23 @@ function getAllTargetSiblings(id) {
   }
 
   let targetSiblings = [];
-  targetSiblings.push(id);
-  targetSiblings.push(...targetColumnIds);
-  targetSiblings.push(...column.outgoing.map((link) => link.id));
+  targetSiblings.push(
+    ...[id, ...targetColumnIds, ...column.outgoing.map((link) => link.id)]
+  );
   return targetSiblings;
 }
 
 function getAllLineageSiblingIds(id) {
-  let siblingIds = [];
-  siblingIds.push(id);
-  siblingIds.push(...getAllSourceSiblings(id));
-  siblingIds.push(...getAllTargetSiblings(id));
+  let siblingIds = [
+    id,
+    ...getAllSourceSiblings(id),
+    ...getAllTargetSiblings(id)
+  ];
 
   siblingIds = siblingIds.filter(
     (id, index) => siblingIds.indexOf(id) === index
   );
 
-  highlightIds(siblingIds);
   return siblingIds;
 }
 
