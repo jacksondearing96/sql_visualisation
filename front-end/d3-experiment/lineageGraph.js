@@ -329,7 +329,7 @@ function getLinkTargetY(link) {
   if (isTopLevelId(link.target.id)) {
     return getNodeY(link.target) + calculateNodeHeight(link.target) / 2;
   }
-  return getNodeY(link.target);
+  return getNodeY(link.target) + columnHeight / 2;
 }
 
 function determineNodeColor(node) {
