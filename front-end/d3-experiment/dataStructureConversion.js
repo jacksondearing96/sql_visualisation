@@ -4,11 +4,12 @@ function getGroupFromId(id) {
   return idParts[0];
 }
 
-function makeNode(type, name, id) {
+function makeNode(type, name, id, order = null) {
   let node = {};
   node.type = type;
   node.name = name;
   node.id = id;
+  if (type === "COLUMN") node.order = order;
   node.group = getGroupFromId(id);
   return node;
 }
@@ -29,8 +30,9 @@ function backendToFrontendDataStructureConversion(lineageNodes) {
   for (let lineageNode of lineageNodes) {
     nodes.push(makeNode(lineageNode.type, lineageNode.name, lineageNode.id));
 
-    for (let column of lineageNode.columns) {
-      nodes.push(makeNode(column.type, column.name, column.id));
+    for (let i = 0; i < lineageNode.columns.length; ++i) {
+      let column = lineageNode.columns[i];
+      nodes.push(makeNode(column.type, column.name, column.id, i));
 
       for (let source of column.sources) {
         links.push(makeLink(source, column.id, ++linkCount))
