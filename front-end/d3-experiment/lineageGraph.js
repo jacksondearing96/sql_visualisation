@@ -193,6 +193,11 @@ var links = [
     source: "customer_insight::",
     target: "note_count_by_agent::*",
     id: "link3"
+  },
+  {
+    source: "%(crm)s_task::status",
+    target: "customer_insight::",
+    id: "link4"
   }
 ];
 
@@ -428,6 +433,12 @@ function getAllTargetSiblings(id) {
   for (let outgoingLink of column.outgoing) {
     targetColumnIds.push(...getAllTargetSiblings(outgoingLink.target.id));
   }
+  if (isTopLevelNode(getNodeById(id))) {
+    let allColumnsIds = getAllChildColumnIdsFromTopLevelId(id);
+    for (let columnId of allColumnsIds) {
+      targetColumnIds.push(...getAllTargetSiblings(columnId));
+    }
+  }
 
   let targetSiblings = [];
   targetSiblings.push(id);
@@ -592,6 +603,9 @@ function ticked() {
       return columnX;
     })
     .attr("y2", (d) => {
+      if (d.target.id.endsWith("::")) {
+        return getNodeY(d.target) + calculateNodeHeight(d.target) / 2;
+      }
       let columnY = getNodeY(d.target);
       return columnY + columnHeight / 2;
     });
