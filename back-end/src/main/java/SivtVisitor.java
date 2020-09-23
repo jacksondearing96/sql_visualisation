@@ -272,7 +272,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      */
     @Override
     protected R visitAliasedRelation(AliasedRelation aliasedRelation, C context) {
-        labellingInformationStack.push(new LabellingInformation(aliasedRelation.getAlias().toString(), aliasedRelation.getColumnNames()));
+        String alias = aliasedRelation.getAlias().toString();
+        List<com.facebook.presto.sql.tree.Identifier> columnNames = aliasedRelation.getColumnNames();
+        labellingInformationStack.push(new LabellingInformation(alias, columnNames));
 
         currentlyInside.push(AliasedRelation.class);
         R node = visitRelation(aliasedRelation, context, true);
