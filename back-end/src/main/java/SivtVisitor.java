@@ -325,6 +325,12 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return visitQueryBody(table, context);
     }
 
+    /**
+     * Visit the RenameTable node of the AST.
+     * @param renameTable The RenameTable node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
     @Override
     protected R visitRenameTable(RenameTable renameTable, C context) {
 
@@ -335,6 +341,12 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return visitStatement(renameTable, context);
     }
 
+    /**
+     * Visit the RenameColumn node of the AST.
+     * @param renameColumn The RenameColumn node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
     @Override
     protected R visitRenameColumn(RenameColumn renameColumn, C context) {
 
@@ -347,6 +359,12 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return visitStatement(renameColumn, context);
     }
 
+    /**
+     * Visit the addColumn node of the AST.
+     * @param addColumn The AddColumn node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
     @Override
     protected R visitAddColumn(AddColumn addColumn, C context) {
 

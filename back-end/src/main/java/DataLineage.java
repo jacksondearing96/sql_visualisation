@@ -97,6 +97,12 @@ public class DataLineage {
         }
     }
 
+    /**
+     * Rename columns in the existingNode based on staged renames in the newNode.
+     * Some columns in the newNode may have a rename staged. This is when the rename must be applied.
+     * @param existingNode The existing node in the nodeList.
+     * @param newNode The new node that may have staged renames.
+     */
     private void applyRenamesToColumns(LineageNode existingNode, LineageNode newNode) {
         for (Column newColumn : newNode.getColumns()) {
             for (Column existingColumn : existingNode.getColumns()) {

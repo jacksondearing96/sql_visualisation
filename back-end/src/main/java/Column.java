@@ -11,6 +11,12 @@ public class Column implements Cloneable {
     private String id = "";
     private ArrayList<String> sources = new ArrayList<String>();
 
+    /**
+     * Maintains an (optional) new name that the node will be renamed to when it is added
+     * to the DataLineage object it is eventually added to.
+     * This has to be staged as opposed to updating the name immediately so that the node is
+     * still able to be matched to potential duplicates that exist in the DatLineage it is added to.
+     */
     private Optional<String> stagedRename = Optional.empty();
 
     public Column() { this("", "", ""); }
