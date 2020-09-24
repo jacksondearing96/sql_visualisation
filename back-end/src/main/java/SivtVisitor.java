@@ -325,6 +325,17 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return visitQueryBody(table, context);
     }
 
+    @Override
+    protected R visitAddColumn(AddColumn addColumn, C context) {
+
+        LineageNode node = new LineageNode("TABLE", addColumn.getName().getSuffix());
+        Column newColumn = new Column(addColumn.getColumn().getName().getValue());
+        node.addColumn(newColumn);
+        lineageNodes.add(node);
+
+        return visitStatement(addColumn, context);
+    }
+
     /**
      * Visit a node by first visiting all its children.
      * @param node Node

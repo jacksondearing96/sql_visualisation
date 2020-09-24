@@ -68,7 +68,7 @@ public class TestRunner {
         column.addListOfSources(sources);
         column.addSource("source1");
         Assertions.assertEquals(
-                "alias=newAlias,id=newID,name=newName,sources={source1,source2,source3,source4,source5}",
+                "alias=newAlias,id=newID,name=newName,sources={source1,source2,source3,source4,source5},stagedRename=Optional.empty",
                 getColumnDataString(column));
 
         // Test Column cloning and equals
@@ -648,5 +648,18 @@ public class TestRunner {
         table1.equals(nodeList.get(0));
         table2.equals(nodeList.get(1));
         anonymous.equals(nodeList.get(2));
+    }
+
+    @Test
+    @DisplayName("testAddColumn")
+    void testAddColumn() {
+        String sql = "ALTER TABLE mytable ADD COLUMN a varchar###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        LineageNode mytable = new LineageNode("TABLE", "mytable");
+        mytable.addColumn(new Column("a"));
+
+        Assertions.assertEquals(1, nodeList.size());
+        mytable.equals(nodeList.get(0));
     }
 }
