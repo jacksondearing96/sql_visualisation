@@ -97,6 +97,16 @@ public class DataLineage {
         }
     }
 
+    private void applyRenamesToColumns(LineageNode existingNode, LineageNode newNode) {
+        for (Column newColumn : newNode.getColumns()) {
+            for (Column existingColumn : existingNode.getColumns()) {
+                if (newColumn.getName().equals(existingColumn.getName())) {
+                    newColumn.getRename().ifPresent(existingColumn::renameAndUpdateId);
+                }
+            }
+        }
+    }
+
     /**
      * Consolidate two nodes that represent the same node.
      * Adds the columns of the new node to the existing node. The addColumn method takes care
@@ -106,6 +116,7 @@ public class DataLineage {
      */
     private void consolidateNodes(LineageNode existingNode, LineageNode newNode) {
         existingNode.addListOfColumns(newNode.getColumns());
+        applyRenamesToColumns(existingNode, newNode);
     }
 
     /**
@@ -116,9 +127,11 @@ public class DataLineage {
         for (LineageNode existingNode : nodeList) {
             if (existingNode.getName().equals(newNode.getName())) {
                 consolidateNodes(existingNode, newNode);
+                newNode.getRename().ifPresent(existingNode::rename);
                 return;
             }
         }
+        newNode.getRename().ifPresent(newNode::rename);
         this.nodeList.add(newNode);
     }
 

@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Columns within a particular table or view.
@@ -9,6 +10,8 @@ public class Column implements Cloneable {
     private String alias = "";
     private String id = "";
     private ArrayList<String> sources = new ArrayList<String>();
+
+    private Optional<String> stagedRename = Optional.empty();
 
     public Column() { this("", "", ""); }
     public Column(String name) {
@@ -93,6 +96,22 @@ public class Column implements Cloneable {
         for (String source : sources) {
             addSource(source);
         }
+    }
+
+    public void stageRenameTo(String rename) {
+        this.stagedRename = Optional.of(rename);
+    }
+
+    public void renameAndUpdateId(String rename) {
+        setName(rename);
+        if (!id.isEmpty()) {
+            String[] idParts = id.split("::");
+            setID(DataLineage.makeId(idParts[0], getName()));
+        }
+    }
+
+    public Optional<String> getRename() {
+        return this.stagedRename;
     }
 
     public String getName() {
