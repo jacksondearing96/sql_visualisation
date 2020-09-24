@@ -2,6 +2,8 @@
 
 const canvasWidth = 5000;
 const canvasHeight = 2500;
+const containerWindowWidthRatio = 0.97;
+const containerWindowHeightRatio = 0.88;
 const scrollIncrementWidthToInitInCenter = -500;
 const scrollIncrementHeightToInitInCenter = -300;
 
@@ -12,7 +14,7 @@ const dragStartAlphaTarget = 0.5;
 const offWhite = "rgb(200,200,200)";
 
 const fontSize = 15;
-const fontFamily = 'Cutive Mono';
+const fontFamily = 'courier new';
 const fontSizeToCharacterWidthRatio = 0.6;
 
 const columnHeight = 20;
@@ -48,9 +50,6 @@ const viewType = "VIEW";
 const columnType = "COLUMN";
 
 const idDelimiter = "::";
-
-const containerWindowWidthRatio = 0.95;
-const containerWindowHeightRatio = 0.85;
 
 const loggingCountThreshold = 50;
 

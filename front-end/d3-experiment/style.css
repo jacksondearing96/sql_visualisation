@@ -13,8 +13,31 @@ svg {
 
 #container {
   border: 1px solid black;
-  box-shadow: 5px 5px 5px black;
+  box-shadow: 5px 5px 3px rgb(20,20,20);
   overflow: auto;
   margin: auto auto;
   background-color: rgb(30,30,30);
+}
+
+header {
+  margin-top: 10px;
+}
+
+h1 {
+  display: inline-block;
+  margin: 0px;
+  margin-bottom: 20px;
+}
+
+#github-logo {
+  margin-top: 6px;
+  display: inline-block;
+  height: 30px;
+  opacity: 0.5;
+  float: right;
+  margin-right:20px;
+}
+
+#github-logo:hover {
+  opacity: 1;
 }
