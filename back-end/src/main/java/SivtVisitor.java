@@ -35,7 +35,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * Defines all the parent nodes that are interested in keeping the resultant anonymous table to use as a source.
       */
     private final ArrayList<Class> contextToKeepList =
-            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class));
+            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class, Prepare.class));
 
     /**
      * Determines whether the current Class context is one which is required to keep the anonymous table.
@@ -94,6 +94,21 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         LineageNode view = sourcesStack.pop().get(0);
         convertNodeToView(view, createView.getName().toString());
         lineageNodes.add(view);
+
+        return node;
+    }
+
+    @Override
+    protected R visitPrepare(Prepare prepare, C context) {
+
+        sourcesStack.push(new ArrayList<>());
+
+        currentlyInside.push(Prepare.class);
+        R node = visitStatement(prepare, context);
+        currentlyInside.pop();
+
+        LineageNode prepareNode = sourcesStack.pop().get(0);
+        lineageNodes.add(prepareNode);
 
         return node;
     }
