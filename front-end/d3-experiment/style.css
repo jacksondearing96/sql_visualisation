@@ -1,0 +1,16 @@
+body {
+  text-align: center;
+}
+
+svg {
+  margin: 0 auto;
+  display: block;
+  overflow: auto;
+}
+
+#container {
+  border: 1px solid lightgrey;
+  box-shadow: 5px 5px 5px lightgrey;
+  overflow: auto;
+  margin: auto auto;
+}
