@@ -326,6 +326,28 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     @Override
+    protected R visitRenameTable(RenameTable renameTable, C context) {
+
+        LineageNode table = new LineageNode("TABLE", renameTable.getSource().getSuffix());
+        table.stageRenameTo(renameTable.getTarget().getSuffix());
+        lineageNodes.add(table);
+
+        return visitStatement(renameTable, context);
+    }
+
+    @Override
+    protected R visitRenameColumn(RenameColumn renameColumn, C context) {
+
+        LineageNode table = new LineageNode("TABLE", renameColumn.getTable().getSuffix());
+        Column column = new Column(renameColumn.getSource().getValue());
+        column.stageRenameTo(renameColumn.getTarget().getValue());
+        table.addColumn(column);
+        lineageNodes.add(table);
+
+        return visitStatement(renameColumn, context);
+    }
+
+    @Override
     protected R visitAddColumn(AddColumn addColumn, C context) {
 
         LineageNode node = new LineageNode("TABLE", addColumn.getName().getSuffix());
