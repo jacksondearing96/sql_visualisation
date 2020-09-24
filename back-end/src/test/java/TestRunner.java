@@ -649,4 +649,54 @@ public class TestRunner {
         table2.equals(nodeList.get(1));
         anonymous.equals(nodeList.get(2));
     }
+
+    @Test
+    @DisplayName("testConditionalSelectItems")
+    void testConditionalSelectItems() {
+        String sql = "SELECT CASE WHEN a = b THEN c ELSE d END FROM mytable###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        LineageNode mytable = new LineageNode("TABLE", "mytable");
+        mytable.addListOfColumns(Arrays.asList(
+                new Column("a"),
+                new Column("b"),
+                new Column("c"),
+                new Column("d")
+        ));
+
+        PrettyPrinter.printLineageNode(nodeList.get(0));
+        Assertions.assertEquals(1, nodeList.size());
+        mytable.equals(nodeList.get(0));
+    }
+
+    @Test
+    @DisplayName("testDereferenceConditionalSelectItems")
+    void testDereferenceConditionalSelectItems() {
+        String sql = "SELECT CASE " +
+                     "WHEN lefttable.a = righttable.b " +
+                     "THEN lefttable.c " +
+                     "ELSE righttable.d " +
+                     "END FROM lefttable INNER JOIN righttable ON 1 = 1###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        LineageNode leftTable = new LineageNode("TABLE", "lefttable");
+        leftTable.addListOfColumns(Arrays.asList(
+                new Column("a"),
+                new Column("c")
+        ));
+
+        LineageNode rightTable = new LineageNode("TABLE", "righttable");
+        rightTable.addListOfColumns(Arrays.asList(
+                new Column("b"),
+                new Column("d")
+        ));
+
+        for (LineageNode node : nodeList) {
+            PrettyPrinter.printLineageNode(node);
+        }
+
+        Assertions.assertEquals(2, nodeList.size());
+        leftTable.equals(nodeList.get(0));
+        rightTable.equals(nodeList.get(1));
+    }
 }
