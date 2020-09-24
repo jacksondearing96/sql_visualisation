@@ -1,9 +1,14 @@
 /* eslint-disable no-undef */
 
-const canvasWidth = 2000;
-const canvasHeight = 1000;
+const canvasWidth = 5000;
+const canvasHeight = 2500;
+const scrollIncrementWidthToInitInCenter = -500;
+const scrollIncrementHeightToInitInCenter = -300;
 
 const nodeForceStrength = -30;
+const dragEndAlphaTarget = 0;
+const dragStartAlphaTarget = 0.5;
+
 const offWhite = "rgb(200,200,200)";
 
 const fontSize = 15;
@@ -19,6 +24,7 @@ const columnFontWeight = "normal";
 
 const linkDefaultColor = "grey";
 const linkHighlightColor = "crimson";
+const linkFill = "none";
 const linkDefaultWidth = "1";
 const linkHighlightWidth = "5";
 const linkPreferredDistance = 50;
@@ -219,8 +225,8 @@ function setContainerDimensions() {
 }
 
 function setContainerScrollPosition() {
-  $("#container").scrollTop(canvasHeight / 2 - 100);
-  $("#container").scrollLeft(canvasWidth / 2 - 100);
+  $("#container").scrollTop(canvasHeight / 2 + scrollIncrementHeightToInitInCenter);
+  $("#container").scrollLeft(canvasWidth / 2 + scrollIncrementWidthToInitInCenter);
 }
 
 function getNodeById(id) {
@@ -393,9 +399,12 @@ function highlightLinks(links) {
 }
 
 function unHighlightColumns(columns) {
-  columns
-    .attr("fill", columnDefaultBackgroundColor)
-    .filter((index, column) => isTopLevelId(column.id))
+  columns.attr("fill", columnDefaultBackgroundColor);
+}
+
+function unHighlightTopLevelNodes(nodes) {
+  nodes
+    .attr("fill", topLevelNodeDefaultBackgroundColor)
     .attr("opacity", topLevelNodeDefaultOpacity);
 }
 
@@ -431,7 +440,11 @@ function highlightIds(ids) {
 
 function unHighlightIds(ids) {
   unHighlightColumns(
-    $("rect").filter((index, column) => ids.includes(column.id))
+    $("rect").filter((index, column) => !isTopLevelId(column.id) && ids.includes(column.id))
+  );
+
+  unHighlightTopLevelNodes(
+    $("rect").filter((index, node) => isTopLevelId(node.id) && ids.includes(node.id))
   );
 
   unHighlightLabels(
@@ -549,7 +562,7 @@ function getAllLineageSiblingIds(id) {
 }
 
 function dragStart(d) {
-  simulation.alphaTarget(0.5).restart();
+  simulation.alphaTarget(dragStartAlphaTarget).restart();
   d.fx = d.x;
   d.fy = d.y;
 }
@@ -560,7 +573,7 @@ function drag(d) {
 }
 
 function dragEnd(d) {
-  simulation.alphaTarget(0);
+  simulation.alphaTarget(dragEndAlphaTarget);
   d.fx = null;
   d.fy = null;
 }
@@ -592,7 +605,7 @@ var linkSelection = svg
   .enter()
   .append("line")
   .attr("stroke", linkDefaultColor)
-  .attr("fill", "none")
+  .attr("fill", linkFill)
   .attr("stroke-width", linkDefaultWidth)
   .attr("id", (d) => d.id)
   .attr("class", "link")
