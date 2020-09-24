@@ -4,37 +4,38 @@ const canvasWidth = 2000;
 const canvasHeight = 1000;
 
 const nodeForceStrength = -30;
+const offWhite = "rgb(200,200,200)";
+
+const fontSize = 15;
+const fontFamily = 'Cutive Mono';
+const fontSizeToCharacterWidthRatio = 0.6;
 
 const columnHeight = 20;
 const columnDefaultBackgroundColor = "dodgerblue";
-const columnHighlightBackgroundColor = "red";
-const columnDefaultTextColor = "white";
-const columnOpacity = 1;
+const columnHighlightBackgroundColor = "crimson";
+const columnDefaultTextColor = offWhite;
+const columnDefaultOpacity = 1;
 const columnFontWeight = "normal";
 
 const linkDefaultColor = "grey";
-const linkHighlightColor = "red";
+const linkHighlightColor = "crimson";
 const linkDefaultWidth = "1";
 const linkHighlightWidth = "5";
 const linkPreferredDistance = 50;
 const linkStrength = 0.1;
 
-const fontSize = 15;
-const fontSizeToCharacterWidthRatio = 0.6;
-
 const labelPaddingHorizontal = 15;
 const labelOffsetToReachCenter = 4;
-const labelHighlightTextColor = "white";
+const labelHighlightTextColor = offWhite;
 
-const tablePaddingHorizontal = 10;
-const tablePaddingVertical = 25;
-const tableDefaultBackgroundColor = "blue";
-const tableDefaultTextColor = "black";
-
-const topLevelNodeOpacity = 0.2;
-const topLevelNodeFontWeight = "bold";
-
-const highlightOpacity = 1;
+const topLevelNodePaddingHorizontal = 10;
+const topLevelNodePaddingVertical = 25;
+const topLevelNodeDefaultBackgroundColor = offWhite;
+const topLevelNodeDefaultTextColor = offWhite;
+const topLevelNodeBackgroundHighlightColor = "crimson";
+const topLevelNodeHighlightOpacity = 0.6;
+const topLevelNodeDefaultOpacity = 0.2;
+const topLevelNodeDefaultFontWeight = "bold";
 
 const tableType = "TABLE";
 const viewType = "VIEW";
@@ -42,8 +43,8 @@ const columnType = "COLUMN";
 
 const idDelimiter = "::";
 
-const containerWindowWidthRatio = 0.9;
-const containerWindowHeightRatio = 0.9;
+const containerWindowWidthRatio = 0.95;
+const containerWindowHeightRatio = 0.85;
 
 const loggingCountThreshold = 50;
 
@@ -275,16 +276,16 @@ function calculateNodeWidth(node) {
 
   if (isTopLevelNode(node)) {
     return Math.max(
-      maxColumnWidth + 2 * tablePaddingHorizontal,
+      maxColumnWidth + 2 * topLevelNodePaddingHorizontal,
       calculateTextWidthWithPadding(node.name)
     );
   }
-  return Math.max(maxColumnWidth, topLevelWidth - 2 * tablePaddingHorizontal);
+  return Math.max(maxColumnWidth, topLevelWidth - 2 * topLevelNodePaddingHorizontal);
 }
 
 function calculateNodeHeight(node) {
   return isTopLevelNode(node)
-    ? columnHeight * countColumnsInGroup(node.group) + tablePaddingVertical
+    ? columnHeight * countColumnsInGroup(node.group) + topLevelNodePaddingVertical
     : columnHeight;
 }
 
@@ -296,14 +297,14 @@ function getParentTable(node) {
 
 function getNodeX(node) {
   if (isTopLevelNode(node)) return node.x;
-  return getNodeX(getParentTable(node)) + tablePaddingHorizontal;
+  return getNodeX(getParentTable(node)) + topLevelNodePaddingHorizontal;
 }
 
 function getNodeY(node) {
   if (isTopLevelNode(node)) return node.y;
   let parentY = getNodeY(getParentTable(node));
   return (
-    parentY + parseInt(node.order, 10) * columnHeight + tablePaddingVertical
+    parentY + parseInt(node.order, 10) * columnHeight + topLevelNodePaddingVertical
   );
 }
 
@@ -312,6 +313,7 @@ function getLabelX(node) {
 }
 
 function getLabelY(node) {
+  if (isTopLevelNode(node)) return getNodeY(node) + columnHeight / 2 + labelOffsetToReachCenter + 5;
   return getNodeY(node) + columnHeight / 2 + labelOffsetToReachCenter;
 }
 
@@ -344,16 +346,16 @@ function getLinkTargetY(link) {
 
 function determineNodeColor(node) {
   return isTopLevelNode(node)
-    ? tableDefaultBackgroundColor
+    ? topLevelNodeDefaultBackgroundColor
     : columnDefaultBackgroundColor;
 }
 
 function determineNodeOpacity(node) {
-  return isTopLevelNode(node) ? topLevelNodeOpacity : columnOpacity;
+  return isTopLevelNode(node) ? topLevelNodeDefaultOpacity : columnDefaultOpacity;
 }
 
 function determineTextColor(node) {
-  return isTopLevelNode(node) ? tableDefaultTextColor : columnDefaultTextColor;
+  return isTopLevelNode(node) ? topLevelNodeDefaultTextColor : columnDefaultTextColor;
 }
 
 function setGroupClasses(node) {
@@ -368,7 +370,13 @@ function columnOfLabel(label) {
 function highlightColumns(columns) {
   $(columns).attr({
     fill: columnHighlightBackgroundColor,
-    opacity: highlightOpacity
+  });
+}
+
+function highlightTopLevelNodes(nodes) {
+  $(nodes).attr({
+    fill: topLevelNodeBackgroundHighlightColor,
+    opacity: topLevelNodeHighlightOpacity
   });
 }
 
@@ -388,13 +396,13 @@ function unHighlightColumns(columns) {
   columns
     .attr("fill", columnDefaultBackgroundColor)
     .filter((index, column) => isTopLevelId(column.id))
-    .attr("opacity", topLevelNodeOpacity);
+    .attr("opacity", topLevelNodeDefaultOpacity);
 }
 
 function unHighlightLabels(labels) {
   $(labels)
     .filter((index, label) => isTopLevelId(columnOfLabel(label)))
-    .attr("fill", tableDefaultTextColor);
+    .attr("fill", topLevelNodeDefaultTextColor);
 }
 
 function unHighlightLinks(links) {
@@ -407,7 +415,11 @@ function unHighlightLinks(links) {
 
 function highlightIds(ids) {
   highlightColumns(
-    $("rect").filter((index, column) => ids.includes(column.id))
+    $("rect").filter((index, column) => !isTopLevelId(column.id) && ids.includes(column.id))
+  );
+
+  highlightTopLevelNodes(
+    $("rect").filter((index, node) => isTopLevelId(node.id) && ids.includes(node.id))
   );
 
   highlightLabels(
@@ -530,7 +542,7 @@ function getAllLineageSiblingIds(id) {
   ];
 
   siblingIds = siblingIds.filter(
-    (id, index) => siblingIds.indexOf(id) === index
+    (siblingId, index) => siblingIds.indexOf(siblingId) === index
   );
 
   return siblingIds;
@@ -592,9 +604,9 @@ var lables = svg
   .append("text")
   .attr("fill", (d) => determineTextColor(d))
   .attr("font-size", fontSize)
-  .attr("font-family", "courier new")
+  .attr("font-family", fontFamily)
   .attr("font-weight", (d) =>
-    isTopLevelNode(d) ? topLevelNodeFontWeight : columnFontWeight
+    isTopLevelNode(d) ? topLevelNodeDefaultFontWeight : columnFontWeight
   )
   .attr("class", "label")
   .attr("id", (d) => "label-" + d.id)

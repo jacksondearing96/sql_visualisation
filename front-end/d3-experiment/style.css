@@ -1,5 +1,8 @@
 body {
   text-align: center;
+  background-color: rgb(60,60,60);
+  font-family: 'Montserrat', sans-serif;
+  color: rgb(200,200,200);
 }
 
 svg {
@@ -9,8 +12,9 @@ svg {
 }
 
 #container {
-  border: 1px solid lightgrey;
-  box-shadow: 5px 5px 5px lightgrey;
+  border: 1px solid black;
+  box-shadow: 5px 5px 5px black;
   overflow: auto;
   margin: auto auto;
+  background-color: rgb(30,30,30);
 }
