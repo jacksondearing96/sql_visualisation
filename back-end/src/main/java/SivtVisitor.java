@@ -74,6 +74,21 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
+     * Convert a LineageNode to a TABLE type.
+     * @param node The LineageNode that is to be converted into a TABLE.
+     * @param tableName The name of the table to be created.
+     */
+    private void convertNodeToTable(LineageNode node, String tableName) {
+        node.setType("TABLE");
+        node.setName(tableName);
+        node.setAlias("");
+
+        for (Column column : node.getColumns()) {
+            column.setID(DataLineage.makeId(tableName, column.getName()));
+        }
+    }
+
+    /**
      * Visit a CreateView node in the AST.
      *
      * @param createView The CreateView node.
@@ -98,6 +113,16 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return node;
     }
 
+    /**
+     * Visit the Prepare node in the AST.
+     * A prepare statement produces a table that can be referenced in later statements.
+     * As a result, the generated table cannot just be an anonymous table because that would lose
+     * its ability to be referenced later by the assigned name. Therefore, prepare statements simply
+     * generate a first class lineage node.
+     * @param prepare The Prepare node.
+     * @param context The context
+     * @return The result of recursively visiting the children.
+     */
     @Override
     protected R visitPrepare(Prepare prepare, C context) {
 
@@ -108,6 +133,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         currentlyInside.pop();
 
         LineageNode prepareNode = sourcesStack.pop().get(0);
+        convertNodeToTable(prepareNode, prepare.getName().getValue());
         lineageNodes.add(prepareNode);
 
         return node;

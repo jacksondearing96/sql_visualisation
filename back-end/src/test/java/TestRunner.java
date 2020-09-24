@@ -654,14 +654,14 @@ public class TestRunner {
     @DisplayName("testPrepareStatement")
     void testPrepareStatement() {
         String sql = "PREPARE mytable FROM SELECT a, b FROM c###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
 
         LineageNode tableC = new LineageNode("TABLE", "c");
         Column columnA = new Column("a");
         Column columnB = new Column("b");
         tableC.addListOfColumns(Arrays.asList(columnA, columnB));
 
-        LineageNode prepareNode = new LineageNode("ANONYMOUS", "Anonymous0");
+        LineageNode prepareNode = new LineageNode("TABLE", "mytable");
         columnA.addSource(DataLineage.makeId(tableC.getName(), columnA.getName()));
         columnB.addSource(DataLineage.makeId(tableC.getName(), columnB.getName()));
         prepareNode.addListOfColumns(Arrays.asList(columnA, columnB));
