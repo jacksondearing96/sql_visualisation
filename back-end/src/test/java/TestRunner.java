@@ -654,23 +654,20 @@ public class TestRunner {
     @DisplayName("testPrepareStatement")
     void testPrepareStatement() {
         String sql = "PREPARE mytable FROM SELECT a, b FROM c###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
         LineageNode tableC = new LineageNode("TABLE", "c");
         Column columnA = new Column("a");
         Column columnB = new Column("b");
         tableC.addListOfColumns(Arrays.asList(columnA, columnB));
 
-        LineageNode prepareNode = new LineageNode("TABLE", "mytable");
+        LineageNode prepareNode = new LineageNode("ANONYMOUS", "Anonymous0");
         columnA.addSource(DataLineage.makeId(tableC.getName(), columnA.getName()));
         columnB.addSource(DataLineage.makeId(tableC.getName(), columnB.getName()));
         prepareNode.addListOfColumns(Arrays.asList(columnA, columnB));
 
-        for (LineageNode node : nodeList) {
-            PrettyPrinter.printLineageNode(node);
-        }
-
         Assertions.assertEquals(2, nodeList.size());
-        prepareNode.equals(nodeList.get(0));
+        tableC.equals(nodeList.get(0));
+        prepareNode.equals(nodeList.get(1));
     }
 }
