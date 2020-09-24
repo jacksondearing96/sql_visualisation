@@ -651,6 +651,31 @@ public class TestRunner {
     }
 
     @Test
+    @DisplayName("testRenameTable")
+    void testRenameTable() {
+        String sql = "ALTER TABLE mytable RENAME TO newname###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        LineageNode table = new LineageNode("TABLE", "newname");
+
+        Assertions.assertEquals(1, nodeList.size());
+        table.equals(nodeList.get(0));
+    }
+
+    @Test
+    @DisplayName("testRenameColumn")
+    void testRenameColumn()  {
+        String sql = "SELECT a FROM mytable### ALTER TABLE mytable RENAME COLUMN a TO b###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        LineageNode tableAfterRename = new LineageNode("TABLE", "mytable");
+        tableAfterRename.addColumn(new Column("b"));
+
+        Assertions.assertEquals(1, nodeList.size());
+        tableAfterRename.equals(nodeList.get(0));
+    }
+
+    @Test
     @DisplayName("testAddColumn")
     void testAddColumn() {
         String sql = "ALTER TABLE mytable ADD COLUMN a varchar###";
