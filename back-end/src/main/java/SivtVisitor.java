@@ -244,6 +244,33 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
+     * Correctly account for dereferenced wildcard select items, Eg. SELECT a.* FROM b;.
+     *
+     * This is required because a dereferenced wildcard is not actually treated as a DereferenceExpression
+     * like ordinary dereference expressions are in the AST.
+     * TODO: This method of dealing with dereference wildcards is a work-around and is not the ideal way.
+     *       This functionality belongs in the proper method that the AST visitor recurses to to deal with
+     *       dereferenced wildcards but I can't figure out which method this would be.
+     *       Functionally, this work-around operates correctly.
+     * @param selectItem A select item that may be a dereferenced wildcard.
+     */
+    private void accountForDereferenceWildcard(com.facebook.presto.sql.tree.SelectItem selectItem) {
+
+        boolean hasIdentifier = selectStatementStack.peek().currentSelectItem().getIdentifiers().size() != 0;
+        if (hasIdentifier) return;
+
+        String[] dereferenceParts = selectItem.toString().split("[.]");
+
+        boolean isDereferenceWildcard = dereferenceParts.length == 2 && dereferenceParts[1].equals("*");
+        if (!isDereferenceWildcard) return;
+
+        // Update the current select item with the dereferenced wildcard.
+        String base = dereferenceParts[0];
+        String field = dereferenceParts[1];
+        selectStatementStack.peek().currentSelectItem().addIdentifier(base, field);
+    }
+
+    /**
      * Visit a SelectItem node in the AST. Also applies the relevant alias to the column constructed for this SelectItem.
      * @param selectItem The select item node.
      * @param context The context.
@@ -257,6 +284,8 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         currentlyInside.push(com.facebook.presto.sql.tree.SelectItem.class);
         R node = visitNode(selectItem, context);
         currentlyInside.pop();
+
+        accountForDereferenceWildcard(selectItem);
 
         // Extract and apply the column's alias.
         selectStatementStack.peek().currentSelectItem().setAlias(extractAlias(selectItem));

@@ -80,7 +80,9 @@ public class SelectStatement {
                         if (!column.getName().equals("*")) sourceTable.addColumn(column);
 
                         // Add this as a source of the column. This will be for the anonymous table.
-                        anonymousColumn.addSource(DataLineage.makeId(sourceTable.getName(), column.getName()));                    }
+                        anonymousColumn.addSource(DataLineage.makeId(sourceTable.getName(), column.getName()));
+
+                    }
 
                     // In the event that the anonymous column derives from a single column in the source table,
                     // it will share the name of that source column.
