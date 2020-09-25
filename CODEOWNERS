@@ -1,5 +1,5 @@
 # Jackson for all of the back-end.
-/back-end/ a1686411@student.adelaide.edu.au
+*.java a1686411@student.adelaide.edu.au
 
 # Rhett for back-end testing and data structures
 /back-end/src/main/java/Column.java a1706579
