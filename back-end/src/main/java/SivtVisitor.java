@@ -36,7 +36,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * Defines all the parent nodes that are interested in keeping the resultant anonymous table to use as a source.
       */
     private final ArrayList<Class> contextToKeepList =
-            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class, Insert.class));
+            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class, Insert.class, Prepare.class));
 
     /**
      * Determines whether the current Class context is one which is required to keep the anonymous table.
@@ -75,6 +75,21 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
+     * Convert a LineageNode to a TABLE type.
+     * @param node The LineageNode that is to be converted into a TABLE.
+     * @param tableName The name of the table to be created.
+     */
+    private void convertNodeToTable(LineageNode node, String tableName) {
+        node.setType("TABLE");
+        node.setName(tableName);
+        node.setAlias("");
+
+        for (Column column : node.getColumns()) {
+            column.setID(DataLineage.makeId(tableName, column.getName()));
+        }
+    }
+
+    /**
      * Visit a CreateView node in the AST.
      *
      * @param createView The CreateView node.
@@ -100,6 +115,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
+<<<<<<< HEAD
      * Visit an Insert node in the AST.
      *
      * @param insert The Insert node.
@@ -125,6 +141,30 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
         // Add the target node.
         lineageNodes.add(nodes.get(0));
+        return node;
+    }
+
+    /** Visit the Prepare node in the AST.
+     * A prepare statement produces a table that can be referenced in later statements.
+     * As a result, the generated table cannot just be an anonymous table because that would lose
+     * its ability to be referenced later by the assigned name. Therefore, prepare statements simply
+     * generate a first class lineage node.
+     * @param prepare The Prepare node.
+     * @param context The context
+     * @return The result of recursively visiting the children.
+     */
+    @Override
+    protected R visitPrepare(Prepare prepare, C context) {
+
+        sourcesStack.push(new ArrayList<>());
+
+        currentlyInside.push(Prepare.class);
+        R node = visitStatement(prepare, context);
+        currentlyInside.pop();
+
+        LineageNode prepareNode = sourcesStack.pop().get(0);
+        convertNodeToTable(prepareNode, prepare.getName().getValue());
+        lineageNodes.add(prepareNode);
 
         return node;
     }
@@ -307,7 +347,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      */
     @Override
     protected R visitAliasedRelation(AliasedRelation aliasedRelation, C context) {
-        labellingInformationStack.push(new LabellingInformation(aliasedRelation.getAlias().toString(), aliasedRelation.getColumnNames()));
+        String alias = aliasedRelation.getAlias().toString();
+        List<com.facebook.presto.sql.tree.Identifier> columnNames = aliasedRelation.getColumnNames();
+        labellingInformationStack.push(new LabellingInformation(alias, columnNames));
 
         currentlyInside.push(AliasedRelation.class);
         R node = visitRelation(aliasedRelation, context, true);

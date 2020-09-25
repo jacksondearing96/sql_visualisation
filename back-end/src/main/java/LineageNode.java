@@ -50,17 +50,18 @@ public class LineageNode {
         LineageNode lineage = (LineageNode) o;
 
         assert name.equals(lineage.name) :
-            String.format("Node names are node equal ('%s' and '%s')", name, lineage.name);
+            String.format("Node names are not equal ('%s' and '%s')", name, lineage.name);
         assert alias.equals(lineage.alias) :
             String.format("Node aliases are not equal ('%s' and '%s')", alias, lineage.alias);
         assert type.equals(lineage.type) :
             String.format("Node types are not equal ('%s' and '%s')", type, lineage.type);
-        assert columns.size() == lineage.columns.size() : String.format("Nodes have dissimilar number of columns");
+        assert columns.size() == lineage.columns.size()
+                : String.format("Node number of columns are not equal ('%s' and '%s')", columns.size(), lineage.columns.size());
 
         // Generic catch-all to catch any unaccounted for attributes.
         for (int i = 0; i < columns.size(); i++) {
             assert columns.get(i).equals(lineage.columns.get(i)) : String.format(
-                "Node columns are not equivalent", columns.get(i), lineage.columns.get(i));
+                "Node columns are not equal", columns.get(i), lineage.columns.get(i));
         }
 
         return true;
