@@ -66,7 +66,7 @@ public class TestRunner {
         column.addListOfSources(sources);
         column.addSource("source1");
         Assertions.assertEquals(
-                "alias=newAlias,id=newID,name=newName,sources={source1,source2,source3,source4,source5}",
+                "alias=newAlias,id=newID,name=newName,sources={source1,source2,source3,source4,source5},stagedRename=Optional.empty",
                 getColumnDataString(column));
 
         // Test Column cloning and equals
@@ -769,6 +769,43 @@ public class TestRunner {
     }
 
     @Test
+    @DisplayName("testRenameTable")
+    void testRenameTable() {
+        String sql = "ALTER TABLE mytable RENAME TO newname###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        LineageNode table = new LineageNode("TABLE", "newname");
+
+        Assertions.assertEquals(1, nodeList.size());
+        table.equals(nodeList.get(0));
+    }
+
+    @Test
+    @DisplayName("testRenameColumn")
+    void testRenameColumn()  {
+        String sql = "SELECT a FROM mytable### ALTER TABLE mytable RENAME COLUMN a TO b###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        LineageNode tableAfterRename = new LineageNode("TABLE", "mytable");
+        tableAfterRename.addColumn(new Column("b"));
+
+        Assertions.assertEquals(1, nodeList.size());
+        tableAfterRename.equals(nodeList.get(0));
+    }
+
+    @Test
+    @DisplayName("testAddColumn")
+    void testAddColumn() {
+        String sql = "ALTER TABLE mytable ADD COLUMN a varchar###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        LineageNode mytable = new LineageNode("TABLE", "mytable");
+        mytable.addColumn(new Column("a"));
+
+        Assertions.assertEquals(1, nodeList.size());
+        mytable.equals(nodeList.get(0));
+    }
+
     @DisplayName("testConditionalSelectItems")
     void testConditionalSelectItems() {
         String sql = "SELECT CASE WHEN a = b THEN c ELSE d END FROM mytable###";

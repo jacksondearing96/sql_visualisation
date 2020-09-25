@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Top-Level node. This can represent either a Table or a View.
@@ -9,6 +10,14 @@ public class LineageNode {
     private String name = "";
     private String alias = "";
     private final ArrayList<Column> columns = new ArrayList<Column>();
+
+    /**
+     * Maintains an (optional) new name that the node will be renamed to when it is added
+     * to the DataLineage object it is eventually added to.
+     * This has to be staged as opposed to updating the name immediately so that the node is
+     * still able to be matched to potential duplicates that exist in the DatLineage it is added to.
+     */
+    private Optional<String> stagedRename = Optional.empty();
 
     public LineageNode(String type) { this(type, "", ""); }
     public LineageNode(String type, String name) { this(type, name, ""); }
@@ -114,6 +123,18 @@ public class LineageNode {
                 addColumn((Column)column.clone());
             } catch (CloneNotSupportedException c) {}
         }
+    }
+
+    public void stageRenameTo(String rename) {
+        this.stagedRename = Optional.of(rename);
+    }
+
+    public void rename(String rename) {
+        setName(rename);
+    }
+
+    public Optional<String> getRename() {
+        return this.stagedRename;
     }
 
     public String getType() {

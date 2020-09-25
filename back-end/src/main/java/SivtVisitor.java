@@ -410,10 +410,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * This keyword generates an inline literal table. Therefore, a new anonymous table is required to be pushed
      * to the sourcesStack.
      * @param values The values node.
-     * @param context The context.
-     * @return The result of recursively visiting the children.
      */
-    @Override
     protected R visitValues(Values values, C context) {
 
         if (isCurrentlyInside(TableSubquery.class)) {
@@ -425,6 +422,56 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         currentlyInside.pop();
 
         return node;
+    }
+
+     /** Visit the RenameTable node of the AST.
+     * @param renameTable The RenameTable node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
+    @Override
+    protected R visitRenameTable(RenameTable renameTable, C context) {
+
+        LineageNode table = new LineageNode("TABLE", renameTable.getSource().getSuffix());
+        table.stageRenameTo(renameTable.getTarget().getSuffix());
+        lineageNodes.add(table);
+
+        return visitStatement(renameTable, context);
+    }
+
+    /**
+     * Visit the RenameColumn node of the AST.
+     * @param renameColumn The RenameColumn node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
+    @Override
+    protected R visitRenameColumn(RenameColumn renameColumn, C context) {
+
+        LineageNode table = new LineageNode("TABLE", renameColumn.getTable().getSuffix());
+        Column column = new Column(renameColumn.getSource().getValue());
+        column.stageRenameTo(renameColumn.getTarget().getValue());
+        table.addColumn(column);
+        lineageNodes.add(table);
+
+        return visitStatement(renameColumn, context);
+    }
+
+    /**
+     * Visit the addColumn node of the AST.
+     * @param addColumn The AddColumn node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
+    @Override
+    protected R visitAddColumn(AddColumn addColumn, C context) {
+
+        LineageNode node = new LineageNode("TABLE", addColumn.getName().getSuffix());
+        Column newColumn = new Column(addColumn.getColumn().getName().getValue());
+        node.addColumn(newColumn);
+        lineageNodes.add(node);
+
+        return visitStatement(addColumn, context);
     }
 
     /**

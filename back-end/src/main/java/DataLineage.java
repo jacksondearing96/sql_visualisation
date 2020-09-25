@@ -98,6 +98,22 @@ public class DataLineage {
     }
 
     /**
+     * Rename columns in the existingNode based on staged renames in the newNode.
+     * Some columns in the newNode may have a rename staged. This is when the rename must be applied.
+     * @param existingColumns The existing columns in the LineageNode.
+     * @param newColumns The new columns that may have staged renames.
+     */
+    private void applyRenamesToColumns(List<Column> existingColumns, List<Column> newColumns) {
+        for (Column newColumn : newColumns) {
+            for (Column existingColumn : existingColumns) {
+                if (newColumn.getName().equals(existingColumn.getName())) {
+                    newColumn.getRename().ifPresent(existingColumn::renameAndUpdateId);
+                }
+            }
+        }
+    }
+
+    /**
      * Consolidate two nodes that represent the same node.
      * Adds the columns of the new node to the existing node. The addColumn method takes care
      * of ensuring these additions are all unique.
@@ -106,6 +122,7 @@ public class DataLineage {
      */
     private void consolidateNodes(LineageNode existingNode, LineageNode newNode) {
         existingNode.addListOfColumns(newNode.getColumns());
+        applyRenamesToColumns(existingNode.getColumns(), newNode.getColumns());
     }
 
     /**
@@ -116,9 +133,11 @@ public class DataLineage {
         for (LineageNode existingNode : nodeList) {
             if (existingNode.getName().equals(newNode.getName())) {
                 consolidateNodes(existingNode, newNode);
+                newNode.getRename().ifPresent(existingNode::rename);
                 return;
             }
         }
+        newNode.getRename().ifPresent(newNode::rename);
         this.nodeList.add(newNode);
     }
 
