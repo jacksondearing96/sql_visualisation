@@ -2,7 +2,6 @@ import com.facebook.presto.sql.tree.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Stack;
 import java.util.Arrays;
 
@@ -12,7 +11,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
     private final Stack<SelectStatement> selectStatementStack = new Stack<>();
     private final Stack<ArrayList<LineageNode>> sourcesStack = new Stack<>();
-    private final Stack<String> aliasStack = new Stack<>();
+    private final Stack<LabellingInformation> labellingInformationStack = new Stack<>();
 
     /**
      * Stack to maintain the context within which the recursive decent visitor is in.
@@ -35,7 +34,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * Defines all the parent nodes that are interested in keeping the resultant anonymous table to use as a source.
       */
     private final ArrayList<Class> contextToKeepList =
-            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class));
+            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class, Prepare.class));
 
     /**
      * Determines whether the current Class context is one which is required to keep the anonymous table.
@@ -74,6 +73,21 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
+     * Convert a LineageNode to a TABLE type.
+     * @param node The LineageNode that is to be converted into a TABLE.
+     * @param tableName The name of the table to be created.
+     */
+    private void convertNodeToTable(LineageNode node, String tableName) {
+        node.setType("TABLE");
+        node.setName(tableName);
+        node.setAlias("");
+
+        for (Column column : node.getColumns()) {
+            column.setID(DataLineage.makeId(tableName, column.getName()));
+        }
+    }
+
+    /**
      * Visit a CreateView node in the AST.
      *
      * @param createView The CreateView node.
@@ -99,6 +113,32 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
+     * Visit the Prepare node in the AST.
+     * A prepare statement produces a table that can be referenced in later statements.
+     * As a result, the generated table cannot just be an anonymous table because that would lose
+     * its ability to be referenced later by the assigned name. Therefore, prepare statements simply
+     * generate a first class lineage node.
+     * @param prepare The Prepare node.
+     * @param context The context
+     * @return The result of recursively visiting the children.
+     */
+    @Override
+    protected R visitPrepare(Prepare prepare, C context) {
+
+        sourcesStack.push(new ArrayList<>());
+
+        currentlyInside.push(Prepare.class);
+        R node = visitStatement(prepare, context);
+        currentlyInside.pop();
+
+        LineageNode prepareNode = sourcesStack.pop().get(0);
+        convertNodeToTable(prepareNode, prepare.getName().getValue());
+        lineageNodes.add(prepareNode);
+
+        return node;
+    }
+
+    /**
      * Visit a TableSubquery node in the AST.
      *
      * A TableSubquery is a query in SQL statements that is encapsulated with parentheses. This is used to construct
@@ -118,7 +158,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         // TODO: Assumption - at the conclusion of recursing through the children of a TableSubquery, there will be a single anonymous table on the sources stack.
         // This assumption should be investigated more thoroughly to ensure it is correct.
         if (isCurrentlyInside(AliasedRelation.class)) {
-            sourcesStack.peek().get(0).setAlias(aliasStack.pop());
+            LabellingInformation labellingInformation = labellingInformationStack.pop();
+            sourcesStack.peek().get(0).setAlias(labellingInformation.getAlias());
+            sourcesStack.peek().get(0).addListOfColumns(labellingInformation.getColumns());
         }
         return node;
     }
@@ -138,19 +180,17 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     @Override
     protected R visitQuerySpecification(QuerySpecification querySpecification, C context) {
 
-        // If this is not a 'SELECT' query specificaiton, return.
-        Optional<Relation> from = querySpecification.getFrom();
-        if (!from.isPresent()) return visitQueryBody(querySpecification, context);
+        boolean isParentOfSelectStatement = querySpecification.getFrom().isPresent();
 
-        // This is a 'SELECT' statement.
-        // Push new columns and tables to the stacks ready to be populated.
-        selectStatementStack.push(new SelectStatement());
-        sourcesStack.push(new ArrayList<LineageNode>());
+        // Push a new list to the sources stack for this query.
+        sourcesStack.push(new ArrayList<>());
 
         // Recursively visit all the children of this node.
         currentlyInside.push(QuerySpecification.class);
         R query_body = visitQueryBody(querySpecification, context);
         currentlyInside.pop();
+
+        if (!isParentOfSelectStatement) return query_body;
 
         // Extract the source tables and anonymous table from the select statement.
         SelectStatement selectStatement = selectStatementStack.pop();
@@ -180,6 +220,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      */
     @Override
     protected R visitSelect(Select select, C context) {
+
+        selectStatementStack.push(new SelectStatement());
+
         currentlyInside.push(Select.class);
         R node = visitNode(select, context);
         currentlyInside.pop();
@@ -201,6 +244,33 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
+     * Correctly account for dereferenced wildcard select items, Eg. SELECT a.* FROM b;.
+     *
+     * This is required because a dereferenced wildcard is not actually treated as a DereferenceExpression
+     * like ordinary dereference expressions are in the AST.
+     * TODO: This method of dealing with dereference wildcards is a work-around and is not the ideal way.
+     *       This functionality belongs in the proper method that the AST visitor recurses to to deal with
+     *       dereferenced wildcards but I can't figure out which method this would be.
+     *       Functionally, this work-around operates correctly.
+     * @param selectItem A select item that may be a dereferenced wildcard.
+     */
+    private void accountForDereferenceWildcard(com.facebook.presto.sql.tree.SelectItem selectItem) {
+
+        boolean hasIdentifier = selectStatementStack.peek().currentSelectItem().getIdentifiers().size() != 0;
+        if (hasIdentifier) return;
+
+        String[] dereferenceParts = selectItem.toString().split("[.]");
+
+        boolean isDereferenceWildcard = dereferenceParts.length == 2 && dereferenceParts[1].equals("*");
+        if (!isDereferenceWildcard) return;
+
+        // Update the current select item with the dereferenced wildcard.
+        String base = dereferenceParts[0];
+        String field = dereferenceParts[1];
+        selectStatementStack.peek().currentSelectItem().addIdentifier(base, field);
+    }
+
+    /**
      * Visit a SelectItem node in the AST. Also applies the relevant alias to the column constructed for this SelectItem.
      * @param selectItem The select item node.
      * @param context The context.
@@ -214,6 +284,8 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         currentlyInside.push(com.facebook.presto.sql.tree.SelectItem.class);
         R node = visitNode(selectItem, context);
         currentlyInside.pop();
+
+        accountForDereferenceWildcard(selectItem);
 
         // Extract and apply the column's alias.
         selectStatementStack.peek().currentSelectItem().setAlias(extractAlias(selectItem));
@@ -270,7 +342,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      */
     @Override
     protected R visitAliasedRelation(AliasedRelation aliasedRelation, C context) {
-        aliasStack.push(aliasedRelation.getAlias().toString());
+        String alias = aliasedRelation.getAlias().toString();
+        List<com.facebook.presto.sql.tree.Identifier> columnNames = aliasedRelation.getColumnNames();
+        labellingInformationStack.push(new LabellingInformation(alias, columnNames));
 
         currentlyInside.push(AliasedRelation.class);
         R node = visitRelation(aliasedRelation, context, true);
@@ -315,18 +389,42 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     protected R visitTable(Table table, C context) {
         if (sourcesStack.empty()) return visitQueryBody(table, context);
 
-        // Get the alias if we are within an AliasedRelation context.
-        String alias = "";
-        if (isCurrentlyInside(AliasedRelation.class)) alias = aliasStack.pop();
+        LineageNode node = new LineageNode("TABLE", table.getName().toString());
 
-        // Create a new LineageNode (table) and append it to the list that is on top of the stack.
-        sourcesStack.peek().add(new LineageNode("TABLE", table.getName().toString(), alias));
+        // Get the alias if we are within an AliasedRelation context.
+        if (isCurrentlyInside(AliasedRelation.class)) {
+            LabellingInformation labellingInformation = labellingInformationStack.pop();
+            node.setAlias(labellingInformation.getAlias());
+            node.addListOfColumns(labellingInformation.getColumns());
+        }
+
+        // Append the new node to the list that is on top of the stack.
+        sourcesStack.peek().add(node);
 
         return visitQueryBody(table, context);
     }
 
     /**
-     * Visit the RenameTable node of the AST.
+     * Visit a Values node in the AST.
+     *
+     * This keyword generates an inline literal table. Therefore, a new anonymous table is required to be pushed
+     * to the sourcesStack.
+     * @param values The values node.
+     */
+    protected R visitValues(Values values, C context) {
+
+        if (isCurrentlyInside(TableSubquery.class)) {
+            sourcesStack.peek().add(new LineageNode("ANONYMOUS", Util.getNextAnonymousTableName()));
+        }
+
+        currentlyInside.push(Values.class);
+        R node = visitQueryBody(values, context);
+        currentlyInside.pop();
+
+        return node;
+    }
+
+     /** Visit the RenameTable node of the AST.
      * @param renameTable The RenameTable node.
      * @param context The context.
      * @return The result of recursively visiting the children.

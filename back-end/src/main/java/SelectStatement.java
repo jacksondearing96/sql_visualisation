@@ -50,7 +50,7 @@ public class SelectStatement {
      * completed LineageNodes. This finalises the sourceTables and anonymousTable members.
      */
     private void reconcileSelectItemsWithSourceTables() {
-        anonymousTable = new LineageNode("ANONYMOUS", "Anonymous" + Util.getNextAnonymousTableId());
+        anonymousTable = new LineageNode("ANONYMOUS", Util.getNextAnonymousTableName());
 
         for (SelectItem selectItem : selectItems) {
             for (LineageNode sourceTable : sourceTables) {
@@ -80,7 +80,9 @@ public class SelectStatement {
                         if (!column.getName().equals("*")) sourceTable.addColumn(column);
 
                         // Add this as a source of the column. This will be for the anonymous table.
-                        anonymousColumn.addSource(DataLineage.makeId(sourceTable.getName(), column.getName()));                    }
+                        anonymousColumn.addSource(DataLineage.makeId(sourceTable.getName(), column.getName()));
+
+                    }
 
                     // In the event that the anonymous column derives from a single column in the source table,
                     // it will share the name of that source column.
