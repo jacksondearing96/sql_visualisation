@@ -2,7 +2,6 @@ import com.facebook.presto.sql.tree.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Stack;
 import java.util.Arrays;
 
@@ -12,7 +11,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
     private final Stack<SelectStatement> selectStatementStack = new Stack<>();
     private final Stack<ArrayList<LineageNode>> sourcesStack = new Stack<>();
-    private final Stack<String> aliasStack = new Stack<>();
+    private final Stack<LabellingInformation> labellingInformationStack = new Stack<>();
 
     /**
      * Stack to maintain the context within which the recursive decent visitor is in.
@@ -118,7 +117,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         // TODO: Assumption - at the conclusion of recursing through the children of a TableSubquery, there will be a single anonymous table on the sources stack.
         // This assumption should be investigated more thoroughly to ensure it is correct.
         if (isCurrentlyInside(AliasedRelation.class)) {
-            sourcesStack.peek().get(0).setAlias(aliasStack.pop());
+            LabellingInformation labellingInformation = labellingInformationStack.pop();
+            sourcesStack.peek().get(0).setAlias(labellingInformation.getAlias());
+            sourcesStack.peek().get(0).addListOfColumns(labellingInformation.getColumns());
         }
         return node;
     }
@@ -138,19 +139,17 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     @Override
     protected R visitQuerySpecification(QuerySpecification querySpecification, C context) {
 
-        // If this is not a 'SELECT' query specificaiton, return.
-        Optional<Relation> from = querySpecification.getFrom();
-        if (!from.isPresent()) return visitQueryBody(querySpecification, context);
+        boolean isParentOfSelectStatement = querySpecification.getFrom().isPresent();
 
-        // This is a 'SELECT' statement.
-        // Push new columns and tables to the stacks ready to be populated.
-        selectStatementStack.push(new SelectStatement());
-        sourcesStack.push(new ArrayList<LineageNode>());
+        // Push a new list to the sources stack for this query.
+        sourcesStack.push(new ArrayList<>());
 
         // Recursively visit all the children of this node.
         currentlyInside.push(QuerySpecification.class);
         R query_body = visitQueryBody(querySpecification, context);
         currentlyInside.pop();
+
+        if (!isParentOfSelectStatement) return query_body;
 
         // Extract the source tables and anonymous table from the select statement.
         SelectStatement selectStatement = selectStatementStack.pop();
@@ -180,6 +179,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      */
     @Override
     protected R visitSelect(Select select, C context) {
+
+        selectStatementStack.push(new SelectStatement());
+
         currentlyInside.push(Select.class);
         R node = visitNode(select, context);
         currentlyInside.pop();
@@ -270,7 +272,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      */
     @Override
     protected R visitAliasedRelation(AliasedRelation aliasedRelation, C context) {
-        aliasStack.push(aliasedRelation.getAlias().toString());
+        String alias = aliasedRelation.getAlias().toString();
+        List<com.facebook.presto.sql.tree.Identifier> columnNames = aliasedRelation.getColumnNames();
+        labellingInformationStack.push(new LabellingInformation(alias, columnNames));
 
         currentlyInside.push(AliasedRelation.class);
         R node = visitRelation(aliasedRelation, context, true);
@@ -315,14 +319,42 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     protected R visitTable(Table table, C context) {
         if (sourcesStack.empty()) return visitQueryBody(table, context);
 
-        // Get the alias if we are within an AliasedRelation context.
-        String alias = "";
-        if (isCurrentlyInside(AliasedRelation.class)) alias = aliasStack.pop();
+        LineageNode node = new LineageNode("TABLE", table.getName().toString());
 
-        // Create a new LineageNode (table) and append it to the list that is on top of the stack.
-        sourcesStack.peek().add(new LineageNode("TABLE", table.getName().toString(), alias));
+        // Get the alias if we are within an AliasedRelation context.
+        if (isCurrentlyInside(AliasedRelation.class)) {
+            LabellingInformation labellingInformation = labellingInformationStack.pop();
+            node.setAlias(labellingInformation.getAlias());
+            node.addListOfColumns(labellingInformation.getColumns());
+        }
+
+        // Append the new node to the list that is on top of the stack.
+        sourcesStack.peek().add(node);
 
         return visitQueryBody(table, context);
+    }
+
+    /**
+     * Visit a Values node in the AST.
+     *
+     * This keyword generates an inline literal table. Therefore, a new anonymous table is required to be pushed
+     * to the sourcesStack.
+     * @param values The values node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
+    @Override
+    protected R visitValues(Values values, C context) {
+
+        if (isCurrentlyInside(TableSubquery.class)) {
+            sourcesStack.peek().add(new LineageNode("ANONYMOUS", Util.getNextAnonymousTableName()));
+        }
+
+        currentlyInside.push(Values.class);
+        R node = visitQueryBody(values, context);
+        currentlyInside.pop();
+
+        return node;
     }
 
     /**
