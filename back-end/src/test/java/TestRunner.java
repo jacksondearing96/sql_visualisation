@@ -99,6 +99,7 @@ public class TestRunner {
         node.setName("");
     }
 
+    @Test
     @DisplayName("testMultipleIdentifiers")
     void testMultipleIdentifiers() {
         String multipleIdentifiersSelectStatement = "select a * b as c, d from mytable###";
@@ -296,6 +297,7 @@ public class TestRunner {
         Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
     }
 
+    @Test
     @DisplayName("testMultipleStatements")
     void testMultipleStatements() {
         String multipleStatements = "SELECT a FROM b### SELECT c FROM d###";
@@ -531,10 +533,11 @@ public class TestRunner {
         Assertions.assertTrue(view1.equals(nodeList.get(5)));
     }
 
+    @Test
     @DisplayName("testNumericSelectValues")
     void testNumbericSelectValues() {
         String numericSelectValues = "SELECT 1 as one FROM a###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineage(numericSelectValues).getNodeList();
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(numericSelectValues).getNodeList();
 
         // Source table (no columns).
         LineageNode sourceTable = new LineageNode("TABLE", "a");
