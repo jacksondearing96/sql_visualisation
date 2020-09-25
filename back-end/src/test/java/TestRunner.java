@@ -1,5 +1,4 @@
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.intellij.lang.annotations.JdkConstants;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
@@ -98,6 +97,7 @@ public class TestRunner {
         node.setName("");
     }
 
+    @Test
     @DisplayName("testMultipleIdentifiers")
     void testMultipleIdentifiers() {
         String multipleIdentifiersSelectStatement = "select a * b as c, d from mytable###";
@@ -295,6 +295,7 @@ public class TestRunner {
         Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
     }
 
+    @Test
     @DisplayName("testMultipleStatements")
     void testMultipleStatements() {
         String multipleStatements = "SELECT a FROM b### SELECT c FROM d###";
@@ -530,10 +531,11 @@ public class TestRunner {
         Assertions.assertTrue(view1.equals(nodeList.get(5)));
     }
 
+    @Test
     @DisplayName("testNumericSelectValues")
     void testNumbericSelectValues() {
         String numericSelectValues = "SELECT 1 as one FROM a###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineage(numericSelectValues).getNodeList();
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(numericSelectValues).getNodeList();
 
         // Source table (no columns).
         LineageNode sourceTable = new LineageNode("TABLE", "a");
@@ -571,8 +573,47 @@ public class TestRunner {
         Assertions.assertEquals(3, nodeList.size());
         sourceA.equals(nodeList.get(0));
         sourceB.equals(nodeList.get(1));
-}
+    }
+  
+    @DisplayName("testStandAloneLiteralTable")
+    void testStandAloneLiteralTable() {
+        String sql = "VALUES " +
+                        "(1, 'a')," +
+                        "(2, 'b')," +
+                        "(3, 'c')###";
 
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        Assertions.assertEquals(0, nodeList.size());
+    }
+
+    @Test
+    @DisplayName("testLiteralInlineTable")
+    void testLiteralInlineTables() {
+
+        String sql = "SELECT b FROM ( " +
+                "VALUES " +
+                "(1, 'a')," +
+                "(2, 'b')," +
+                "(3, 'c')" +
+                ")###";
+
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Inline literal table.
+        LineageNode inlineLiteral = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column b = new Column("b");
+        inlineLiteral.addColumn(b);
+
+        // Anonymous table (from select statement).
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous1");
+        b.addSource("Anonymous0::b");
+        anonymous.addColumn(b);
+
+        Assertions.assertEquals(2, nodeList.size());
+        inlineLiteral.equals(nodeList.get(0));
+    }
+  
     @DisplayName("testFunctionCall")
     void testFunctionCall() {
         String sql = "SELECT someFunction(a) AS b FROM c###";
@@ -594,6 +635,32 @@ public class TestRunner {
     }
 
     @Test
+    @DisplayName("testLiteralInlineTableWithAlias")
+    void testLiteralInlineTablesWithAlias() {
+
+        String sql = "SELECT b FROM ( " +
+                "VALUES " +
+                "(1, 'a')," +
+                "(2, 'b')," +
+                "(3, 'c')" +
+                ") AS a###";
+
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Inline literal table.
+        LineageNode inlineLiteral = new LineageNode("ANONYMOUS", "Anonymous0", "a");
+        Column b = new Column("b");
+        inlineLiteral.addColumn(b);
+
+        // Anonymous table (from select statement).
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous1");
+        b.addSource("Anonymous0::b");
+        anonymous.addColumn(b);
+
+        Assertions.assertEquals(2, nodeList.size());
+        inlineLiteral.equals(nodeList.get(0));
+    }
+
     @DisplayName("testMultipleAliasesWithinSelectItem")
     void testMultipleAliasesWithinSelectItem() {
         String sql = "SELECT cast(a AS date) AS b FROM c###";
@@ -615,6 +682,33 @@ public class TestRunner {
     }
 
     @Test
+    @DisplayName("testLiteralInlineTableWithAliasAndColumnLabels")
+    void testLiteralInlineTablesWithAliasAndColumnLabels() {
+
+        String sql = "SELECT b FROM ( " +
+                "VALUES " +
+                "(1, 'a')," +
+                "(2, 'b')," +
+                "(3, 'c')" +
+                ") AS a (b, c)###";
+
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Inline literal table.
+        LineageNode inlineLiteral = new LineageNode("ANONYMOUS", "Anonymous0", "a");
+        Column b = new Column("b");
+        inlineLiteral.addListOfColumns(Arrays.asList(b, new Column("c")));
+
+        // Anonymous table (from select statement).
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous1");
+        b.addSource("Anonymous0::b");
+        anonymous.addColumn(b);
+
+        Assertions.assertEquals(2, nodeList.size());
+        inlineLiteral.equals(nodeList.get(0));
+        anonymous.equals(nodeList.get(1));
+    }
+
     @DisplayName("testSubquery")
     void testSubquery() {
         String sql = "SELECT a FROM (\n" +

@@ -50,7 +50,7 @@ public class SelectStatement {
      * completed LineageNodes. This finalises the sourceTables and anonymousTable members.
      */
     private void reconcileSelectItemsWithSourceTables() {
-        anonymousTable = new LineageNode("ANONYMOUS", "Anonymous" + Util.getNextAnonymousTableId());
+        anonymousTable = new LineageNode("ANONYMOUS", Util.getNextAnonymousTableName());
 
         for (SelectItem selectItem : selectItems) {
             for (LineageNode sourceTable : sourceTables) {
