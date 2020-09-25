@@ -290,10 +290,6 @@ public class TestRunner {
         columnA.addSource("b::*");
         anonymousTable.addColumn(columnA);
 
-        for (LineageNode node :  nodeList) {
-            PrettyPrinter.printLineageNode(node);
-        }
-
         Assertions.assertEquals(2, nodeList.size());
         Assertions.assertTrue(table.equals(nodeList.get(0)));
         Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
@@ -575,6 +571,106 @@ public class TestRunner {
         Assertions.assertEquals(3, nodeList.size());
         sourceA.equals(nodeList.get(0));
         sourceB.equals(nodeList.get(1));
+}
+
+    @DisplayName("testFunctionCall")
+    void testFunctionCall() {
+        String sql = "SELECT someFunction(a) AS b FROM c###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Source table.
+        LineageNode source = new LineageNode("TABLE", "c");
+        source.addColumn(new Column("a"));
+
+        // Anonymous table.
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column b = new Column("b");
+        b.addSource("c::a");
+        anonymous.addColumn(b);
+
+        Assertions.assertEquals(2, nodeList.size());
+        source.equals(nodeList.get(0));
+        anonymous.equals(nodeList.get(1));
+    }
+
+    @Test
+    @DisplayName("testMultipleAliasesWithinSelectItem")
+    void testMultipleAliasesWithinSelectItem() {
+        String sql = "SELECT cast(a AS date) AS b FROM c###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Source table.
+        LineageNode source = new LineageNode("TABLE", "c");
+        source.addColumn(new Column("a"));
+
+        // Anonymous table.
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
+        Column b = new Column("b");
+        b.addSource("c::a");
+        anonymous.addColumn(b);
+
+        Assertions.assertEquals(2, nodeList.size());
+        source.equals(nodeList.get(0));
+        anonymous.equals(nodeList.get(1));
+    }
+
+    @Test
+    @DisplayName("testSubquery")
+    void testSubquery() {
+        String sql = "SELECT a FROM (\n" +
+                        "SELECT b FROM c\n" +
+                      ")###\n";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Table c.
+        LineageNode tableC = new LineageNode("TABLE", "c");
+        Column b = new Column("b");
+        tableC.addColumn(b);
+
+        // Inner-most anonymous table.
+        LineageNode anonymous0 = new LineageNode("ANONYMOUS", "Anonymous0");
+        b.addSource("c::b");
+        anonymous0.addColumn(b);
+
+        // Outer-most anonymous table.
+        LineageNode anonymous1 = new LineageNode("ANONYMOUS", "Anonymous1");
+        Column a = new Column("a");
+        anonymous0.addColumn(a);
+        a.addSource("Anonymous0::a");
+        anonymous1.addColumn(a);
+
+        Assertions.assertEquals(3, nodeList.size());
+        tableC.equals(nodeList.get(0));
+        anonymous0.equals(nodeList.get(1));
+        anonymous1.equals(nodeList.get(2));
+    }
+
+    @Test
+    @DisplayName("testMultipleSources")
+    void testMultipleSources() {
+        String sql = "SELECT table1.a, table2.b " +
+                     "FROM table1 INNER JOIN table2 ON 1 = 1### ";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Source table1.
+        LineageNode table1 = new LineageNode("TABLE", "table1");
+        Column a = new Column("a");
+        table1.addColumn(a);
+
+        // Source table2.
+        LineageNode table2 = new LineageNode("TABLE", "table2");
+        Column b = new Column("b");
+        table2.addColumn(b);
+
+        // Anonymous table.
+        LineageNode anonymous = new LineageNode("ANONYMOUS", "Anonymous0");
+        a.addSource("table1::a");
+        b.addSource("table2::b");
+        anonymous.addListOfColumns(Arrays.asList(a, b));
+
+        Assertions.assertEquals(3, nodeList.size());
+        table1.equals(nodeList.get(0));
+        table2.equals(nodeList.get(1));
         anonymous.equals(nodeList.get(2));
     }
 }
