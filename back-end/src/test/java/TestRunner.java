@@ -742,4 +742,25 @@ public class TestRunner {
         table2.equals(nodeList.get(1));
         anonymous.equals(nodeList.get(2));
     }
+
+    @Test
+    @DisplayName("testPrepareStatement")
+    void testPrepareStatement() {
+        String sql = "PREPARE mytable FROM SELECT a, b FROM c###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        LineageNode tableC = new LineageNode("TABLE", "c");
+        Column columnA = new Column("a");
+        Column columnB = new Column("b");
+        tableC.addListOfColumns(Arrays.asList(columnA, columnB));
+
+        LineageNode prepareNode = new LineageNode("TABLE", "mytable");
+        columnA.addSource(DataLineage.makeId(tableC.getName(), columnA.getName()));
+        columnB.addSource(DataLineage.makeId(tableC.getName(), columnB.getName()));
+        prepareNode.addListOfColumns(Arrays.asList(columnA, columnB));
+
+        Assertions.assertEquals(2, nodeList.size());
+        tableC.equals(nodeList.get(0));
+        prepareNode.equals(nodeList.get(1));
+    }
 }
