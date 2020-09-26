@@ -111,7 +111,7 @@ public class Column implements Cloneable {
     public void renameAndUpdateId(String rename) {
         setName(rename);
         if (!id.isEmpty()) {
-            String[] idParts = id.split("::");
+            String[] idParts = id.split(Constants.Source.SEPARATOR);
             setID(DataLineage.makeId(idParts[0], getName()));
         }
     }

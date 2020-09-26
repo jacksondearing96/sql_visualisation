@@ -78,7 +78,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * @param tableName The name of the table to be created.
      */
     private void convertNodeToTable(LineageNode node, String tableName) {
-        node.setType("TABLE");
+        node.setType(Constants.Node.TYPE_TABLE);
         node.setName(tableName);
         node.setAlias("");
 
@@ -389,7 +389,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     protected R visitTable(Table table, C context) {
         if (sourcesStack.empty()) return visitQueryBody(table, context);
 
-        LineageNode node = new LineageNode("TABLE", table.getName().toString());
+        LineageNode node = new LineageNode(Constants.Node.TYPE_TABLE, table.getName().toString());
 
         // Get the alias if we are within an AliasedRelation context.
         if (isCurrentlyInside(AliasedRelation.class)) {
@@ -414,7 +414,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     protected R visitValues(Values values, C context) {
 
         if (isCurrentlyInside(TableSubquery.class)) {
-            sourcesStack.peek().add(new LineageNode("ANONYMOUS", Util.getNextAnonymousTableName()));
+            sourcesStack.peek().add(new LineageNode(Constants.Node.TYPE_ANON, Util.getNextAnonymousTableName()));
         }
 
         currentlyInside.push(Values.class);
@@ -432,7 +432,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     @Override
     protected R visitRenameTable(RenameTable renameTable, C context) {
 
-        LineageNode table = new LineageNode("TABLE", renameTable.getSource().getSuffix());
+        LineageNode table = new LineageNode(Constants.Node.TYPE_TABLE, renameTable.getSource().getSuffix());
         table.stageRenameTo(renameTable.getTarget().getSuffix());
         lineageNodes.add(table);
 
@@ -448,7 +448,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     @Override
     protected R visitRenameColumn(RenameColumn renameColumn, C context) {
 
-        LineageNode table = new LineageNode("TABLE", renameColumn.getTable().getSuffix());
+        LineageNode table = new LineageNode(Constants.Node.TYPE_TABLE, renameColumn.getTable().getSuffix());
         Column column = new Column(renameColumn.getSource().getValue());
         column.stageRenameTo(renameColumn.getTarget().getValue());
         table.addColumn(column);
@@ -466,7 +466,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     @Override
     protected R visitAddColumn(AddColumn addColumn, C context) {
 
-        LineageNode node = new LineageNode("TABLE", addColumn.getName().getSuffix());
+        LineageNode node = new LineageNode(Constants.Node.TYPE_TABLE, addColumn.getName().getSuffix());
         Column newColumn = new Column(addColumn.getColumn().getName().getValue());
         node.addColumn(newColumn);
         lineageNodes.add(node);
@@ -487,9 +487,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         // Columns are usually captured in the visitIdentifier function but wildcard operators
         // are not classed as an Identifier which means they are skipped.
         // Explicitly add wildcard select items here instead.
-        if (node.toString().equals("*")) {
+        if (node.toString().equals(Constants.WILDCARD)) {
             if (isCurrentlyInside(com.facebook.presto.sql.tree.SelectItem.class)) {
-                selectStatementStack.peek().currentSelectItem().addIdentifier("*");
+                selectStatementStack.peek().currentSelectItem().addIdentifier(Constants.WILDCARD);
             }
         }
 

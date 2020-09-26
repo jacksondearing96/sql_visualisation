@@ -41,7 +41,7 @@ public class LineageNode {
      */
     public boolean isSourceOf(List<String> sources) {
         for (String source : sources) {
-            if (source.contains(alias + "::") || source.contains(name + "::")
+            if (source.contains(alias + Constants.Source.SEPARATOR) || source.contains(name + Constants.Source.SEPARATOR)
             || source.equals(alias) || source.equals(name)) return true;
         }
         return false;
