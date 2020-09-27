@@ -1,0 +1,4 @@
+{
+    "parser": "./java/parser-backend-jar-with-dependencies.jar",
+    "parserClasses": "Main"
+}

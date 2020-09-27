@@ -6,7 +6,7 @@ import json
 with open('./configuration/config.JSON') as config_file:
     data = json.load(config_file)
 
-jnius_config.set_classpath('.', data['jar'])
+jnius_config.set_classpath('.', data['parser'])
 from jnius import autoclass
 # Configuration
 DEBUG = True
@@ -46,7 +46,7 @@ def upload_file():
         file = request.files['file[0]']
         responseObject['input'] = request.form['concatInput']
         responseObject['name'] = file.filename
-        agentLeadOutput = autoclass(data['classes'])
+        agentLeadOutput = autoclass(data['parserClasses'])
         sb = agentLeadOutput()
         response_text = sb.outputDataStruct(file.filename)
         responseObject['tables'] = json.loads(response_text)
