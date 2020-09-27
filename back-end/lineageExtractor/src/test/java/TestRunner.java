@@ -411,7 +411,7 @@ public class TestRunner {
     @Test
     @DisplayName("testAgentLeads")
     void testAgentLeads() {
-        String agentLeadsSql = FileReader.ReadFile("../propic_sql_scripts/agent_leads.sql");
+        String agentLeadsSql = FileReader.ReadFile("../../propic_sql_scripts/agent_leads.sql");
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(agentLeadsSql).getNodeList();
 
         // crms_task table.
