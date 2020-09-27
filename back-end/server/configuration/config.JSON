@@ -1,4 +1,4 @@
 {
-    "parser": "./java/parser-backend-jar-with-dependencies.jar",
+    "parser": "./java/lineage-extractor-jar-with-dependencies.jar",
     "parserClasses": "Main"
 }
