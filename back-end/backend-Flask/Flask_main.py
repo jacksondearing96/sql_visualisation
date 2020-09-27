@@ -24,13 +24,6 @@ def index():
 
 
 """
-Is called by the html template after file is uploaded.
-The upload_file is just returning the uploaded file currently
-this will be passed to the sql script in the future
-which will then be redirected to the vue application.
-"""
-
-"""
 Trying to integrate Java with Python Back-end
 
 Add to your Environment Variables:
