@@ -1,14 +1,12 @@
 from flask import Flask, render_template, request
 import os
-from flask_cors import CORS
 import jnius_config
 import json
 
+lineage_extractor_location = '../lineageExtractor/target/lineage-extractor-jar-with-dependencies.jar'
+lineage_extractor_class_name = 'LineageExtractor'
 
-with open('./configuration/config.JSON') as config_file:
-    data = json.load(config_file)
-
-jnius_config.set_classpath('.', data['lineageExtractor'])
+jnius_config.set_classpath('.', lineage_extractor_location)
 from jnius import autoclass
 
 app = Flask(__name__, root_path='../../front-end/')
@@ -16,9 +14,8 @@ app = Flask(__name__, root_path='../../front-end/')
 
 @app.route('/')
 def index():
-    lineageExtractor = autoclass(data['lineageExtractorClasses'])
+    lineageExtractor = autoclass(lineage_extractor_class_name)
     response_text = lineageExtractor.extractLineageAsJson('SELECT a, b FROM c###')
-    print(response_text)
     return render_template('index.html')
 
 
