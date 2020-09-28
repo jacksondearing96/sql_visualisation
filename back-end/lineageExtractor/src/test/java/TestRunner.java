@@ -27,13 +27,6 @@ public class TestRunner {
         System.out.println("Testing: " + testInfo.getDisplayName() + " - Complete");
     }
 
-    @Test
-    @DisplayName("testFileReader")
-    void testFileReader(){
-        Assertions.assertEquals(" SELECT * FROM hello### SELECT a FROM goodbye",
-                FileReader.ReadFile("./src/test/java/testInput.sql"));
-    }
-
     /**
      * Get the data from a column in the format:
      * "alias=columnAlias,id=columnID,name=columnName,sources={source1,source2,...}"
@@ -854,7 +847,7 @@ public class TestRunner {
         leftTable.equals(nodeList.get(0));
         rightTable.equals(nodeList.get(1));
     }
-      
+
     @DisplayName("testPrepareStatement")
     void testPrepareStatement() {
         String sql = "PREPARE mytable FROM SELECT a, b FROM c###";
