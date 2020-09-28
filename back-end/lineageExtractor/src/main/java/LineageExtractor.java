@@ -5,6 +5,10 @@ import com.facebook.presto.sql.tree.Statement;
 import java.util.List;
 
 public class LineageExtractor {
+    public static String extractLineageAsJson(String sql)  {
+        return extractLineage(sql).getNodeListAsJson();
+    }
+
     public static DataLineage extractLineage(String sql) {
         DataLineage dataLineage = extractLineageWithAnonymousTables(sql);
         dataLineage.bypassAnonymousTables();
@@ -12,7 +16,7 @@ public class LineageExtractor {
     }
 
     public static DataLineage extractLineageWithAnonymousTables(String sql) {
-        DataLineage dataLineage = new DataLineage("lineage_output.json");
+        DataLineage dataLineage = new DataLineage();
 
         List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
 
