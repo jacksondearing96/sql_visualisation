@@ -3,8 +3,12 @@ import java.util.stream.Collectors;
 
 import com.facebook.presto.sql.tree.Insert;
 import com.facebook.presto.sql.tree.Identifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InsertStatement {
+
+    final static Logger LOGGING = LoggerFactory.getLogger(InsertStatement.class);
 
     private LineageNode target;
     private Optional<LineageNode> source;
@@ -55,7 +59,7 @@ public class InsertStatement {
                 source = Optional.empty();
                 break;
             default:
-                Logger.warning("INSERT statement is deriving from a non-single source");
+                LOGGING.warn("INSERT statement is deriving from a non-single source");
         }
     }
 

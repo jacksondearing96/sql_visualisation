@@ -1,13 +1,15 @@
 import com.facebook.presto.sql.tree.*;
-import com.facebook.presto.sql.tree.Identifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 class SivtVisitor<R, C> extends AstVisitor<R, C> {
+
+    final static Logger LOGGING = LoggerFactory.getLogger(SivtVisitor.class);
 
     private final ArrayList<LineageNode> lineageNodes = new ArrayList<>();
 
@@ -188,7 +190,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         // TODO: Assumption - at the conclusion of recursing through the children of a TableSubquery,
         //       there will be a single anonymous table on the sources stack.
         //       This assumption should be investigated more thoroughly to ensure it is correct.
-        if (sourcesStack.peek().size() != 1) Logger.warning("There was not a single source table after recursing through a subquery");
+        if (sourcesStack.peek().size() != 1) {
+            LOGGING.warn("There was not a single source table after recursing through a subquery");
+        }
 
         // Give the result of the subquery its alias if it has one.
         if (isCurrentlyInside(AliasedRelation.class)) {
