@@ -21,11 +21,6 @@ public class SivtParser {
     private static final ParsingOptions parsingOptions = sivtParsingOptions();
 
     /**
-     * The specific delimiter used by convention in Propic SQL scripts.
-     */
-    private static final String sqlStatementDelimiter = "###";
-
-    /**
      * Parse an SQL statement.
      * @param statement The statement to be parsed. This statement must be one of the statements
      *                  returned by the StatementSplitter.
@@ -42,7 +37,7 @@ public class SivtParser {
      */
     public static List<StatementSplitter.Statement> getStatements(String sql) {
         Set<String> delimiters = new HashSet<String>();
-        delimiters.add(sqlStatementDelimiter);
+        delimiters.add(Constants.PrestoSQLSyntax.STATEMENT_DELIM);
         StatementSplitter statementSplitter = new StatementSplitter(sql, delimiters);
         List<StatementSplitter.Statement> statements = statementSplitter.getCompleteStatements();
         return statements;
