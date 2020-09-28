@@ -17,18 +17,9 @@ public final class Constants {
         public static final String TYPE_TABLE = "TABLE";
         public static final String TYPE_VIEW = "VIEW";
         public static final String TYPE_ANON = "ANONYMOUS";
-
-        private Node() {}
-    }
-
-    public final class Source {
-        public static final String TYPE_TABLE = "Table";
-        public static final String TYPE_VIEW = "View";
-        public static final String TYPE_ANON = "Anonymous";
         public static final String SEPARATOR = "::";
 
-
-        private Source() {}
+        private Node() {}
     }
 
     private Constants() {}

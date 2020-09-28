@@ -14,7 +14,7 @@ public class Util {
      * @return The next unique ID.
      */
     public static String getNextAnonymousTableName() {
-        return Constants.Source.TYPE_ANON.concat(Integer.toString(++anonymousTableCount));
+        return Constants.Node.TYPE_ANON.concat(Integer.toString(++anonymousTableCount));
     }
 
     public static void resetAnonymousTableCount() { anonymousTableCount = -1; }
