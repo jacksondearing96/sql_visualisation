@@ -22,23 +22,30 @@ function makeLink(source, target, idCount) {
   return link;
 }
 
+function addColumnToGraph(graph, column, order) {
+  // Add the column as a node.
+  graph.nodes.push(makeNode(column.type, column.name, column.id, order));
+
+  // Add each of the sources as links.
+  column.sources.forEach(source => graph.links.push(makeLink(source, column.id, graph.links.length)));
+}
+
 function backendToFrontendDataStructureConversion(lineageNodes) {
-  let nodes = [];
-  let links = [];
-  let linkCount = -1;
 
-  for (let lineageNode of lineageNodes) {
-    nodes.push(makeNode(lineageNode.type, lineageNode.name, lineageNode.id));
-
-    for (let i = 0; i < lineageNode.columns.length; ++i) {
-      let column = lineageNode.columns[i];
-      nodes.push(makeNode(column.type, column.name, column.id, i));
-
-      for (let source of column.sources) {
-        links.push(makeLink(source, column.id, ++linkCount))
-      }
-    }
+  let graph = {
+    nodes: [],
+    links: []
   }
 
-  return { nodes: nodes, links: links };
+  lineageNodes.forEach(lineageNode => {
+    // Add the top level node.
+    nodes.push(makeNode(lineageNode.type, lineageNode.name, lineageNode.id));
+
+    // Add each of the columns.
+    lineageNode.columns.forEach((column, index) => {
+      addColumnToGraph(graph, column, index);
+    });
+  });
+
+  return graph;
 }
