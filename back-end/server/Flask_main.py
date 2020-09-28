@@ -6,7 +6,7 @@ import json
 with open('./configuration/config.JSON') as config_file:
     data = json.load(config_file)
 
-jnius_config.set_classpath('.', data['parser'])
+jnius_config.set_classpath('.', data['lineageExtractor'])
 from jnius import autoclass
 # Configuration
 DEBUG = True
@@ -39,7 +39,7 @@ def upload_file():
         file = request.files['file[0]']
         responseObject['input'] = request.form['concatInput']
         responseObject['name'] = file.filename
-        agentLeadOutput = autoclass(data['parserClasses'])
+        agentLeadOutput = autoclass(data['lineageExtractorClasses'])
         response_text = agentLeadOutput.ReadFile('../lineageExtractor/resources/staticTestData.txt')
         responseObject['tables'] = json.loads(response_text)
     return jsonify(responseObject)

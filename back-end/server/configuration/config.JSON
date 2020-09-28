@@ -1,4 +1,4 @@
 {
-    "parser": "./java/lineage-extractor-jar-with-dependencies.jar",
-    "parserClasses": "FileReader"
+    "lineageExtractor": "./java/lineage-extractor-jar-with-dependencies.jar",
+    "lineageExtractorClasses": "FileReader"
 }
