@@ -57,7 +57,7 @@ public class DataLineage {
 
                         // If a source points to a column in an anonymous table, replace this source with the sources
                         // of the column in the anonymous table. This bypasses the anonymous table in the graph structure.
-                        if (source.contains("Anonymous")) {
+                        if (source.contains(Constants.Node.TYPE_ANON)) {
                             madeChange = true;
                             replaceSourceWithSources(column, i, idToSources.get(source));
                         }
@@ -67,7 +67,7 @@ public class DataLineage {
         }
 
         // Delete the now redundant anonymous nodes.
-        nodeList.removeIf(node -> node.getType().equals("ANONYMOUS"));
+        nodeList.removeIf(node -> node.getType().equals(Constants.Node.TYPE_ANON));
     }
 
 
@@ -139,6 +139,6 @@ public class DataLineage {
     }
 
     public static String makeId(String source, String target) {
-        return Util.removeDatabasePrefix(source).concat("::").concat(target);
+        return Util.removeDatabasePrefix(source).concat(Constants.Node.SEPARATOR).concat(target);
     }
 }
