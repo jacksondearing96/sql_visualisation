@@ -39,8 +39,8 @@ def upload_file():
         file = request.files['file[0]']
         responseObject['input'] = request.form['concatInput']
         responseObject['name'] = file.filename
-        agentLeadOutput = autoclass(data['lineageExtractorClasses'])
-        response_text = agentLeadOutput.ReadFile('../lineageExtractor/resources/staticTestData.txt')
+        lineageExtractor = autoclass(data['lineageExtractorClasses'])
+        response_text = lineageExtractor.extractLineageAsJson(responseObject['input'])
         responseObject['tables'] = json.loads(response_text)
     return jsonify(responseObject)
 

@@ -1,4 +1,4 @@
 {
     "lineageExtractor": "./java/lineage-extractor-jar-with-dependencies.jar",
-    "lineageExtractorClasses": "FileReader"
+    "lineageExtractorClasses": "LineageExtractor"
 }
