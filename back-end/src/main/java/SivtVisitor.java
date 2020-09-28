@@ -88,12 +88,24 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         }
     }
 
+    /**
+     * Adds the columns from the given column definitions to the table.
+     * @param table The table to have columns populated.
+     * @param columnDefinitions The column definitions that define columns within the table.
+     */
     void applyColumnDefinitionsToTable(LineageNode table, ArrayList<ColumnDefinition> columnDefinitions) {
         for (ColumnDefinition columnDefinition : columnDefinitions) {
             table.addColumn(new Column(columnDefinition.getName().getValue()));
         }
     }
 
+    /**
+     * Visit a CreateTable node in the AST.
+     *
+     * @param createTable The CreateTable node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
     @Override
     protected R visitCreateTable(CreateTable createTable, C context)  {
         columnDefinitionStack.push(new ArrayList<>());
@@ -107,6 +119,13 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return node;
     }
 
+    /**
+     * Visit a ColumnDefinition node in the AST.
+     *
+     * @param columnDefinition The ColumnDefinition node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
     @Override
     protected R visitColumnDefinition(ColumnDefinition columnDefinition, C context)
     {
@@ -114,6 +133,13 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return visitTableElement(columnDefinition, context);
     }
 
+    /**
+     * Visit a CreateTableAsSelect node in the AST.
+     *
+     * @param createTableAsSelect The CreateView node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
     @Override
     protected R visitCreateTableAsSelect(CreateTableAsSelect createTableAsSelect, C context) {
         sourcesStack.push(new ArrayList<>());
