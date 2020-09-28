@@ -1,15 +1,10 @@
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Columns within a particular table or view.
  */
 public class Column implements Cloneable {
-    // Create a logger for logging - each class should have this.
-    final static Logger LOGGING = LoggerFactory.getLogger(Column.class);
 
     private String name = "";
     private String alias = "";
@@ -32,8 +27,6 @@ public class Column implements Cloneable {
         this.name = name;
         this.alias = alias;
         this.id = id;
-        // There are different levels of logging, pick the appropriate log level for the function.
-        LOGGING.info("Column created.");
     }
 
     public Object clone() throws CloneNotSupportedException {
