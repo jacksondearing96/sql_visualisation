@@ -16,7 +16,7 @@ public class LineageExtractor {
     }
 
     public static DataLineage extractLineageWithAnonymousTables(String sql) {
-        DataLineage dataLineage = new DataLineage(Constants.LineageExtractor.OUTPUT_JSON_FILE);
+        DataLineage dataLineage = new DataLineage();
 
         List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
 

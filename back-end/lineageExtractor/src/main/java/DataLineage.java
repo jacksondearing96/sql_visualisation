@@ -16,6 +16,8 @@ public class DataLineage {
         return nodeList;
     }
 
+    public DataLineage() {}
+
     /**
      * Replace the source of a column at index with a list of other sources.
      * @param column The column to have its source replaced.
@@ -78,7 +80,6 @@ public class DataLineage {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String jsonStr = mapper.writeValueAsString(nodeList);
-            System.out.println(jsonStr);
             return jsonStr;
         } catch (IOException e) {}
         return "";
