@@ -1,0 +1,14 @@
+# Jackson for all of the back-end.
+/back-end/ @a1686411
+
+# Rhett for back-end testing and data structures
+/back-end/src/main/java/Column.java @a1706579 @a1686411
+/back-end/src/main/java/DataLineage.java @a1706579 @a1686411
+/back-end/src/main/java/LineageNode.java @a1706579 @a1686411
+/back-end/src/test/java/TestRunner.java @a1706579 @a1686411
+
+# Gabriel and Colin for front-end.
+/front-end/ @a1704822 @a1673698
+
+# Server
+/backend-Flask @a1717968
