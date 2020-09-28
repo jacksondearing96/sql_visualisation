@@ -12,6 +12,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     private final Stack<SelectStatement> selectStatementStack = new Stack<>();
     private final Stack<ArrayList<LineageNode>> sourcesStack = new Stack<>();
     private final Stack<LabellingInformation> labellingInformationStack = new Stack<>();
+    private final Stack<ArrayList<ColumnDefinition>> columnDefinitionStack = new Stack<>();
 
     /**
      * Stack to maintain the context within which the recursive decent visitor is in.
@@ -34,7 +35,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * Defines all the parent nodes that are interested in keeping the resultant anonymous table to use as a source.
       */
     private final ArrayList<Class> contextToKeepList =
-            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class, Prepare.class));
+            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class, Prepare.class, CreateTable.class, CreateTableAsSelect.class));
 
     /**
      * Determines whether the current Class context is one which is required to keep the anonymous table.
@@ -88,6 +89,73 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
+     * Adds the columns from the given column definitions to the table.
+     * @param table The table to have columns populated.
+     * @param columnDefinitions The column definitions that define columns within the table.
+     */
+    void applyColumnDefinitionsToTable(LineageNode table, ArrayList<ColumnDefinition> columnDefinitions) {
+        for (ColumnDefinition columnDefinition : columnDefinitions) {
+            table.addColumn(new Column(columnDefinition.getName().getValue()));
+        }
+    }
+
+    /**
+     * Visit a CreateTable node in the AST.
+     *
+     * @param createTable The CreateTable node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
+    @Override
+    protected R visitCreateTable(CreateTable createTable, C context)  {
+        columnDefinitionStack.push(new ArrayList<>());
+
+        R node = visitStatement(createTable, context);
+
+        LineageNode table = new LineageNode("TABLE", createTable.getName().getSuffix());
+        applyColumnDefinitionsToTable(table, columnDefinitionStack.pop());
+        lineageNodes.add(table);
+
+        return node;
+    }
+
+    /**
+     * Visit a ColumnDefinition node in the AST.
+     *
+     * @param columnDefinition The ColumnDefinition node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
+    @Override
+    protected R visitColumnDefinition(ColumnDefinition columnDefinition, C context)
+    {
+        if (!columnDefinitionStack.isEmpty()) columnDefinitionStack.peek().add(columnDefinition);
+        return visitTableElement(columnDefinition, context);
+    }
+
+    /**
+     * Visit a CreateTableAsSelect node in the AST.
+     *
+     * @param createTableAsSelect The CreateView node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
+    @Override
+    protected R visitCreateTableAsSelect(CreateTableAsSelect createTableAsSelect, C context) {
+        sourcesStack.push(new ArrayList<>());
+
+        currentlyInside.push(CreateTableAsSelect.class);
+        R node = visitStatement(createTableAsSelect, context);
+        currentlyInside.pop();
+
+        LineageNode table = sourcesStack.pop().get(0);
+        convertNodeToTable(table, createTableAsSelect.getName().getSuffix());
+        lineageNodes.add(table);
+
+        return node;
+    }
+
+    /**
      * Visit a CreateView node in the AST.
      *
      * @param createView The CreateView node.
@@ -106,7 +174,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
         // Mutate the anonymous table that was received to become the view.
         LineageNode view = sourcesStack.pop().get(0);
-        convertNodeToView(view, createView.getName().toString());
+        convertNodeToView(view, createView.getName().getSuffix());
         lineageNodes.add(view);
 
         return node;
