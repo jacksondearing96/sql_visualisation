@@ -1,0 +1,4 @@
+{
+    "lineageExtractor": "../../back-end/lineageExtractor/target/lineage-extractor-jar-with-dependencies.jar",
+    "lineageExtractorClasses": "LineageExtractor"
+}
