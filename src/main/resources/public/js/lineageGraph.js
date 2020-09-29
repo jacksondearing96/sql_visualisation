@@ -2,8 +2,6 @@
 
 const canvasWidth = 5000;
 const canvasHeight = 2500;
-const containerWindowWidthRatio = 0.90;
-const containerWindowHeightRatio = 0.80;
 const scrollIncrementWidthToInitInCenter = -500;
 const scrollIncrementHeightToInitInCenter = -300;
 
@@ -60,9 +58,7 @@ function generateVisualisation(graph) {
 }
 
 function initialiseContainer() {
-  $('#visualisation-container').show();
-  setContainerDimensions();
-  setContainerScrollPosition();
+  $('#visualisation-container').show(600, setContainerScrollPosition);
 }
 
 function updateGraphData(graph) {
@@ -87,14 +83,10 @@ function log(message) {
 var nodes = []
 var links = []
 
-function setContainerDimensions() {
-  $("#container").css("width", $(window).width() * containerWindowWidthRatio);
-  $("#container").css("height", $(window).height() * containerWindowHeightRatio);
-}
-
 function setContainerScrollPosition() {
-  $("#container").scrollTop(canvasHeight / 2 + scrollIncrementHeightToInitInCenter);
-  $("#container").scrollLeft(canvasWidth / 2 + scrollIncrementWidthToInitInCenter);
+  console.log("Running!");
+  $("#visualisation-container").scrollTop(canvasHeight / 2 + scrollIncrementHeightToInitInCenter);
+  $("#visualisation-container").scrollLeft(canvasWidth / 2 + scrollIncrementWidthToInitInCenter);
 }
 
 function getNodeById(id) {

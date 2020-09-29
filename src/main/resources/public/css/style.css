@@ -12,14 +12,15 @@ svg {
 }
 
 #visualisation-container {
+  margin: 0 auto;
+  margin-top: 20px;
   display: none;
   border: 1px solid black;
   box-shadow: 5px 5px 3px rgb(20,20,20);
-  overflow: auto;
-  margin: auto auto;
+  overflow: auto !important;
   background-color: rgb(30,30,30);
-  margin: 20px;
-  height: 600px;
+  width: 95%;
+  height: 80vh;
 }
 
 header {
@@ -46,11 +47,11 @@ h1 {
 }
 
 #file-upload-container {
-  margin: auto auto;
+  margin: 0 auto;
   border-radius: 10px;
   background-color: rgb(200,200,200);
   padding: 10px;
-  margin-bottom: 20px;
+  width: 95%;
 }
 
 #file-upload-container input {
@@ -67,6 +68,8 @@ h1 {
     color: white;
     border: 0px;
     box-shadow: 3px 3px 3px grey;
+    padding-right: 10px;
+    padding-left: 10px;
 }
 
 #file-upload-container button:hover {
