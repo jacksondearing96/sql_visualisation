@@ -53,10 +53,23 @@ const idDelimiter = "::";
 
 const loggingCountThreshold = 50;
 
-$(document).ready(() => {
+function generateVisualisation(graph) {
+  initialiseContainer();
+  updateGraphData(graph);
+  generateSimulation();
+}
+
+function initialiseContainer() {
+  $('#visualisation-container').show();
   setContainerDimensions();
   setContainerScrollPosition();
-});
+}
+
+function updateGraphData(graph) {
+  nodes = graph.nodes;
+  links = graph.links;
+  allocateIncomingAndOutgoingLinks();
+}
 
 function error(message) {
   console.error(message);
@@ -71,152 +84,8 @@ function log(message) {
   ++logCount;
 }
 
-var nodes = [
-  {
-    id: "%(crm)s_task::",
-    name: "%(crm)s_task",
-    group: "%(crm)s_task",
-    incoming: [],
-    outgoing: [],
-    type: "TABLE"
-  },
-  {
-    id: "%(crm)s_task::accountid",
-    name: "accountid",
-    group: "%(crm)s_task",
-    order: "0",
-    incoming: [],
-    outgoing: [],
-    type: "COLUMN"
-  },
-  {
-    id: "%(crm)s_task::ownerid",
-    name: "ownerid",
-    group: "%(crm)s_task",
-    order: "1",
-    incoming: [],
-    outgoing: [],
-    type: "COLUMN"
-  },
-  {
-    id: "%(crm)s_task::status",
-    name: "status",
-    group: "%(crm)s_task",
-    order: "2",
-    incoming: [],
-    outgoing: [],
-    type: "COLUMN"
-  },
-  {
-    id: "%(crm)s_task::activitydate",
-    name: "activitydate",
-    group: "%(crm)s_task",
-    order: "3",
-    incoming: [],
-    outgoing: [],
-    type: "COLUMN"
-  },
-
-  {
-    id: "customer_insight::",
-    name: "customer_insight",
-    group: "customer_insight",
-    incoming: [],
-    outgoing: [],
-    type: "TABLE"
-  },
-  {
-    id: "customer_insight::acct_sf_id",
-    name: "acct_sf_id",
-    group: "customer_insight",
-    order: "0",
-    incoming: [],
-    outgoing: [],
-    type: "COLUMN"
-  },
-  {
-    id: "customer_insight::user_sf_id",
-    name: "user_sf_id",
-    group: "customer_insight",
-    order: "1",
-    incoming: [],
-    outgoing: [],
-    type: "COLUMN"
-  },
-
-  {
-    id: "note_count_by_agent::",
-    name: "note_count_by_agent",
-    group: "note_count_by_agent",
-    incoming: [],
-    outgoing: [],
-    type: "VIEW"
-  },
-  {
-    id: "note_count_by_agent::acct_sf_id",
-    name: "acct_sf_id",
-    group: "note_count_by_agent",
-    order: "0",
-    incoming: [],
-    outgoing: [],
-    type: "COLUMN"
-  },
-  {
-    id: "note_count_by_agent::user_sf_id",
-    name: "user_sf_id",
-    group: "note_count_by_agent",
-    order: "1",
-    incoming: [],
-    outgoing: [],
-    type: "COLUMN"
-  },
-  {
-    id: "note_count_by_agent::cnt",
-    name: "cnt",
-    group: "note_count_by_agent",
-    order: "2",
-    incoming: [],
-    outgoing: [],
-    type: "COLUMN"
-  },
-  {
-    id: "note_count_by_agent::*",
-    name: "*",
-    group: "note_count_by_agent",
-    order: "3",
-    incoming: [],
-    outgoing: [],
-    type: "COLUMN"
-  }
-];
-
-var links = [
-  {
-    source: "%(crm)s_task::ownerid",
-    target: "customer_insight::acct_sf_id",
-    id: "link0"
-  },
-  {
-    source: "customer_insight::acct_sf_id",
-    target: "note_count_by_agent::acct_sf_id",
-    id: "link1"
-  },
-  {
-    source: "customer_insight::user_sf_id",
-    target: "note_count_by_agent::user_sf_id",
-    id: "link2"
-  },
-  {
-    source: "customer_insight::",
-    target: "note_count_by_agent::*",
-    id: "link3"
-  },
-  {
-    source: "%(crm)s_task::status",
-    target: "customer_insight::",
-    id: "link4"
-  }
-];
+var nodes = []
+var links = []
 
 function setContainerDimensions() {
   $("#container").css("width", $(window).width() * containerWindowWidthRatio);
@@ -494,8 +363,6 @@ function allocateIncomingAndOutgoingLinks() {
   });
 }
 
-allocateIncomingAndOutgoingLinks();
-
 function getAllChildColumnIdsFromTopLevelId(id) {
   return nodes
     .filter(
@@ -577,12 +444,16 @@ function dragEnd(d) {
   d.fy = null;
 }
 
-var svg = d3
+
+var simulation, nodeSelection, linkSelection, labels, svg;
+function generateSimulation() {
+
+  svg = d3
   .select("svg")
   .attr("width", canvasWidth)
   .attr("height", canvasHeight);
 
-var nodeSelection = svg
+  nodeSelection = svg
   .selectAll("rect")
   .data(nodes)
   .enter()
@@ -598,7 +469,7 @@ var nodeSelection = svg
   .on("mouseover", (d) => columnMouseOver(d.id))
   .on("mouseout", (d) => columnMouseOut(d.id));
 
-var linkSelection = svg
+  linkSelection = svg
   .selectAll("line")
   .data(links)
   .enter()
@@ -611,7 +482,7 @@ var linkSelection = svg
   .on("mouseover", (d) => linkMouseOver(d))
   .on("mouseout", (d) => linkMouseOut(d));
 
-var lables = svg
+  lables = svg
   .selectAll("g")
   .append("text")
   .attr("fill", (d) => determineTextColor(d))
@@ -626,20 +497,21 @@ var lables = svg
   .on("mouseover", labelMouseOver)
   .on("mouseout", labelMouseOut);
 
-var simulation = d3.forceSimulation(nodes);
+  simulation = d3.forceSimulation(nodes);
 
-simulation
-  .force("center", d3.forceCenter(canvasWidth / 2, canvasHeight / 2))
-  .force("nodes", d3.forceManyBody().strength(nodeForceStrength))
-  .force(
-    "links",
-    d3
-      .forceLink(links)
-      .id((d) => d.id)
-      .distance(linkPreferredDistance)
-      .strength(linkStrength)
-  )
-  .on("tick", ticked);
+  simulation
+    .force("center", d3.forceCenter(canvasWidth / 2, canvasHeight / 2))
+    .force("nodes", d3.forceManyBody().strength(nodeForceStrength))
+    .force(
+      "links",
+      d3
+        .forceLink(links)
+        .id((d) => d.id)
+        .distance(linkPreferredDistance)
+        .strength(linkStrength)
+    )
+    .on("tick", ticked);
+}
 
 function ticked() {
   nodeSelection.attr("x", (d) => getNodeX(d)).attr("y", (d) => getNodeY(d));
