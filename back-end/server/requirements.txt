@@ -1,5 +1,0 @@
-Flask==1.1.1
-pyjnius==1.3.0
-Flask_Cors==3.0.9
-wheel==0.35.1
-jnius==1.1.0
