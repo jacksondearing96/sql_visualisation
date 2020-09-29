@@ -958,4 +958,35 @@ public class TestRunner {
         tableC.equals(nodeList.get(0));
         prepareNode.equals(nodeList.get(1));
     }
+
+    @Test
+    @DisplayName("testWithClause")
+    void testWithClause() {
+        System.out.println("testing with clause");
+        String sql = "WITH withtable AS (" +
+                        "SELECT a, b FROM existingtable" +
+                     ")" +
+                     "SELECT a FROM withtable###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        LineageNode existingTable = new LineageNode(Constants.Node.TYPE_TABLE, "existingtable");
+        Column a = new Column("a");
+        Column b = new Column("b");
+        existingTable.addListOfColumns(Arrays.asList(a, b));
+
+        LineageNode withTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"), "withtable");
+        a.addSource(DataLineage.makeId(existingTable.getName(), a.getName()));
+        b.addSource(DataLineage.makeId(existingTable.getName(), b.getName()));
+        withTable.addListOfColumns(Arrays.asList(a, b));
+
+        LineageNode resultantTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"));
+        a = new Column("a");
+        a.addSource(DataLineage.makeId(withTable.getName(), a.getName()));
+        resultantTable.addColumn(a);
+
+        Assertions.assertEquals(3, nodeList.size());
+        existingTable.equals(nodeList.get(0));
+        withTable.equals(nodeList.get(1));
+        resultantTable.equals(nodeList.get(2));
+    }
 }
