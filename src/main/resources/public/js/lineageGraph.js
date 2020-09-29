@@ -2,8 +2,8 @@
 
 const canvasWidth = 5000;
 const canvasHeight = 2500;
-const containerWindowWidthRatio = 0.97;
-const containerWindowHeightRatio = 0.88;
+const containerWindowWidthRatio = 0.90;
+const containerWindowHeightRatio = 0.80;
 const scrollIncrementWidthToInitInCenter = -500;
 const scrollIncrementHeightToInitInCenter = -300;
 

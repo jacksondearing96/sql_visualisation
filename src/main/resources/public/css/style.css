@@ -11,12 +11,13 @@ svg {
   overflow: auto;
 }
 
-#container {
+#visualisation-container {
   border: 1px solid black;
   box-shadow: 5px 5px 3px rgb(20,20,20);
   overflow: auto;
   margin: auto auto;
   background-color: rgb(30,30,30);
+  margin: 20px;
 }
 
 header {
@@ -40,4 +41,75 @@ h1 {
 
 #github-logo:hover {
   opacity: 1;
+}
+
+#file-upload-container {
+  display: none;
+  margin: auto auto;
+  width: 80%;
+  border-radius: 10px;
+  background-color: rgb(200,200,200);
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+input {
+  margin-top: 14px;
+}
+
+button {
+    background-color: dodgerblue;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    border-radius: 10px;
+    height: 35px;
+    font-size: 16px;
+    color: white;
+    border: 0px;
+    box-shadow: 3px 3px 3px grey;
+}
+
+#file-upload-container button:hover {
+    cursor: pointer;
+}
+
+#file-upload-container button[disabled]{
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
+  cursor: default;
+}
+
+#file-list {
+  margin-top: 20px;
+  font-weight: 800;
+  color: rgb(20,20,20);
+}
+
+.file-name-container {
+  text-align: center;
+  display: inline-block;
+}
+
+.file-name-container p {
+  display: inline;
+  float: right;
+  margin: 0px;
+  margin-top: 3px;
+}
+
+.tick, .cross {
+  display: inline;
+  float: left;
+}
+
+.tick {
+  height: 25px;
+  padding-right: 8px;
+}
+
+.cross {
+  height: 15px;
+  padding-right: 8px;
+  padding-top: 5px;
 }

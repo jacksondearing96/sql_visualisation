@@ -18,12 +18,19 @@
         src="https://image.flaticon.com/icons/png/512/37/37318.png" /></a>
   </header>
 
-  <div id="container">
+  <div id="file-upload-container">
+      <input ref="file" type="file" id="upload-files-button" multiple>
+      <button type="button" disabled>Generate Visualisation</button>
+      <div id="file-list"></div>
+  </div>
+
+  <div id="visualisation-container">
     <svg version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"></svg>
   </div>
 
   <script src="https://d3js.org/d3.v4.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="js/fileUploader.js"></script>
   <script src="js/lineageGraph.js"></script>
 </body>
 

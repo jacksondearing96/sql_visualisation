@@ -5,9 +5,9 @@ public class Server {
         staticFiles.location("public");
         get("/", (request, response) -> "index.html");
 
-        post("/upload_files", (request, response) -> {
-            System.out.println(request.body());
-            return "post method returning";
-        });
+        // post("/upload_files", (request, response) -> {
+        //     System.out.println(request.body());
+        //     return "post method returning";
+        // });
     }
 }
