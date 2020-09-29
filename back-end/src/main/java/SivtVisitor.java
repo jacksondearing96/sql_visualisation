@@ -241,13 +241,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     @Override
-    protected R visitWith(With with, C context) {
-        return visitNode(with, context);
-    }
-
-    @Override
     protected R visitWithQuery(WithQuery withQuery, C context) {
-        System.out.println(withQuery);
 
         sourcesStack.push(new ArrayList<>());
 
