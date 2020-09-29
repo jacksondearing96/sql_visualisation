@@ -48,6 +48,12 @@
             <version>3.11</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.8.0-beta2</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <build>
