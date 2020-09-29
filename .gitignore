@@ -14,6 +14,7 @@ hs_err_pid*
 
 
 ## Maven
+*.iml
 target/
 pom.xml.tag
 pom.xml.releaseBackup
