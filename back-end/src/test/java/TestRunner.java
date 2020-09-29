@@ -588,6 +588,7 @@ public class TestRunner {
         sourceB.equals(nodeList.get(1));
     }
   
+    @Test
     @DisplayName("testStandAloneLiteralTable")
     void testStandAloneLiteralTable() {
         String sql = "VALUES " + "(1, 'a')," + "(2, 'b')," + "(3, 'c')###";
@@ -619,6 +620,7 @@ public class TestRunner {
         inlineLiteral.equals(nodeList.get(0));
     }
   
+    @Test
     @DisplayName("testFunctionCall")
     void testFunctionCall() {
         String sql = "SELECT someFunction(a) AS b FROM c###";
@@ -661,6 +663,7 @@ public class TestRunner {
         inlineLiteral.equals(nodeList.get(0));
     }
 
+    @Test
     @DisplayName("testMultipleAliasesWithinSelectItem")
     void testMultipleAliasesWithinSelectItem() {
         String sql = "SELECT cast(a AS date) AS b FROM c###";
@@ -794,6 +797,7 @@ public class TestRunner {
         existingTable.equals(nodeList.get(2));
     }
 
+    @Test
     @DisplayName("testSubquery")
     void testSubquery() {
         String sql = "SELECT a FROM (\n" + "SELECT b FROM c\n" + ")###\n";
@@ -888,6 +892,7 @@ public class TestRunner {
         mytable.equals(nodeList.get(0));
     }
 
+    @Test
     @DisplayName("testConditionalSelectItems")
     void testConditionalSelectItems() {
         String sql = "SELECT CASE WHEN a = b THEN c ELSE d END FROM mytable###";
@@ -933,6 +938,7 @@ public class TestRunner {
         rightTable.equals(nodeList.get(1));
     }
 
+    @Test
     @DisplayName("testPrepareStatement")
     void testPrepareStatement() {
         String sql = "PREPARE mytable FROM SELECT a, b FROM c###";
