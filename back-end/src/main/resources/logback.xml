@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Logging configuration
+-->
+<configuration debug="false">
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>log/backend.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSSS} [%level] %logger{35} :: %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <!--
+    Log each file individually. Level is the maximum log level to log to the file.
+    -->
+    <logger name="Column" level="INFO">
+        <appender-ref ref="FILE"/>
+    </logger>
+</configuration>

@@ -1,4 +1,6 @@
 import com.facebook.presto.sql.tree.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +8,8 @@ import java.util.Stack;
 import java.util.Arrays;
 
 class SivtVisitor<R, C> extends AstVisitor<R, C> {
+
+    final static Logger LOGGING = LoggerFactory.getLogger(SivtVisitor.class);
 
     private final ArrayList<LineageNode> lineageNodes = new ArrayList<>();
 
@@ -35,7 +39,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * Defines all the parent nodes that are interested in keeping the resultant anonymous table to use as a source.
       */
     private final ArrayList<Class> contextToKeepList =
-            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class, Prepare.class, CreateTable.class, CreateTableAsSelect.class));
+            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class, Insert.class, Prepare.class, CreateTable.class, CreateTableAsSelect.class));
 
     /**
      * Determines whether the current Class context is one which is required to keep the anonymous table.
@@ -181,7 +185,36 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
-     * Visit the Prepare node in the AST.
+<<<<<<< HEAD
+     * Visit an Insert node in the AST.
+     *
+     * @param insert The Insert node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
+    @Override
+    protected R visitInsert(Insert insert, C context) {
+
+        // Make room for the sources table which contains the insert values.
+        sourcesStack.push(new ArrayList<>());
+
+        currentlyInside.push(Insert.class);
+        R node = visitStatement(insert, context);
+        currentlyInside.pop();
+
+        // Get the lineage nodes that result from the INSERT statement.
+        InsertStatement insertStatement = new InsertStatement(insert, sourcesStack.pop());
+        ArrayList<LineageNode> nodes = insertStatement.getLineageNodes();
+
+        // Add the source node (if exists).
+        if (nodes.size() > 1) lineageNodes.add(nodes.get(1));
+
+        // Add the target node.
+        lineageNodes.add(nodes.get(0));
+        return node;
+    }
+
+    /** Visit the Prepare node in the AST.
      * A prepare statement produces a table that can be referenced in later statements.
      * As a result, the generated table cannot just be an anonymous table because that would lose
      * its ability to be referenced later by the assigned name. Therefore, prepare statements simply
@@ -222,9 +255,14 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         R node = visitQueryBody(tableSubquery, context);
         currentlyInside.pop();
 
+        // TODO: Assumption - at the conclusion of recursing through the children of a TableSubquery,
+        //       there will be a single anonymous table on the sources stack.
+        //       This assumption should be investigated more thoroughly to ensure it is correct.
+        if (sourcesStack.peek().size() != 1) {
+            LOGGING.warn("There was not a single source table after recursing through a subquery");
+        }
+
         // Give the result of the subquery its alias if it has one.
-        // TODO: Assumption - at the conclusion of recursing through the children of a TableSubquery, there will be a single anonymous table on the sources stack.
-        // This assumption should be investigated more thoroughly to ensure it is correct.
         if (isCurrentlyInside(AliasedRelation.class)) {
             LabellingInformation labellingInformation = labellingInformationStack.pop();
             sourcesStack.peek().get(0).setAlias(labellingInformation.getAlias());
