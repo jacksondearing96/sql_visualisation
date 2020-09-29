@@ -37,6 +37,7 @@ out/
 ## VSCode
 .vscode
 
-.settings
-.project
-.classpath
+.settings/
+*.project
+*.classpath
+.bin/
