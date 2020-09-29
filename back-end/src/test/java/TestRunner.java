@@ -989,7 +989,6 @@ public class TestRunner {
         resultantTable.equals(nodeList.get(2));
     }
 
-
     @Test
     @DisplayName("testMultipleWithClause")
     void testMultipleWithClause() {
@@ -1036,6 +1035,37 @@ public class TestRunner {
         existingTable2.equals(nodeList.get(2));
         withTable2.equals(nodeList.get(3));
         resultantTable.equals(nodeList.get(4));
+    }
+
+    @Test
+    @DisplayName("testMultipleWithClauseEarlyReference")
+    void testMultipleWithClaseEarlyReference() {
+        String sql = "CREATE VIEW myview AS " + 
+                     "WITH withtable1 AS (" +
+                        "SELECT a, b FROM existingtable1" +
+                     "), " +
+                     "withtable2 AS (" +
+                        "SELECT b AS c FROM withtable1" +
+                     ") " +
+                     "SELECT withtable1.a, withtable2.c " +
+                     "FROM withtable1 INNER JOIN withtable2 ON 1 = 1###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        LineageNode existingTable1 = new LineageNode(Constants.Node.TYPE_TABLE, "existingtable1");
+        Column a = new Column("a");
+        Column b = new Column("b");
+        existingTable1.addListOfColumns(Arrays.asList(a, b));
+
+        LineageNode view = new LineageNode(Constants.Node.TYPE_VIEW, "myview");
+        a = new Column("a");
+        Column c = new Column("c");
+        a.addSource(DataLineage.makeId(existingTable1.getName(), a.getName()));
+        c.addSource(DataLineage.makeId(existingTable1.getName(), b.getName()));
+        view.addListOfColumns(Arrays.asList(a, c));
+
+        Assertions.assertEquals(2, nodeList.size());
+        existingTable1.equals(nodeList.get(0));
+        view.equals(nodeList.get(1));
     }
 
     @Test

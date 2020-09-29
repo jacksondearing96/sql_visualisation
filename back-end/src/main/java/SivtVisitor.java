@@ -384,9 +384,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         boolean hasIdentifier = selectStatementStack.peek().currentSelectItem().getIdentifiers().size() != 0;
         if (hasIdentifier) return;
 
-        String[] dereferenceParts = selectItem.toString().split("[.]");
+        String[] dereferenceParts = selectItem.toString().split(Constants.PrestoSQLSyntax.DEREFERENCE_DELIM_REGEX);
 
-        boolean isDereferenceWildcard = dereferenceParts.length == 2 && dereferenceParts[1].equals("*");
+        boolean isDereferenceWildcard = dereferenceParts.length == 2 && dereferenceParts[1].equals(Constants.WILDCARD);
         if (!isDereferenceWildcard) return;
 
         // Update the current select item with the dereferenced wildcard.
