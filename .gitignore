@@ -33,3 +33,8 @@ out/
 
 ## VSCode
 .vscode
+
+.settings
+log
+.project
+.classpath
