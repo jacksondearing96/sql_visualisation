@@ -6,6 +6,7 @@ import java.util.Optional;
  * Columns within a particular table or view.
  */
 public class Column implements Cloneable {
+
     private String name = "";
     private String alias = "";
     private String id = "";

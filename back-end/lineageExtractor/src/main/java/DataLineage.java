@@ -16,8 +16,6 @@ public class DataLineage {
         return nodeList;
     }
 
-    public DataLineage() {}
-
     /**
      * Replace the source of a column at index with a list of other sources.
      * @param column The column to have its source replaced.
@@ -27,6 +25,7 @@ public class DataLineage {
     private void replaceSourceWithSources(Column column, int index, ArrayList<String> sources) {
         column.getSources().remove(index);
         --index;
+        if (sources == null) return;
         for (String source : sources) {
             column.getSources().add(++index, source);
         }
@@ -69,7 +68,7 @@ public class DataLineage {
         }
 
         // Delete the now redundant anonymous nodes.
-        nodeList.removeIf(node -> node.getType().equals(Constants.Node.TYPE_ANON));
+        nodeList.removeIf(node -> node.getType().equals("ANONYMOUS"));
     }
 
 
@@ -79,8 +78,7 @@ public class DataLineage {
     public String getNodeListAsJson() {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            String jsonStr = mapper.writeValueAsString(nodeList);
-            return jsonStr;
+            return mapper.writeValueAsString(nodeList);
         } catch (IOException e) {}
         return "";
     }
@@ -140,6 +138,6 @@ public class DataLineage {
     }
 
     public static String makeId(String source, String target) {
-        return Util.removeDatabasePrefix(source).concat(Constants.Node.SEPARATOR).concat(target);
+        return Util.removeDatabasePrefix(source).concat("::").concat(target);
     }
 }

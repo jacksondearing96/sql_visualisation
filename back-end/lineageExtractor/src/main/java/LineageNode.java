@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.Optional;
 
 /**
@@ -151,6 +152,10 @@ public class LineageNode {
 
     public List<Column> getColumns() {
         return this.columns;
+    }
+
+    public List<String> getColumnNames() {
+        return columns.stream().map(Column::getName).collect(Collectors.toList());
     }
 
     public boolean hasAlias() {

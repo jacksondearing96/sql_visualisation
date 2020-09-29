@@ -1,11 +1,16 @@
 import com.facebook.presto.sql.tree.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.Arrays;
+import java.util.HashMap;
 
 class SivtVisitor<R, C> extends AstVisitor<R, C> {
+
+    final static Logger LOGGING = LoggerFactory.getLogger(SivtVisitor.class);
 
     private final ArrayList<LineageNode> lineageNodes = new ArrayList<>();
 
@@ -13,6 +18,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     private final Stack<ArrayList<LineageNode>> sourcesStack = new Stack<>();
     private final Stack<LabellingInformation> labellingInformationStack = new Stack<>();
     private final Stack<ArrayList<ColumnDefinition>> columnDefinitionStack = new Stack<>();
+    private final HashMap<String, LineageNode> withTables = new HashMap<>();
 
     /**
      * Stack to maintain the context within which the recursive decent visitor is in.
@@ -35,7 +41,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * Defines all the parent nodes that are interested in keeping the resultant anonymous table to use as a source.
       */
     private final ArrayList<Class> contextToKeepList =
-            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class, Prepare.class, CreateTable.class, CreateTableAsSelect.class));
+            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class, Insert.class, Prepare.class, CreateTable.class, CreateTableAsSelect.class, WithQuery.class));
 
     /**
      * Determines whether the current Class context is one which is required to keep the anonymous table.
@@ -181,7 +187,35 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
-     * Visit the Prepare node in the AST.
+     * Visit an Insert node in the AST.
+     *
+     * @param insert The Insert node.
+     * @param context The context.
+     * @return The result of recursively visiting the children.
+     */
+    @Override
+    protected R visitInsert(Insert insert, C context) {
+
+        // Make room for the sources table which contains the insert values.
+        sourcesStack.push(new ArrayList<>());
+
+        currentlyInside.push(Insert.class);
+        R node = visitStatement(insert, context);
+        currentlyInside.pop();
+
+        // Get the lineage nodes that result from the INSERT statement.
+        InsertStatement insertStatement = new InsertStatement(insert, sourcesStack.pop());
+        ArrayList<LineageNode> nodes = insertStatement.getLineageNodes();
+
+        // Add the source node (if exists).
+        if (nodes.size() > 1) lineageNodes.add(nodes.get(1));
+
+        // Add the target node.
+        lineageNodes.add(nodes.get(0));
+        return node;
+    }
+
+    /** Visit the Prepare node in the AST.
      * A prepare statement produces a table that can be referenced in later statements.
      * As a result, the generated table cannot just be an anonymous table because that would lose
      * its ability to be referenced later by the assigned name. Therefore, prepare statements simply
@@ -206,6 +240,24 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         return node;
     }
 
+    @Override
+    protected R visitWithQuery(WithQuery withQuery, C context) {
+
+        sourcesStack.push(new ArrayList<>());
+
+        currentlyInside.push(WithQuery.class);
+        R node = visitNode(withQuery, context);
+        currentlyInside.pop();
+
+        if (sourcesStack.peek().size() != 1) LOGGING.warn("Sources stack not maintained correctly for WITH query");
+        LineageNode withTable = sourcesStack.pop().get(0);
+        withTable.setAlias(withQuery.getName().getValue());
+        lineageNodes.add(withTable);
+        withTables.put(withTable.getAlias(), withTable);
+
+        return node;
+    }
+
     /**
      * Visit a TableSubquery node in the AST.
      *
@@ -222,9 +274,14 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         R node = visitQueryBody(tableSubquery, context);
         currentlyInside.pop();
 
+        // TODO: Assumption - at the conclusion of recursing through the children of a TableSubquery,
+        //       there will be a single anonymous table on the sources stack.
+        //       This assumption should be investigated more thoroughly to ensure it is correct.
+        if (sourcesStack.peek().size() != 1) {
+            LOGGING.warn("There was not a single source table after recursing through a subquery");
+        }
+
         // Give the result of the subquery its alias if it has one.
-        // TODO: Assumption - at the conclusion of recursing through the children of a TableSubquery, there will be a single anonymous table on the sources stack.
-        // This assumption should be investigated more thoroughly to ensure it is correct.
         if (isCurrentlyInside(AliasedRelation.class)) {
             LabellingInformation labellingInformation = labellingInformationStack.pop();
             sourcesStack.peek().get(0).setAlias(labellingInformation.getAlias());
@@ -327,9 +384,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         boolean hasIdentifier = selectStatementStack.peek().currentSelectItem().getIdentifiers().size() != 0;
         if (hasIdentifier) return;
 
-        String[] dereferenceParts = selectItem.toString().split("[.]");
+        String[] dereferenceParts = selectItem.toString().split(Constants.PrestoSQLSyntax.DEREFERENCE_DELIM_REGEX);
 
-        boolean isDereferenceWildcard = dereferenceParts.length == 2 && dereferenceParts[1].equals("*");
+        boolean isDereferenceWildcard = dereferenceParts.length == 2 && dereferenceParts[1].equals(Constants.WILDCARD);
         if (!isDereferenceWildcard) return;
 
         // Update the current select item with the dereferenced wildcard.
@@ -457,7 +514,13 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     protected R visitTable(Table table, C context) {
         if (sourcesStack.empty()) return visitQueryBody(table, context);
 
-        LineageNode node = new LineageNode(Constants.Node.TYPE_TABLE, table.getName().toString());
+        String tableName = table.getName().toString();
+        LineageNode node;
+        if (withTables.containsKey(tableName)) {
+            node = withTables.get(tableName);
+        } else {
+            node = new LineageNode(Constants.Node.TYPE_TABLE, tableName);
+        }
 
         // Get the alias if we are within an AliasedRelation context.
         if (isCurrentlyInside(AliasedRelation.class)) {

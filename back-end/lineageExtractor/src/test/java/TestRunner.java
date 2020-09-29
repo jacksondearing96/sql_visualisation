@@ -8,34 +8,35 @@ import java.util.List;
 public class TestRunner {
 
     @BeforeAll
-    static void setup(){
+    static void setup() {
         System.out.println("Testing for SIVT Back-end:");
     }
 
     @AfterAll
-    static void afterAll(){
+    static void afterAll() {
         System.out.println("All tests complete.");
     }
 
     @BeforeEach
-    void beforeEach(TestInfo testInfo){
+    void beforeEach(TestInfo testInfo) {
         System.out.println("Testing: " + testInfo.getDisplayName() + " - Started");
     }
 
     @AfterEach
-    void afterEach(TestInfo testInfo){
+    void afterEach(TestInfo testInfo) {
         System.out.println("Testing: " + testInfo.getDisplayName() + " - Complete");
     }
 
     /**
      * Get the data from a column in the format:
      * "alias=columnAlias,id=columnID,name=columnName,sources={source1,source2,...}"
+     * 
      * @param column The column which will have its data extracted and stringified.
      * @return The column data in the string form (above).
      */
-    private String getColumnDataString(Column column)  {
+    private String getColumnDataString(Column column) {
         String columnData = ReflectionToStringBuilder.reflectionToString(column);
-        return columnData.substring(columnData.indexOf("[")+1, columnData.indexOf("]"));
+        return columnData.substring(columnData.indexOf("[") + 1, columnData.indexOf("]"));
     }
 
     @Test
@@ -66,7 +67,7 @@ public class TestRunner {
         try {
             Column clone = (Column) column.clone();
             Assertions.assertTrue(column.equals(clone));
-        } catch(CloneNotSupportedException c) {
+        } catch (CloneNotSupportedException c) {
             Assertions.fail("Cloning column failure.");
         }
     }
@@ -94,7 +95,8 @@ public class TestRunner {
     @DisplayName("testMultipleIdentifiers")
     void testMultipleIdentifiers() {
         String multipleIdentifiersSelectStatement = "select a * b as c, d from mytable###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(multipleIdentifiersSelectStatement).getNodeList();
+        List<LineageNode> nodeList = LineageExtractor
+                .extractLineageWithAnonymousTables(multipleIdentifiersSelectStatement).getNodeList();
 
         // Expected source table.
         LineageNode myTable = new LineageNode(Constants.Node.TYPE_TABLE, "mytable");
@@ -115,7 +117,8 @@ public class TestRunner {
         Assertions.assertTrue(myTable.equals(nodeList.get(0)));
         Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
 
-        // While we have the expected tables constructed, test more statements with the same expected output
+        // While we have the expected tables constructed, test more statements with the
+        // same expected output
         // with variations to the SQL syntax.
         multipleIdentifiersSelectStatement = "select someFunction(a, b) as c, d from mytable###";
         nodeList = LineageExtractor.extractLineageWithAnonymousTables(multipleIdentifiersSelectStatement).getNodeList();
@@ -329,7 +332,8 @@ public class TestRunner {
     @DisplayName("testMultipleStatements")
     void testMultipleStatements() {
         String multipleStatements = "SELECT a FROM b### SELECT c FROM d###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(multipleStatements).getNodeList();
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(multipleStatements)
+                .getNodeList();
 
         // Source table (first statement).
         LineageNode firstSource = new LineageNode(Constants.Node.TYPE_TABLE, "b");
@@ -362,7 +366,8 @@ public class TestRunner {
     @DisplayName("testMultipleReferences")
     void testMultipleReferences() {
         String multipleReferences = "SELECT a FROM b### SELECT c FROM b###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(multipleReferences).getNodeList();
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(multipleReferences)
+                .getNodeList();
 
         // Source table (both statements).
         LineageNode source = new LineageNode(Constants.Node.TYPE_TABLE, "b");
@@ -389,14 +394,7 @@ public class TestRunner {
     @Test
     @DisplayName("testBypassAnonymousTables")
     void testBypassAnonymousTables() {
-        String sql =
-                "CREATE VIEW view AS " +
-                        "SELECT b " +
-                        "FROM (" +
-                        "SELECT b " +
-                        "FROM B" +
-                        ") AS A" +
-                        "###";
+        String sql = "CREATE VIEW view AS " + "SELECT b " + "FROM (" + "SELECT b " + "FROM B" + ") AS A" + "###";
 
         // Source table.
         LineageNode source = new LineageNode(Constants.Node.TYPE_TABLE, "b");
@@ -415,7 +413,8 @@ public class TestRunner {
         b.addSource(DataLineage.makeId(anonymous.getName(), b.getName()));
         view.addColumn(b);
 
-        // First, verify that the anonymous table is produced correctly as the intermediate table.
+        // First, verify that the anonymous table is produced correctly as the
+        // intermediate table.
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
         Assertions.assertEquals(3, nodeList.size());
@@ -423,7 +422,8 @@ public class TestRunner {
         Assertions.assertTrue(anonymous.equals(nodeList.get(1)));
         Assertions.assertTrue(view.equals(nodeList.get(2)));
 
-        // Now extract the lineage, including the step where the anonymous tables are bypassed.
+        // Now extract the lineage, including the step where the anonymous tables are
+        // bypassed.
         nodeList = LineageExtractor.extractLineage(sql).getNodeList();
 
         // Adjust the view, it's column's sources have now bypassed the anonymous table.
@@ -433,139 +433,17 @@ public class TestRunner {
         view.addColumn(b);
 
         // Check the resultant lineage is as expected.
-        Assertions.assertEquals(2,  nodeList.size());
+        Assertions.assertEquals(2, nodeList.size());
         Assertions.assertTrue(source.equals(nodeList.get(0)));
         Assertions.assertTrue(view.equals(nodeList.get(1)));
-    }
-
-    @Test
-    @DisplayName("testAgentLeads")
-    void testAgentLeads() {
-        String agentLeadsSql = FileReader.ReadFile("../../propic_sql_scripts/agent_leads.sql");
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(agentLeadsSql).getNodeList();
-
-        // crms_task table.
-        String crmsTaskName = "%(crm)s_task";
-        LineageNode crmsTask = new LineageNode(Constants.Node.TYPE_TABLE, crmsTaskName);
-        Column accountid = new Column("accountid");
-        Column ownerid = new Column("ownerid");
-        Column status = new Column("status");
-        Column activityDate = new Column("activitydate");
-        crmsTask.addListOfColumns(Arrays.asList(accountid, ownerid, status, activityDate));
-
-        // customer_insight table.
-        String customerInsightName = "customer_insight";
-        LineageNode customerInsight = new LineageNode(Constants.Node.TYPE_TABLE, customerInsightName);
-        Column acctSfId = new Column("acct_sf_id");
-        Column userSfId = new Column("user_sf_id");
-        customerInsight.addListOfColumns(Arrays.asList(acctSfId, userSfId));
-        customerInsight.setAlias("b");
-
-        // ANONYMOUS0.
-        LineageNode anonymous0 = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        accountid.addSource(DataLineage.makeId(crmsTaskName, accountid.getName()));
-        ownerid.addSource(DataLineage.makeId(crmsTaskName, ownerid.getName()));
-        status.addSource(DataLineage.makeId(crmsTaskName, status.getName()));
-        Column taskNoteDate = new Column("task_note_date");
-        taskNoteDate.addSource(DataLineage.makeId(crmsTaskName, activityDate.getName()));
-        anonymous0.addListOfColumns(Arrays.asList(accountid, ownerid, status, taskNoteDate));
-        anonymous0.setAlias("a");
-
-        // Anonymous1.
-        LineageNode anonymous1 = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"));
-        acctSfId.addSource(DataLineage.makeId(customerInsightName, acctSfId.getName()));
-        userSfId.addSource(DataLineage.makeId(customerInsightName, userSfId.getName()));
-        anonymous1.addListOfColumns(Arrays.asList(acctSfId, userSfId));
-
-        // View.
-        String view0Name = "note_count_by_agent";
-        LineageNode view0 = new LineageNode(Constants.Node.TYPE_VIEW, view0Name);
-        acctSfId = new Column("acct_sf_id");
-        acctSfId.addSource(DataLineage.makeId(Constants.Node.TYPE_ANON.concat("1"), acctSfId.getName()));
-        userSfId = new Column("user_sf_id");
-        userSfId.addSource(DataLineage.makeId(Constants.Node.TYPE_ANON.concat("1"), userSfId.getName()));
-        Column cnt = new Column("cnt");
-        view0.addListOfColumns(Arrays.asList(acctSfId, userSfId, cnt));
-
-        // View (second statement).
-        String view1Name = "agent_prediction_obj";
-        LineageNode view1 = new LineageNode(Constants.Node.TYPE_VIEW, view1Name);
-        Column address_detail_pid = new Column("address_detail_pid");
-        Column acctName = new Column("acct_name");
-        Column spark = new Column("spark");
-        Column kafka = new Column("kafka");
-        Column clientAgentScore = new Column("client_agent_score");
-        Column caseE = new Column("case_e");
-        Column caseF = new Column("case_f");
-        Column caseG = new Column("case_g");
-        Column primaryOwner = new Column("primary_owner");
-        Column allOwners = new Column("all_owners");
-        Column noteCnt = new Column("note_cnt");
-
-        customerInsight.addListOfColumns(
-                Arrays.asList(
-                        address_detail_pid,
-                        acctName,
-                        spark,
-                        kafka,
-                        clientAgentScore,
-                        caseE,
-                        caseF,
-                        caseG,
-                        primaryOwner,
-                        allOwners
-                )
-        );
-
-        address_detail_pid.addSource(DataLineage.makeId(customerInsightName, address_detail_pid.getName()));
-        acctSfId = new Column("acct_sf_id");
-        acctSfId.addSource(DataLineage.makeId(customerInsightName, acctSfId.getName()));
-        acctName.addSource(DataLineage.makeId(customerInsightName, acctName.getName()));
-        userSfId = new Column("user_sf_id");
-        userSfId.addSource(DataLineage.makeId(customerInsightName, userSfId.getName()));
-        spark.addSource(DataLineage.makeId(customerInsightName, spark.getName()));
-        kafka.addSource(DataLineage.makeId(customerInsightName, kafka.getName()));
-        clientAgentScore.addSource(DataLineage.makeId(customerInsightName, clientAgentScore.getName()));
-        caseE.addSource(DataLineage.makeId(customerInsightName, caseE.getName()));
-        caseF.addSource(DataLineage.makeId(customerInsightName, caseF.getName()));
-        caseG.addSource(DataLineage.makeId(customerInsightName, caseG.getName()));
-        primaryOwner.addSource(DataLineage.makeId(customerInsightName, primaryOwner.getName()));
-        allOwners.addSource(DataLineage.makeId(customerInsightName, allOwners.getName()));
-        noteCnt.addSource(DataLineage.makeId(view0Name, cnt.getName()));
-
-        view1.addListOfColumns(Arrays.asList(
-                address_detail_pid,
-                acctSfId,
-                acctName,
-                userSfId,
-                spark,
-                kafka,
-                clientAgentScore,
-                caseE,
-                caseF,
-                caseG,
-                primaryOwner,
-                allOwners,
-                noteCnt
-        ));
-
-        Assertions.assertEquals(6, nodeList.size());
-        Assertions.assertTrue(crmsTask.equals(nodeList.get(0)));
-        Assertions.assertTrue(anonymous0.equals(nodeList.get(1)));
-        Assertions.assertTrue(customerInsight.equals(nodeList.get(2)));
-        Assertions.assertTrue(anonymous1.equals(nodeList.get(3)));
-        Assertions.assertTrue(view0.equals(nodeList.get(4)));
-        // TODO: the table not tested here is %(db)s.customer_insight
-        //       The behaviour here depends on how the database name prefix is handled.
-        //       The correct behaviour has not been determined yet.
-        Assertions.assertTrue(view1.equals(nodeList.get(5)));
     }
 
     @Test
     @DisplayName("testNumericSelectValues")
     void testNumbericSelectValues() {
         String numericSelectValues = "SELECT 1 as one FROM a###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(numericSelectValues).getNodeList();
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(numericSelectValues)
+                .getNodeList();
 
         // Source table (no columns).
         LineageNode sourceTable = new LineageNode(Constants.Node.TYPE_TABLE, "a");
@@ -605,12 +483,10 @@ public class TestRunner {
         sourceB.equals(nodeList.get(1));
     }
   
+    @Test
     @DisplayName("testStandAloneLiteralTable")
     void testStandAloneLiteralTable() {
-        String sql = "VALUES " +
-                        "(1, 'a')," +
-                        "(2, 'b')," +
-                        "(3, 'c')###";
+        String sql = "VALUES " + "(1, 'a')," + "(2, 'b')," + "(3, 'c')###";
 
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
@@ -621,12 +497,7 @@ public class TestRunner {
     @DisplayName("testLiteralInlineTable")
     void testLiteralInlineTables() {
 
-        String sql = "SELECT b FROM ( " +
-                "VALUES " +
-                "(1, 'a')," +
-                "(2, 'b')," +
-                "(3, 'c')" +
-                ")###";
+        String sql = "SELECT b FROM ( " + "VALUES " + "(1, 'a')," + "(2, 'b')," + "(3, 'c')" + ")###";
 
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
@@ -644,6 +515,7 @@ public class TestRunner {
         inlineLiteral.equals(nodeList.get(0));
     }
   
+    @Test
     @DisplayName("testFunctionCall")
     void testFunctionCall() {
         String sql = "SELECT someFunction(a) AS b FROM c###";
@@ -668,12 +540,7 @@ public class TestRunner {
     @DisplayName("testLiteralInlineTableWithAlias")
     void testLiteralInlineTablesWithAlias() {
 
-        String sql = "SELECT b FROM ( " +
-                "VALUES " +
-                "(1, 'a')," +
-                "(2, 'b')," +
-                "(3, 'c')" +
-                ") AS a###";
+        String sql = "SELECT b FROM ( " + "VALUES " + "(1, 'a')," + "(2, 'b')," + "(3, 'c')" + ") AS a###";
 
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
@@ -691,6 +558,7 @@ public class TestRunner {
         inlineLiteral.equals(nodeList.get(0));
     }
 
+    @Test
     @DisplayName("testMultipleAliasesWithinSelectItem")
     void testMultipleAliasesWithinSelectItem() {
         String sql = "SELECT cast(a AS date) AS b FROM c###";
@@ -715,12 +583,7 @@ public class TestRunner {
     @DisplayName("testLiteralInlineTableWithAliasAndColumnLabels")
     void testLiteralInlineTablesWithAliasAndColumnLabels() {
 
-        String sql = "SELECT b FROM ( " +
-                "VALUES " +
-                "(1, 'a')," +
-                "(2, 'b')," +
-                "(3, 'c')" +
-                ") AS a (b, c)###";
+        String sql = "SELECT b FROM ( " + "VALUES " + "(1, 'a')," + "(2, 'b')," + "(3, 'c')" + ") AS a (b, c)###";
 
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
@@ -739,11 +602,100 @@ public class TestRunner {
         anonymous.equals(nodeList.get(1));
     }
 
+    @Test
+    @DisplayName("testInsertStatement")
+    void testInsertStatement() {
+        String sql = "INSERT INTO existingTable VALUES a###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // The only table that will be derived from this.
+        LineageNode existingTable = new LineageNode("TABLE", "existingtable");
+
+        Assertions.assertEquals(1, nodeList.size());
+        existingTable.equals(nodeList.get(0));
+    }
+
+    @Test
+    @DisplayName("testInsertFromSelect")
+    void testInsertFromSelect() {
+        String sql = "INSERT INTO existingTable SELECT * FROM a###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Source table a.
+        LineageNode sourceA = new LineageNode("TABLE", "a");
+
+        // Anonymous table from select statement.
+        LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
+        Column wildcard = new Column("*");
+        wildcard.addSource("a::*");
+        anonymous.addColumn(wildcard);
+
+        // The existing table that is having values inserted.
+        LineageNode existingTable = new LineageNode("TABLE", "existingtable");
+        wildcard = new Column("*");
+        wildcard.addSource(DataLineage.makeId(anonymous.getName(), wildcard.getName()));
+        existingTable.addColumn(wildcard);
+
+        Assertions.assertEquals(3, nodeList.size());
+        sourceA.equals(nodeList.get(0));
+        anonymous.equals(nodeList.get(1));
+        existingTable.equals(nodeList.get(2));
+    }
+
+    @Test
+    @DisplayName("testInsertWithListedColumnsAndInlineLiteral")
+    void testInsertWithListedColumnsAndInlineLiteral() {
+        String sql = "INSERT INTO existingTable (a, b, c) VALUES d, e, f###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // The existing table that is having values inserted.
+        LineageNode existingTable = new LineageNode("TABLE", "existingtable");
+        existingTable.addListOfColumns(Arrays.asList(new Column("a"), new Column("b"), new Column("c")));
+
+        Assertions.assertEquals(1, nodeList.size());
+        existingTable.equals(nodeList.get(0));
+    }
+
+    @Test
+    @DisplayName("testInsertWithListedColumnsAndSelect")
+    void testInsertWithListedColumnsAndSelect() {
+        String sql = "INSERT INTO existingTable (a, b, c) SELECT d, e, f FROM sourceTable###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        // Source table.
+        LineageNode sourceTable = new LineageNode("TABLE", "sourcetable");
+        Column d = new Column("d");
+        Column e = new Column("e");
+        Column f = new Column("f");
+        sourceTable.addListOfColumns(Arrays.asList(d, e, f));
+
+        // Anonymous table from select statement.
+        LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
+        d.addSource(DataLineage.makeId(sourceTable.getName(), d.getName()));
+        e.addSource(DataLineage.makeId(sourceTable.getName(), e.getName()));
+        f.addSource(DataLineage.makeId(sourceTable.getName(), f.getName()));
+        anonymous.addListOfColumns(Arrays.asList(d, e, f));
+
+        // The existing table that is having values inserted.
+        LineageNode existingTable = new LineageNode("TABLE", "existingtable");
+        Column a = new Column("a");
+        Column b = new Column("b");
+        Column c = new Column("c");
+        a.addSource(DataLineage.makeId(anonymous.getName(), d.getName()));
+        b.addSource(DataLineage.makeId(anonymous.getName(), e.getName()));
+        c.addSource(DataLineage.makeId(anonymous.getName(), f.getName()));
+        existingTable.addListOfColumns(Arrays.asList(a, b, c));
+
+        Assertions.assertEquals(3, nodeList.size());
+        sourceTable.equals(nodeList.get(0));
+        anonymous.equals(nodeList.get(1));
+        existingTable.equals(nodeList.get(2));
+    }
+
+    @Test
     @DisplayName("testSubquery")
     void testSubquery() {
-        String sql = "SELECT a FROM (\n" +
-                        "SELECT b FROM c\n" +
-                      ")###\n";
+        String sql = "SELECT a FROM (\n" + "SELECT b FROM c\n" + ")###\n";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
         // Table c.
@@ -772,8 +724,7 @@ public class TestRunner {
     @Test
     @DisplayName("testMultipleSources")
     void testMultipleSources() {
-        String sql = "SELECT table1.a, table2.b " +
-                     "FROM table1 INNER JOIN table2 ON 1 = 1### ";
+        String sql = "SELECT table1.a, table2.b " + "FROM table1 INNER JOIN table2 ON 1 = 1### ";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
         // Source table1.
@@ -836,6 +787,7 @@ public class TestRunner {
         mytable.equals(nodeList.get(0));
     }
 
+    @Test
     @DisplayName("testConditionalSelectItems")
     void testConditionalSelectItems() {
         String sql = "SELECT CASE WHEN a = b THEN c ELSE d END FROM mytable###";
@@ -849,7 +801,6 @@ public class TestRunner {
                 new Column("d")
         ));
 
-        PrettyPrinter.printLineageNode(nodeList.get(0));
         Assertions.assertEquals(1, nodeList.size());
         mytable.equals(nodeList.get(0));
     }
@@ -857,11 +808,8 @@ public class TestRunner {
     @Test
     @DisplayName("testDereferenceConditionalSelectItems")
     void testDereferenceConditionalSelectItems() {
-        String sql = "SELECT CASE " +
-                     "WHEN lefttable.a = righttable.b " +
-                     "THEN lefttable.c " +
-                     "ELSE righttable.d " +
-                     "END FROM lefttable INNER JOIN righttable ON 1 = 1###";
+        String sql = "SELECT CASE " + "WHEN lefttable.a = righttable.b " + "THEN lefttable.c " + "ELSE righttable.d "
+                + "END FROM lefttable INNER JOIN righttable ON 1 = 1###";
         List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
 
         LineageNode leftTable = new LineageNode(Constants.Node.TYPE_TABLE, "lefttable");
@@ -876,15 +824,12 @@ public class TestRunner {
                 new Column("d")
         ));
 
-        for (LineageNode node : nodeList) {
-            PrettyPrinter.printLineageNode(node);
-        }
-
         Assertions.assertEquals(2, nodeList.size());
         leftTable.equals(nodeList.get(0));
         rightTable.equals(nodeList.get(1));
     }
 
+    @Test
     @DisplayName("testPrepareStatement")
     void testPrepareStatement() {
         String sql = "PREPARE mytable FROM SELECT a, b FROM c###";
@@ -903,5 +848,139 @@ public class TestRunner {
         Assertions.assertEquals(2, nodeList.size());
         tableC.equals(nodeList.get(0));
         prepareNode.equals(nodeList.get(1));
+    }
+
+    @Test
+    @DisplayName("testWithClause")
+    void testWithClause() {
+        String sql = "WITH withtable AS (" +
+                        "SELECT a, b FROM existingtable" +
+                     ")" +
+                     "SELECT a FROM withtable###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        LineageNode existingTable = new LineageNode(Constants.Node.TYPE_TABLE, "existingtable");
+        Column a = new Column("a");
+        Column b = new Column("b");
+        existingTable.addListOfColumns(Arrays.asList(a, b));
+
+        LineageNode withTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"), "withtable");
+        a.addSource(DataLineage.makeId(existingTable.getName(), a.getName()));
+        b.addSource(DataLineage.makeId(existingTable.getName(), b.getName()));
+        withTable.addListOfColumns(Arrays.asList(a, b));
+
+        LineageNode resultantTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"));
+        a = new Column("a");
+        a.addSource(DataLineage.makeId(withTable.getName(), a.getName()));
+        resultantTable.addColumn(a);
+
+        Assertions.assertEquals(3, nodeList.size());
+        existingTable.equals(nodeList.get(0));
+        withTable.equals(nodeList.get(1));
+        resultantTable.equals(nodeList.get(2));
+    }
+
+    @Test
+    @DisplayName("testMultipleWithClause")
+    void testMultipleWithClause() {
+        String sql = "WITH withtable1 AS (" +
+                        "SELECT a, b FROM existingtable1" +
+                     "), " +
+                     "withtable2 AS (" +
+                        "SELECT c, d FROM existingtable2" +
+                     ") " +
+                     "SELECT withtable1.a, withtable2.c " +
+                     "FROM withtable1 INNER JOIN withtable2 ON 1 = 1###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+
+        LineageNode existingTable1 = new LineageNode(Constants.Node.TYPE_TABLE, "existingtable1");
+        Column a = new Column("a");
+        Column b = new Column("b");
+        existingTable1.addListOfColumns(Arrays.asList(a, b));
+
+        LineageNode existingTable2 = new LineageNode(Constants.Node.TYPE_TABLE, "existingtable2");
+        Column c = new Column("c");
+        Column d = new Column("d");
+        existingTable2.addListOfColumns(Arrays.asList(c, d));
+
+        LineageNode withTable1 = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"), "withtable1");
+        a.addSource(DataLineage.makeId(existingTable1.getName(), a.getName()));
+        b.addSource(DataLineage.makeId(existingTable1.getName(), b.getName()));
+        withTable1.addListOfColumns(Arrays.asList(a, b));
+
+        LineageNode withTable2 = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"), "withtable2");
+        c.addSource(DataLineage.makeId(existingTable2.getName(), c.getName()));
+        d.addSource(DataLineage.makeId(existingTable2.getName(), d.getName()));
+        withTable2.addListOfColumns(Arrays.asList(c, d));
+
+        LineageNode resultantTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("2"));
+        a = new Column("a");
+        c = new Column("c");
+        a.addSource(DataLineage.makeId(withTable1.getName(), a.getName()));
+        c.addSource(DataLineage.makeId(withTable2.getName(), c.getName()));
+        resultantTable.addListOfColumns(Arrays.asList(a, c));
+
+        Assertions.assertEquals(5, nodeList.size());
+        existingTable1.equals(nodeList.get(0));
+        withTable1.equals(nodeList.get(1));
+        existingTable2.equals(nodeList.get(2));
+        withTable2.equals(nodeList.get(3));
+        resultantTable.equals(nodeList.get(4));
+    }
+
+    @Test
+    @DisplayName("testMultipleWithClauseEarlyReference")
+    void testMultipleWithClaseEarlyReference() {
+        String sql = "CREATE VIEW myview AS " + 
+                     "WITH withtable1 AS (" +
+                        "SELECT a, b FROM existingtable1" +
+                     "), " +
+                     "withtable2 AS (" +
+                        "SELECT b AS c FROM withtable1" +
+                     ") " +
+                     "SELECT withtable1.a, withtable2.c " +
+                     "FROM withtable1 INNER JOIN withtable2 ON 1 = 1###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        LineageNode existingTable1 = new LineageNode(Constants.Node.TYPE_TABLE, "existingtable1");
+        Column a = new Column("a");
+        Column b = new Column("b");
+        existingTable1.addListOfColumns(Arrays.asList(a, b));
+
+        LineageNode view = new LineageNode(Constants.Node.TYPE_VIEW, "myview");
+        a = new Column("a");
+        Column c = new Column("c");
+        a.addSource(DataLineage.makeId(existingTable1.getName(), a.getName()));
+        c.addSource(DataLineage.makeId(existingTable1.getName(), b.getName()));
+        view.addListOfColumns(Arrays.asList(a, c));
+
+        Assertions.assertEquals(2, nodeList.size());
+        existingTable1.equals(nodeList.get(0));
+        view.equals(nodeList.get(1));
+    }
+
+    @Test
+    @DisplayName("testBypassAnonymousWithTable")
+    void testBypassAnonymousWithTable() {
+        String sql = "CREATE OR REPLACE VIEW view1 AS " + 
+                     "WITH withtable AS (" +
+                        "SELECT a, b FROM existingtable" +
+                     ")" +
+                     "SELECT a FROM withtable###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
+
+        LineageNode existingTable = new LineageNode(Constants.Node.TYPE_TABLE, "existingtable");
+        Column a = new Column("a");
+        Column b = new Column("b");
+        existingTable.addListOfColumns(Arrays.asList(a, b));
+
+        LineageNode view = new LineageNode(Constants.Node.TYPE_VIEW, "view1");
+        a = new Column("a");
+        a.addSource(DataLineage.makeId(existingTable.getName(), a.getName()));
+        view.addColumn(a);
+
+        Assertions.assertEquals(2, nodeList.size());
+        existingTable.equals(nodeList.get(0));
+        view.equals(nodeList.get(1));
     }
 }

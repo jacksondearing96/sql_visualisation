@@ -29,4 +29,17 @@ public class Util {
         String[] nameParts = name.split("[.]");
         return nameParts[nameParts.length - 1];
     }
+
+    /**
+     * Copies every column from source into target.
+     * @param target The target lineage node.
+     * @param source The source lineage node.
+     */
+    public static void deriveEveryColumnFromSource(LineageNode target, LineageNode source) {
+        for (Column sourceColumn : source.getColumns()) {
+            Column column = new Column(sourceColumn.getName());
+            column.addSource(DataLineage.makeId(source.getName(), column.getName()));
+            target.addColumn(column);
+        }
+    }
 }
