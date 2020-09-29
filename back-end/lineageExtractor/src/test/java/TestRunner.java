@@ -929,10 +929,6 @@ public class TestRunner {
                 new Column("d")
         ));
 
-        for (LineageNode node : nodeList) {
-            PrettyPrinter.printLineageNode(node);
-        }
-
         Assertions.assertEquals(2, nodeList.size());
         leftTable.equals(nodeList.get(0));
         rightTable.equals(nodeList.get(1));
