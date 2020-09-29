@@ -3,6 +3,7 @@ public final class Constants {
 
     public final class PrestoSQLSyntax {
         public static final String STATEMENT_DELIM = "###";
+        public static final String DEREFERENCE_DELIM_REGEX = "[.]";
 
         private PrestoSQLSyntax() {}
     }

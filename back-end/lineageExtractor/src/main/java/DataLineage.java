@@ -25,6 +25,7 @@ public class DataLineage {
     private void replaceSourceWithSources(Column column, int index, ArrayList<String> sources) {
         column.getSources().remove(index);
         --index;
+        if (sources == null) return;
         for (String source : sources) {
             column.getSources().add(++index, source);
         }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.Arrays;
+import java.util.HashMap;
 
 class SivtVisitor<R, C> extends AstVisitor<R, C> {
 
@@ -17,6 +18,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     private final Stack<ArrayList<LineageNode>> sourcesStack = new Stack<>();
     private final Stack<LabellingInformation> labellingInformationStack = new Stack<>();
     private final Stack<ArrayList<ColumnDefinition>> columnDefinitionStack = new Stack<>();
+    private final HashMap<String, LineageNode> withTables = new HashMap<>();
 
     /**
      * Stack to maintain the context within which the recursive decent visitor is in.
@@ -39,7 +41,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * Defines all the parent nodes that are interested in keeping the resultant anonymous table to use as a source.
       */
     private final ArrayList<Class> contextToKeepList =
-            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class, Insert.class, Prepare.class, CreateTable.class, CreateTableAsSelect.class));
+            new ArrayList<Class>(Arrays.asList(TableSubquery.class, CreateView.class, Insert.class, Prepare.class, CreateTable.class, CreateTableAsSelect.class, WithQuery.class));
 
     /**
      * Determines whether the current Class context is one which is required to keep the anonymous table.
@@ -185,7 +187,6 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     }
 
     /**
-<<<<<<< HEAD
      * Visit an Insert node in the AST.
      *
      * @param insert The Insert node.
@@ -235,6 +236,24 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         LineageNode prepareNode = sourcesStack.pop().get(0);
         convertNodeToTable(prepareNode, prepare.getName().getValue());
         lineageNodes.add(prepareNode);
+
+        return node;
+    }
+
+    @Override
+    protected R visitWithQuery(WithQuery withQuery, C context) {
+
+        sourcesStack.push(new ArrayList<>());
+
+        currentlyInside.push(WithQuery.class);
+        R node = visitNode(withQuery, context);
+        currentlyInside.pop();
+
+        if (sourcesStack.peek().size() != 1) LOGGING.warn("Sources stack not maintained correctly for WITH query");
+        LineageNode withTable = sourcesStack.pop().get(0);
+        withTable.setAlias(withQuery.getName().getValue());
+        lineageNodes.add(withTable);
+        withTables.put(withTable.getAlias(), withTable);
 
         return node;
     }
@@ -365,9 +384,9 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
         boolean hasIdentifier = selectStatementStack.peek().currentSelectItem().getIdentifiers().size() != 0;
         if (hasIdentifier) return;
 
-        String[] dereferenceParts = selectItem.toString().split("[.]");
+        String[] dereferenceParts = selectItem.toString().split(Constants.PrestoSQLSyntax.DEREFERENCE_DELIM_REGEX);
 
-        boolean isDereferenceWildcard = dereferenceParts.length == 2 && dereferenceParts[1].equals("*");
+        boolean isDereferenceWildcard = dereferenceParts.length == 2 && dereferenceParts[1].equals(Constants.WILDCARD);
         if (!isDereferenceWildcard) return;
 
         // Update the current select item with the dereferenced wildcard.
@@ -495,7 +514,13 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     protected R visitTable(Table table, C context) {
         if (sourcesStack.empty()) return visitQueryBody(table, context);
 
-        LineageNode node = new LineageNode(Constants.Node.TYPE_TABLE, table.getName().toString());
+        String tableName = table.getName().toString();
+        LineageNode node;
+        if (withTables.containsKey(tableName)) {
+            node = withTables.get(tableName);
+        } else {
+            node = new LineageNode(Constants.Node.TYPE_TABLE, tableName);
+        }
 
         // Get the alias if we are within an AliasedRelation context.
         if (isCurrentlyInside(AliasedRelation.class)) {
