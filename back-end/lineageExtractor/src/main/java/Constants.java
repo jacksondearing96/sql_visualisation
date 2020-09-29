@@ -18,7 +18,6 @@ public final class Constants {
         public static final String TYPE_TABLE = "TABLE";
         public static final String TYPE_VIEW = "VIEW";
         public static final String TYPE_ANON = "ANONYMOUS";
-        public static final String TYPE_WITH = "WITH";
         public static final String SEPARATOR = "::";
 
         private Node() {}
