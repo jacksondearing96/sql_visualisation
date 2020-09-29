@@ -34,7 +34,7 @@ out/
 ## VSCode
 .vscode
 
-.settings
+.settings/
 log
-.project
-.classpath
+*.project
+*.classpath
