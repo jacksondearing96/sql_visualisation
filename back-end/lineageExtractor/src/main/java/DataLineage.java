@@ -1,8 +1,6 @@
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import java.io.IOException;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -13,14 +11,6 @@ import java.util.HashMap;
  */
 public class DataLineage {
     private ArrayList<LineageNode> nodeList = new ArrayList<LineageNode>();
-    private String fileName;
-
-    /**
-     * @param fileName name of the JSON file.
-     */
-    public DataLineage(String fileName) {
-        this.fileName = fileName;
-    }
 
     public List<LineageNode> getNodeList() {
         return nodeList;
@@ -77,24 +67,19 @@ public class DataLineage {
         }
 
         // Delete the now redundant anonymous nodes.
-        nodeList.removeIf(node -> node.getType().equals(Constants.Node.TYPE_ANON));
+        nodeList.removeIf(node -> node.getType().equals("ANONYMOUS"));
     }
 
 
     /**
      * Writes out the data lineage to a JSON file.
      */
-    public void toJSON() {
+    public String getNodeListAsJson() {
         try {
-            // Create object mapper instance
             ObjectMapper mapper = new ObjectMapper();
-            ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-
-            // Convert Nodes to JSON file
-            writer.writeValue(Paths.get(this.fileName).toFile(), this.nodeList);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+            return mapper.writeValueAsString(nodeList);
+        } catch (IOException e) {}
+        return "";
     }
 
     /**
@@ -151,14 +136,7 @@ public class DataLineage {
         }
     }
 
-    /**
-     * @param fileName name of the JSON file.
-     */
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
     public static String makeId(String source, String target) {
-        return Util.removeDatabasePrefix(source).concat(Constants.Node.SEPARATOR).concat(target);
+        return Util.removeDatabasePrefix(source).concat("::").concat(target);
     }
 }
