@@ -1,6 +1,7 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.List;
 
@@ -8,7 +9,7 @@ public class TestAlias {
 
     @Test
     @DisplayName("testAliasForColumn")
-    void testAliasForColumn() {
+    public void testAliasForColumn() {
         String statement = "SELECT a AS b from c###";
 
         // Output
@@ -30,7 +31,7 @@ public class TestAlias {
 
     @Test
     @DisplayName("testAliasForTable")
-    void testAliasForTable() {
+    public void testAliasForTable() {
         String statement = "SELECT a FROM b AS c###";
 
         // Output
@@ -52,7 +53,7 @@ public class TestAlias {
 
     @Test
     @DisplayName("testMultipleAliasesWithinSelectItem")
-    void testMultipleAliasesWithinSelectItem() {
+    public void testMultipleAliasesWithinSelectItem() {
         String sql = "SELECT cast(a AS date) AS b FROM c###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 

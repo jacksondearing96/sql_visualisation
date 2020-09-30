@@ -9,7 +9,7 @@ public class TestLiteral {
 
     @Test
     @DisplayName("testStandAloneLiteralTable")
-    void testStandAloneLiteralTable() {
+    public void testStandAloneLiteralTable() {
         String sql = "VALUES " + "(1, 'a')," + "(2, 'b')," + "(3, 'c')###";
 
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
@@ -19,7 +19,7 @@ public class TestLiteral {
 
     @Test
     @DisplayName("testLiteralInlineTable")
-    void testLiteralInlineTables() {
+    public void testLiteralInlineTables() {
 
         String sql = "SELECT b FROM ( " + "VALUES " + "(1, 'a')," + "(2, 'b')," + "(3, 'c')" + ")###";
 
@@ -41,7 +41,7 @@ public class TestLiteral {
 
     @Test
     @DisplayName("testLiteralInlineTableWithAlias")
-    void testLiteralInlineTablesWithAlias() {
+    public void testLiteralInlineTablesWithAlias() {
 
         String sql = "SELECT b FROM ( " + "VALUES " + "(1, 'a')," + "(2, 'b')," + "(3, 'c')" + ") AS a###";
 
@@ -63,7 +63,7 @@ public class TestLiteral {
 
     @Test
     @DisplayName("testLiteralInlineTableWithAliasAndColumnLabels")
-    void testLiteralInlineTablesWithAliasAndColumnLabels() {
+    public void testLiteralInlineTablesWithAliasAndColumnLabels() {
 
         String sql = "SELECT b FROM ( " + "VALUES " + "(1, 'a')," + "(2, 'b')," + "(3, 'c')" + ") AS a (b, c)###";
 

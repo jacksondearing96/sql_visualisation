@@ -9,7 +9,7 @@ public class TestFiles {
 
     @Test
     @DisplayName("testAgentLeads")
-    void testAgentLeads() {
+    public void testAgentLeads() {
         String agentLeadsSql = FileReader.ReadFile("../../propic_sql_scripts/agent_leads.sql");
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(agentLeadsSql).getNodeList();
 

@@ -8,7 +8,7 @@ public class TestLineage {
 
     @Test
     @DisplayName("lineageNodeNamingConvention")
-    void lineageNodeSetName() {
+    public void lineageNodeSetName() {
         // Basic name.
         LineageNode node = new LineageNode(Constants.Node.TYPE_TABLE, "name");
         Assertions.assertEquals("name", node.getName());
@@ -27,7 +27,7 @@ public class TestLineage {
 
     @Test
     @DisplayName("testLineageNodes")
-    void testLineageNodes() {
+    public void testLineageNodes() {
         String simpleSelect = "SELECT a FROM b###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(simpleSelect).getNodeList();
 

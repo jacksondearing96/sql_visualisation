@@ -9,7 +9,7 @@ public class TestWildcard {
 
     @Test
     @DisplayName("testWildCardOperator")
-    void testWildCardOperator() {
+    public void testWildCardOperator() {
         String statement = "SELECT * from b###";
 
         // Output
@@ -31,7 +31,7 @@ public class TestWildcard {
 
     @Test
     @DisplayName("testDereferencedWildcard")
-    void testDereferencedWildcard() {
+    public void testDereferencedWildcard() {
         String sql = "SELECT a.*, b.c FROM a INNER JOIN b ON 1 = 1###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 

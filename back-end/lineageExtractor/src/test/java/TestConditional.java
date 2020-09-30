@@ -1,6 +1,6 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,7 +9,7 @@ public class TestConditional {
 
     @Test
     @DisplayName("testConditionalSelectItems")
-    void testConditionalSelectItems() {
+    public void testConditionalSelectItems() {
         String sql = "SELECT CASE WHEN a = b THEN c ELSE d END FROM mytable###";
         List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
 
@@ -27,7 +27,7 @@ public class TestConditional {
 
     @Test
     @DisplayName("testDereferenceConditionalSelectItems")
-    void testDereferenceConditionalSelectItems() {
+    public void testDereferenceConditionalSelectItems() {
         String sql = "SELECT CASE " + "WHEN lefttable.a = righttable.b " + "THEN lefttable.c " + "ELSE righttable.d "
                 + "END FROM lefttable INNER JOIN righttable ON 1 = 1###";
         List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();

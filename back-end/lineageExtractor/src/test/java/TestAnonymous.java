@@ -1,16 +1,12 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class TestAnonymous {
-    @BeforeAll
-    static void setup() {
-        System.out.println("Testing for SIVT Back-end:");
-    }
 
     @Test
     @DisplayName("testBasicAnonymousTableGeneration")

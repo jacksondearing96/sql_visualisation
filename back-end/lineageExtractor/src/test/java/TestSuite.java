@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -23,4 +24,9 @@ import org.junit.runners.Suite;
 )
 
 public class TestSuite{
+
+        @BeforeEach
+        static void beforeEach(){
+                System.out.println("Testing TESTING");
+        }
 }

@@ -9,7 +9,7 @@ public class TestMultiple {
 
     @Test
     @DisplayName("testMultipleIdentifiers")
-    void testMultipleIdentifiers() {
+    public void testMultipleIdentifiers() {
         String multipleIdentifiersSelectStatement = "select a * b as c, d from mytable###";
         List<LineageNode> nodeList = LineageExtractor
                 .extractLineageWithAnonymousTables(multipleIdentifiersSelectStatement).getNodeList();
@@ -46,7 +46,7 @@ public class TestMultiple {
 
     @Test
     @DisplayName("testMultipleSelect")
-    void testMultipleSelect() {
+    public void testMultipleSelect() {
         String statement = "SELECT a, b FROM c###";
 
         // Output
@@ -71,7 +71,7 @@ public class TestMultiple {
 
     @Test
     @DisplayName("testMultipleStatements")
-    void testMultipleStatements() {
+    public void testMultipleStatements() {
         String multipleStatements = "SELECT a FROM b### SELECT c FROM d###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(multipleStatements)
                 .getNodeList();
@@ -105,7 +105,7 @@ public class TestMultiple {
 
     @Test
     @DisplayName("testMultipleReferences")
-    void testMultipleReferences() {
+    public void testMultipleReferences() {
         String multipleReferences = "SELECT a FROM b### SELECT c FROM b###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(multipleReferences)
                 .getNodeList();
@@ -134,7 +134,7 @@ public class TestMultiple {
 
     @Test
     @DisplayName("testMultipleSources")
-    void testMultipleSources() {
+    public void testMultipleSources() {
         String sql = "SELECT table1.a, table2.b " + "FROM table1 INNER JOIN table2 ON 1 = 1### ";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 

@@ -9,7 +9,7 @@ public class TestWith {
 
     @Test
     @DisplayName("testWithClause")
-    void testWithClause() {
+    public void testWithClause() {
         String sql = "WITH withtable AS (" +
                 "SELECT a, b FROM existingtable" +
                 ")" +
@@ -39,7 +39,7 @@ public class TestWith {
 
     @Test
     @DisplayName("testMultipleWithClause")
-    void testMultipleWithClause() {
+    public void testMultipleWithClause() {
         String sql = "WITH withtable1 AS (" +
                 "SELECT a, b FROM existingtable1" +
                 "), " +
@@ -87,7 +87,7 @@ public class TestWith {
 
     @Test
     @DisplayName("testMultipleWithClauseEarlyReference")
-    void testMultipleWithClauseEarlyReference() {
+    public void testMultipleWithClauseEarlyReference() {
         String sql = "CREATE VIEW myview AS " +
                 "WITH withtable1 AS (" +
                 "SELECT a, b FROM existingtable1" +
@@ -118,7 +118,7 @@ public class TestWith {
 
     @Test
     @DisplayName("testBypassAnonymousWithTable")
-    void testBypassAnonymousWithTable() {
+    public void testBypassAnonymousWithTable() {
         String sql = "CREATE OR REPLACE VIEW view1 AS " +
                 "WITH withtable AS (" +
                 "SELECT a, b FROM existingtable" +

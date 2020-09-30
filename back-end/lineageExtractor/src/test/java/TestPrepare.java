@@ -9,7 +9,7 @@ public class TestPrepare {
 
     @Test
     @DisplayName("testPrepareStatement")
-    void testPrepareStatement() {
+    public void testPrepareStatement() {
         String sql = "PREPARE mytable FROM SELECT a, b FROM c###";
         List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
 

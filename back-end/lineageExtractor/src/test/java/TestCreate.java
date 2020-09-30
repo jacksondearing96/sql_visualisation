@@ -1,8 +1,8 @@
 import org.junit.jupiter.api.*;
-import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.List;
+import org.junit.Test;
 
 public class TestCreate {
 
@@ -25,7 +25,7 @@ public class TestCreate {
 
     @Test
     @DisplayName("testCreateTableAsSelect")
-    void testCreateTableAsSelect() {
+    public void testCreateTableAsSelect() {
         String sql = "CREATE TABLE createdtable AS SELECT a, b FROM existingtable###";
         List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
 
@@ -46,7 +46,7 @@ public class TestCreate {
 
     @Test
     @DisplayName("testCreateView")
-    void testCreateView() {
+    public void testCreateView() {
         String statement = "CREATE VIEW a AS SELECT b from c###";
 
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(statement).getNodeList();

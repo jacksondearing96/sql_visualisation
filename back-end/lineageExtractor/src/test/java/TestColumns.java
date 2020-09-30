@@ -1,7 +1,7 @@
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +23,7 @@ public class TestColumns {
 
     @Test
     @DisplayName("testColumn")
-    void testColumn() {
+    public void testColumn() {
         // Testing "getters"
         Column column = new Column("name", "alias", "id");
         Assertions.assertEquals("name", column.getName());
@@ -56,7 +56,7 @@ public class TestColumns {
 
     @Test
     @DisplayName("testRenameColumn")
-    void testRenameColumn()  {
+    public void testRenameColumn()  {
         String sql = "SELECT a FROM mytable### ALTER TABLE mytable RENAME COLUMN a TO b###";
         List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
 
@@ -69,7 +69,7 @@ public class TestColumns {
 
     @Test
     @DisplayName("testAddColumn")
-    void testAddColumn() {
+    public void testAddColumn() {
         String sql = "ALTER TABLE mytable ADD COLUMN a varchar###";
         List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
 

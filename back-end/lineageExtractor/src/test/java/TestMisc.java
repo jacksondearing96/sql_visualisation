@@ -11,14 +11,14 @@ public class TestMisc {
 
     @Test
     @DisplayName("testFileReader")
-    void testFileReader() {
+    public void testFileReader() {
         Assertions.assertEquals(" SELECT * FROM hello### SELECT a FROM goodbye",
                 FileReader.ReadFile("./src/test/java/testInput.sql"));
     }
 
     @Test
     @DisplayName("testNumericSelectValues")
-    void testNumericSelectValues() {
+    public void testNumericSelectValues() {
         String numericSelectValues = "SELECT 1 as one FROM a###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(numericSelectValues)
                 .getNodeList();
@@ -37,7 +37,7 @@ public class TestMisc {
 
     @Test
     @DisplayName("testFunctionCall")
-    void testFunctionCall() {
+    public void testFunctionCall() {
         String sql = "SELECT someFunction(a) AS b FROM c###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
@@ -58,7 +58,7 @@ public class TestMisc {
 
     @Test
     @DisplayName("testSubquery")
-    void testSubquery() {
+    public void testSubquery() {
         String sql = "SELECT a FROM (\n" + "SELECT b FROM c\n" + ")###\n";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
@@ -87,7 +87,7 @@ public class TestMisc {
 
     @Test
     @DisplayName("testRenameTable")
-    void testRenameTable() {
+    public void testRenameTable() {
         String sql = "ALTER TABLE mytable RENAME TO newname###";
         List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
 

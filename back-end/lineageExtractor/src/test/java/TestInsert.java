@@ -9,7 +9,7 @@ public class TestInsert {
 
     @Test
     @DisplayName("testInsertStatement")
-    void testInsertStatement() {
+    public void testInsertStatement() {
         String sql = "INSERT INTO existingTable VALUES a###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
@@ -22,7 +22,7 @@ public class TestInsert {
 
     @Test
     @DisplayName("testInsertFromSelect")
-    void testInsertFromSelect() {
+    public void testInsertFromSelect() {
         String sql = "INSERT INTO existingTable SELECT * FROM a###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
@@ -49,7 +49,7 @@ public class TestInsert {
 
     @Test
     @DisplayName("testInsertWithListedColumnsAndInlineLiteral")
-    void testInsertWithListedColumnsAndInlineLiteral() {
+    public void testInsertWithListedColumnsAndInlineLiteral() {
         String sql = "INSERT INTO existingTable (a, b, c) VALUES d, e, f###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
@@ -63,7 +63,7 @@ public class TestInsert {
 
     @Test
     @DisplayName("testInsertWithListedColumnsAndSelect")
-    void testInsertWithListedColumnsAndSelect() {
+    public void testInsertWithListedColumnsAndSelect() {
         String sql = "INSERT INTO existingTable (a, b, c) SELECT d, e, f FROM sourceTable###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
