@@ -2,16 +2,26 @@ import java.util.ArrayList;
 import java.util.Stack;
 import java.util.function.Predicate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Represents a select statement from an SQL statement.
  * A select statement contains potentially multiple distinct select items and these items
  * are sourced from potentially multiple source tables.
  */
 public class SelectStatement {
+    final static Logger LOGGING = LoggerFactory.getLogger(SelectStatement.class);
+
     private Stack<SelectItem> selectItems = new Stack<>();
     private ArrayList<LineageNode> sourceTables = new ArrayList<>();
     private LineageNode anonymousTable;
     private boolean isReconciled = false;
+    private DataLineage existingLineage;
+
+    public SelectStatement(DataLineage existingLineage) {
+        this.existingLineage = existingLineage;
+    }
 
     public void addEmptySelectItem() {
         selectItems.push(new SelectItem());
@@ -76,8 +86,16 @@ public class SelectStatement {
                         column.getSources().removeIf(isNameOrAlias);
 
                         // Add the source column to the source table.
-                        // Skip wildcard columns.
-                        if (!column.getName().equals(Constants.WILDCARD)) sourceTable.addColumn(column);
+                        if (!column.isWildcard()) {
+                            sourceTable.addColumn(column);
+                        } else {
+                            Util.deriveEveryColumnFromSource(anonymousTable, sourceTable);
+                            existingLineage.getNodeWithName(sourceTable.getName()).ifPresent(node -> {
+                                Util.deriveEveryColumnFromSource(anonymousTable, node);
+                                LOGGING.warn("Deriving wildcard lineage from table with no (yet) observed columns");
+                            }
+                            );
+                        }
 
                         // Add this as a source of the column. This will be for the anonymous table.
                         anonymousColumn.addSource(DataLineage.makeId(sourceTable.getName(), column.getName()));
@@ -91,8 +109,8 @@ public class SelectStatement {
 
                 // If an alias exists for this column, use it as the name for the anonymous table.
                 if (!selectItem.getAlias().isEmpty()) anonymousColumn.setName(selectItem.getAlias());
-                // Every selected item is added to the anonymous table.
-                anonymousTable.addColumn(anonymousColumn);
+                // Every selected item is added to the anonymous table (except wildcards).
+                if (!anonymousColumn.isWildcard()) anonymousTable.addColumn(anonymousColumn);
             }
         }
         isReconciled = true;
