@@ -92,7 +92,7 @@ public class TestMisc {
 
     @Test
     @DisplayName("testTopLevelNodeIds")
-    void testTopLevelNodeIds() {
+    public void testTopLevelNodeIds() {
         LineageNode node = new LineageNode(Constants.Node.TYPE_TABLE, "node");
         Assertions.assertEquals("node::", node.getID());
 
