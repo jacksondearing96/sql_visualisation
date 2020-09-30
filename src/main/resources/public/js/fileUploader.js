@@ -11,19 +11,19 @@ let tickImg = "<img class='tick' src='https://lesspestcontrol.com.au/wp-content/
 let crossImg = "<img class='cross' src='https://freesvg.org/img/milker_X_icon.png'>";
 
 const propic_file_order = [
-  'crm_join.sql',
-  'supporting_views.sql',
-  'appraisal_case.sql',
-  'buyer_vendor_case.sql',
-  'record_sale_nearby.sql',
-  'leads_from_crm.sql',
-  'leads_from_market.sql',
-  'leads_with_score.sql',
-  'agent_leads.sql'
+    'crm_join.sql',
+    'supporting_views.sql',
+    'appraisal_case.sql',
+    'buyer_vendor_case.sql',
+    'record_sale_nearby.sql',
+    'leads_from_crm.sql',
+    'leads_from_market.sql',
+    'leads_with_score.sql',
+    'agent_leads.sql'
 ]
 
 function isValidSqlFileContents(contents) {
-  return true;
+    return true;
 }
 
 function fileLine(img, filename) {
@@ -31,22 +31,22 @@ function fileLine(img, filename) {
 }
 
 function validFile(filename) {
-  return fileLine(tickImg, filename);
+    return fileLine(tickImg, filename);
 }
 
 function invalidFile(filename) {
-  return fileLine(crossImg, filename);
+    return fileLine(crossImg, filename);
 }
 
 function readFile(file) {
-  return new Promise(resolve => {
-    let reader = new FileReader();
-    reader.readAsText(file, 'UTF-8');
-    reader.onload = event => {
-        let isValid = isValidSqlFileContents(event.target.result);
-        resolve(isValid ? validFile(file.name) : invalidFile(file.name))
-    }
-  });
+    return new Promise(resolve => {
+        let reader = new FileReader();
+        reader.readAsText(file, 'UTF-8');
+        reader.onload = event => {
+            let isValid = isValidSqlFileContents(event.target.result);
+            resolve(isValid ? validFile(file.name) : invalidFile(file.name))
+        }
+    });
 }
 
 /**
@@ -54,48 +54,48 @@ function readFile(file) {
  * All files not defined in Propic's list will be ordered randomly at the end of the ordered list.
  */
 function sortingOrder(file) {
-  let preSortedFileIndex = propic_file_order.indexOf(file.name);
-  return (preSortedFileIndex === NOT_FOUND) ? propic_file_order.length : preSortedFileIndex;
+    let preSortedFileIndex = propic_file_order.indexOf(file.name);
+    return (preSortedFileIndex === NOT_FOUND) ? propic_file_order.length : preSortedFileIndex;
 }
 
 function sortFiles(files) {
-  let sortedFiles = [];
-  for (let file of files) {
-    sortedFiles.push(file);
-  }
-  return sortedFiles.sort((file1, file2) => sortingOrder(file1) - sortingOrder(file2));
+    let sortedFiles = [];
+    for (let file of files) {
+        sortedFiles.push(file);
+    }
+    return sortedFiles.sort((file1, file2) => sortingOrder(file1) - sortingOrder(file2));
 }
 
 function errorFileExists() {
-  return fileListContainer.find('img.cross').length != 0
+    return fileListContainer.find('img.cross').length != 0
 }
 
 function uploadFiles() {
     // Clear any files currently uploaded.
     fileListContainer.html('');
-    
+
     // Read files asynchronously.
     let files = document.getElementById('upload-files-input').files;
     let readFilePromises = sortFiles(files).map(file => readFile(file));
-    
-    Promise.all(readFilePromises).then(listItems => {
-      fileListContainer.show();
-      listItems.forEach(listItem => fileListContainer.append(listItem));
 
-      // Activate button if all files are validated.
-      if (!errorFileExists()) generateVisualisationButton.prop('disabled', false);
+    Promise.all(readFilePromises).then(listItems => {
+        fileListContainer.show();
+        listItems.forEach(listItem => fileListContainer.append(listItem));
+
+        // Activate button if all files are validated.
+        if (!errorFileExists()) generateVisualisationButton.prop('disabled', false);
     });
 }
 
 function generateVisualisationButtonClicked() {
-  generateVisualisation(demoGraph);
+    generateVisualisation(demoGraph);
 }
 
 function initialiseEventListeners() {
-  uploadFilesInput.change(uploadFiles);
-  chooseFilesButton.click(() => uploadFilesInput.trigger('click'));
-  generateVisualisationButton.click(generateVisualisationButtonClicked);
-  demoButton.click(() => generateVisualisation(demoGraph));
+    uploadFilesInput.change(uploadFiles);
+    chooseFilesButton.click(() => uploadFilesInput.trigger('click'));
+    generateVisualisationButton.click(generateVisualisationButtonClicked);
+    demoButton.click(() => generateVisualisation(demoGraph));
 }
 
 $(document).ready(() => initialiseEventListeners);

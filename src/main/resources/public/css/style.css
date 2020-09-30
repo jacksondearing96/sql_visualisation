@@ -1,70 +1,70 @@
 body {
-  text-align: center;
-  background-color: rgb(60,60,60);
-  font-family: 'Montserrat', sans-serif;
-  color: rgb(200,200,200);
+    text-align: center;
+    background-color: rgb(60, 60, 60);
+    font-family: 'Montserrat', sans-serif;
+    color: rgb(200, 200, 200);
 }
 
 svg {
-  margin: 0 auto;
-  display: block;
-  overflow: auto;
+    margin: 0 auto;
+    display: block;
+    overflow: auto;
 }
 
 #visualisation-container {
-  margin: 0 auto;
-  margin-top: 20px;
-  display: none;
-  border: 1px solid black;
-  box-shadow: 5px 5px 3px rgb(20,20,20);
-  overflow: auto !important;
-  background-color: rgb(30,30,30);
-  width: 95%;
-  height: 80vh;
+    margin: 0 auto;
+    margin-top: 20px;
+    display: none;
+    border: 1px solid black;
+    box-shadow: 5px 5px 3px rgb(20, 20, 20);
+    overflow: auto !important;
+    background-color: rgb(30, 30, 30);
+    width: 95%;
+    height: 80vh;
 }
 
 header {
-  margin-top: 10px;
+    margin-top: 10px;
 }
 
 h1 {
-  display: inline-block;
-  margin: 0px;
-  margin-bottom: 20px;
+    display: inline-block;
+    margin: 0px;
+    margin-bottom: 20px;
 }
 
 #github-logo {
-  margin-top: 6px;
-  display: inline-block;
-  height: 30px;
-  opacity: 0.5;
-  float: right;
-  margin-right:20px;
+    margin-top: 6px;
+    display: inline-block;
+    height: 30px;
+    opacity: 0.5;
+    float: right;
+    margin-right: 20px;
 }
 
 #github-logo:hover {
-  opacity: 1;
+    opacity: 1;
 }
 
 #file-upload-container {
-  margin: 0 auto;
-  border-radius: 10px;
-  background-color: rgb(200,200,200);
-  padding: 15px;
-  width: 95%;
-  max-width: 900px;
+    margin: 0 auto;
+    border-radius: 10px;
+    background-color: rgb(200, 200, 200);
+    padding: 15px;
+    width: 95%;
+    max-width: 900px;
 }
 
 #file-upload-container .row {
-  display: block;
-  width: 100%;
-  display: flex;
-  margin: 0px;
-  justify-content: space-around;
+    display: block;
+    width: 100%;
+    display: flex;
+    margin: 0px;
+    justify-content: space-around;
 }
 
 #file-upload-container input {
-  display: none;
+    display: none;
 }
 
 #file-upload-container button {
@@ -82,44 +82,45 @@ h1 {
     cursor: pointer;
 }
 
-#file-upload-container button[disabled]{
-  border: 1px solid #999999;
-  background-color: #cccccc;
-  color: #666666;
-  cursor: default;
+#file-upload-container button[disabled] {
+    border: 1px solid #999999;
+    background-color: #cccccc;
+    color: #666666;
+    cursor: default;
 }
 
 #file-list-container {
-  display: none;
-  margin-top: 20px;
-  font-weight: 800;
-  color: rgb(20,20,20);
+    display: none;
+    margin-top: 20px;
+    font-weight: 800;
+    color: rgb(20, 20, 20);
 }
 
 .file-name-container {
-  text-align: center;
-  display: inline-block;
+    text-align: center;
+    display: inline-block;
 }
 
 .file-name-container p {
-  display: inline;
-  float: right;
-  margin: 0px;
-  margin-top: 3px;
+    display: inline;
+    float: right;
+    margin: 0px;
+    margin-top: 3px;
 }
 
-.tick, .cross {
-  display: inline;
-  float: left;
+.tick,
+.cross {
+    display: inline;
+    float: left;
 }
 
 .tick {
-  height: 25px;
-  padding-right: 8px;
+    height: 25px;
+    padding-right: 8px;
 }
 
 .cross {
-  height: 15px;
-  padding-right: 8px;
-  padding-top: 5px;
+    height: 15px;
+    padding-right: 8px;
+    padding-top: 5px;
 }
