@@ -9,6 +9,7 @@ import java.util.Optional;
 public class LineageNode {
     private String type = "";
     private String name = "";
+    private String id = "";
     private String alias = "";
     private final ArrayList<Column> columns = new ArrayList<Column>();
 
@@ -64,13 +65,14 @@ public class LineageNode {
             String.format("Node aliases are not equal ('%s' and '%s')", alias, lineage.alias);
         assert type.equals(lineage.type) :
             String.format("Node types are not equal ('%s' and '%s')", type, lineage.type);
+        assert id.equals(lineage.id) :
+            String.format("Node ids are not equal ('%s' and '%s')", id, lineage.id);
         assert columns.size() == lineage.columns.size()
                 : String.format("Node number of columns are not equal ('%s' and '%s')", columns.size(), lineage.columns.size());
 
         // Generic catch-all to catch any unaccounted for attributes.
         for (int i = 0; i < columns.size(); i++) {
-            assert columns.get(i).equals(lineage.columns.get(i)) : String.format(
-                "Node columns are not equal", columns.get(i), lineage.columns.get(i));
+            assert columns.get(i).equals(lineage.columns.get(i)) : "Node columns are not equal";
         }
 
         return true;
@@ -87,6 +89,7 @@ public class LineageNode {
      */
     public void setName(String name) {
         this.name = Util.removeDatabasePrefix(name);
+        this.id = DataLineage.makeId(this.name);
     }
 
     public void setAlias(String alias) {
@@ -144,6 +147,10 @@ public class LineageNode {
 
     public String getName() {
         return this.name;
+    }
+
+    public String getID() {
+        return this.id;
     }
 
     public String getAlias() {
