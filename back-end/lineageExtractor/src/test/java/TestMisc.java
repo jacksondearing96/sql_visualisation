@@ -1,6 +1,6 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -8,13 +8,6 @@ public class TestMisc {
     /**
      *  Todo: Organise below methods
      */
-
-    @Test
-    @DisplayName("testFileReader")
-    public void testFileReader() {
-        Assertions.assertEquals(" SELECT * FROM hello### SELECT a FROM goodbye",
-                FileReader.ReadFile("./src/test/java/testInput.sql"));
-    }
 
     @Test
     @DisplayName("testNumericSelectValues")

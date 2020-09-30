@@ -9,7 +9,6 @@ public class TestCreate {
     @Test
     @DisplayName("testCreateTable")
     public void testCreateTable() {
-        System.out.println("first test create");
         String sql = "CREATE TABLE createdTable(" +
                 "col1 varchar," +
                 "col2 double" +

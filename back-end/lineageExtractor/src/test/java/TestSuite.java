@@ -1,3 +1,5 @@
+import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -11,7 +13,6 @@ import org.junit.runners.Suite;
                 TestColumns.class,
                 TestConditional.class,
                 TestCreate.class,
-                TestFiles.class,
                 TestInsert.class,
                 TestLineage.class,
                 TestLiteral.class,
@@ -24,9 +25,4 @@ import org.junit.runners.Suite;
 )
 
 public class TestSuite{
-
-        @BeforeEach
-        static void beforeEach(){
-                System.out.println("Testing TESTING");
-        }
 }
