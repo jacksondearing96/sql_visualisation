@@ -1088,4 +1088,14 @@ public class TestRunner {
         existingTable.equals(nodeList.get(0));
         view.equals(nodeList.get(1));
     }
+
+    @Test
+    @DisplayName("testTopLevelNodeIds")
+    void testTopLevelNodeIds() {
+        LineageNode node = new LineageNode(Constants.Node.TYPE_TABLE, "node");
+        Assertions.assertEquals("node::", node.getID());
+
+        node.setName("newname");
+        Assertions.assertEquals("newname::", node.getID());
+    }
 }
