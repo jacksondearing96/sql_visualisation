@@ -9,24 +9,24 @@ const nodeForceStrength = -30;
 const dragEndAlphaTarget = 0;
 const dragStartAlphaTarget = 0.5;
 
-const offWhite = "rgb(200,200,200)";
+const offWhite = 'rgb(200,200,200)';
 
 const fontSize = 15;
 const fontFamily = 'courier new';
 const fontSizeToCharacterWidthRatio = 0.6;
 
 const columnHeight = 20;
-const columnDefaultBackgroundColor = "dodgerblue";
-const columnHighlightBackgroundColor = "crimson";
+const columnDefaultBackgroundColor = 'dodgerblue';
+const columnHighlightBackgroundColor = 'crimson';
 const columnDefaultTextColor = offWhite;
 const columnDefaultOpacity = 1;
-const columnFontWeight = "normal";
+const columnFontWeight = 'normal';
 
-const linkDefaultColor = "grey";
-const linkHighlightColor = "crimson";
-const linkFill = "none";
-const linkDefaultWidth = "1";
-const linkHighlightWidth = "5";
+const linkDefaultColor = 'grey';
+const linkHighlightColor = 'crimson';
+const linkFill = 'none';
+const linkDefaultWidth = '1';
+const linkHighlightWidth = '5';
 const linkPreferredDistance = 50;
 const linkStrength = 0.1;
 
@@ -38,16 +38,16 @@ const topLevelNodePaddingHorizontal = 10;
 const topLevelNodePaddingVertical = 25;
 const topLevelNodeDefaultBackgroundColor = offWhite;
 const topLevelNodeDefaultTextColor = offWhite;
-const topLevelNodeBackgroundHighlightColor = "crimson";
+const topLevelNodeBackgroundHighlightColor = 'crimson';
 const topLevelNodeHighlightOpacity = 0.6;
 const topLevelNodeDefaultOpacity = 0.2;
-const topLevelNodeDefaultFontWeight = "bold";
+const topLevelNodeDefaultFontWeight = 'bold';
 
-const tableType = "TABLE";
-const viewType = "VIEW";
-const columnType = "COLUMN";
+const tableType = 'TABLE';
+const viewType = 'VIEW';
+const columnType = 'COLUMN';
 
-const idDelimiter = "::";
+const idDelimiter = '::';
 
 const loggingCountThreshold = 50;
 
@@ -76,7 +76,7 @@ let logCount = 0;
 function log(message) {
   if (logCount < loggingCountThreshold) console.log(message);
   if (logCount === loggingCountThreshold)
-    console.error("Logging capacity exceeded!");
+    console.error('Logging capacity exceeded!');
   ++logCount;
 }
 
@@ -84,16 +84,16 @@ var nodes = []
 var links = []
 
 function setContainerScrollPosition() {
-  console.log("Running!");
-  $("#visualisation-container").scrollTop(canvasHeight / 2 + scrollIncrementHeightToInitInCenter);
-  $("#visualisation-container").scrollLeft(canvasWidth / 2 + scrollIncrementWidthToInitInCenter);
+  console.log('Running!');
+  $('#visualisation-container').scrollTop(canvasHeight / 2 + scrollIncrementHeightToInitInCenter);
+  $('#visualisation-container').scrollLeft(canvasWidth / 2 + scrollIncrementWidthToInitInCenter);
 }
 
 function getNodeById(id) {
   for (let node of nodes) {
     if (node.id === id) return node;
   }
-  error("Couldn't find node with id: " + id);
+  error('Could not find node with id: ' + id);
 }
 
 function isTopLevelNode(node) {
@@ -157,7 +157,7 @@ function calculateNodeHeight(node) {
 
 function getParentTable(node) {
   let parent = nodes.filter((n) => isTopLevelNode(n) && n.group === node.group);
-  if (parent.length !== 1) error("Could not find parent table.");
+  if (parent.length !== 1) error('Could not find parent table.');
   return parent[0];
 }
 
@@ -225,12 +225,12 @@ function determineTextColor(node) {
 }
 
 function setGroupClasses(node) {
-  return node.group + isTopLevelNode(node) ? " top-level-node" : " column";
+  return node.group + isTopLevelNode(node) ? ' top-level-node' : ' column';
 }
 
 function columnOfLabel(label) {
-  if (!label.id.includes("label-")) error("Invalid label ID: " + label.id);
-  return label.id.split("label-")[1];
+  if (!label.id.includes('label-')) error('Invalid label ID: ' + label.id);
+  return label.id.split('label-')[1];
 }
 
 function highlightColumns(columns) {
@@ -247,71 +247,71 @@ function highlightTopLevelNodes(nodes) {
 }
 
 function highlightLabels(labels) {
-  $(labels).attr("fill", labelHighlightTextColor);
+  $(labels).attr('fill', labelHighlightTextColor);
 }
 
 function highlightLinks(links) {
   $(links).attr({
     stroke: linkHighlightColor,
     fill: linkHighlightColor,
-    "stroke-width": linkHighlightWidth
+    'stroke-width': linkHighlightWidth
   });
 }
 
 function unHighlightColumns(columns) {
-  columns.attr("fill", columnDefaultBackgroundColor);
+  columns.attr('fill', columnDefaultBackgroundColor);
 }
 
 function unHighlightTopLevelNodes(nodes) {
   nodes
-    .attr("fill", topLevelNodeDefaultBackgroundColor)
-    .attr("opacity", topLevelNodeDefaultOpacity);
+    .attr('fill', topLevelNodeDefaultBackgroundColor)
+    .attr('opacity', topLevelNodeDefaultOpacity);
 }
 
 function unHighlightLabels(labels) {
   $(labels)
     .filter((index, label) => isTopLevelId(columnOfLabel(label)))
-    .attr("fill", topLevelNodeDefaultTextColor);
+    .attr('fill', topLevelNodeDefaultTextColor);
 }
 
 function unHighlightLinks(links) {
   $(links).attr({
     stroke: linkDefaultColor,
     fill: linkDefaultColor,
-    "stroke-width": linkDefaultWidth
+    'stroke-width': linkDefaultWidth
   });
 }
 
 function highlightIds(ids) {
   highlightColumns(
-    $("rect").filter((index, column) => !isTopLevelId(column.id) && ids.includes(column.id))
+    $('rect').filter((index, column) => !isTopLevelId(column.id) && ids.includes(column.id))
   );
 
   highlightTopLevelNodes(
-    $("rect").filter((index, node) => isTopLevelId(node.id) && ids.includes(node.id))
+    $('rect').filter((index, node) => isTopLevelId(node.id) && ids.includes(node.id))
   );
 
   highlightLabels(
-    $(".label").filter((index, label) => ids.includes(columnOfLabel(label)))
+    $('.label').filter((index, label) => ids.includes(columnOfLabel(label)))
   );
 
-  highlightLinks($(".link").filter((index, link) => ids.includes(link.id)));
+  highlightLinks($('.link').filter((index, link) => ids.includes(link.id)));
 }
 
 function unHighlightIds(ids) {
   unHighlightColumns(
-    $("rect").filter((index, column) => !isTopLevelId(column.id) && ids.includes(column.id))
+    $('rect').filter((index, column) => !isTopLevelId(column.id) && ids.includes(column.id))
   );
 
   unHighlightTopLevelNodes(
-    $("rect").filter((index, node) => isTopLevelId(node.id) && ids.includes(node.id))
+    $('rect').filter((index, node) => isTopLevelId(node.id) && ids.includes(node.id))
   );
 
   unHighlightLabels(
-    $(".label").filter((index, label) => ids.includes(columnOfLabel(label)))
+    $('.label').filter((index, label) => ids.includes(columnOfLabel(label)))
   );
 
-  unHighlightLinks($(".link").filter((index, link) => ids.includes(link.id)));
+  unHighlightLinks($('.link').filter((index, link) => ids.includes(link.id)));
 }
 
 function linkMouseOver(link) {
@@ -339,12 +339,12 @@ function columnMouseOut(id) {
 }
 
 function labelMouseOver() {
-  let columnId = $(this.parentElement).find("rect").attr("id");
+  let columnId = $(this.parentElement).find('rect').attr('id');
   columnMouseOver(columnId);
 }
 
 function labelMouseOut() {
-  let columnId = $(this.parentElement).find("rect").attr("id");
+  let columnId = $(this.parentElement).find('rect').attr('id');
   columnMouseOut(columnId);
 }
 
@@ -441,78 +441,78 @@ var simulation, nodeSelection, linkSelection, labels, svg;
 function generateSimulation() {
 
   svg = d3
-  .select("svg")
-  .attr("width", canvasWidth)
-  .attr("height", canvasHeight);
+  .select('svg')
+  .attr('width', canvasWidth)
+  .attr('height', canvasHeight);
 
   nodeSelection = svg
-  .selectAll("rect")
+  .selectAll('rect')
   .data(nodes)
   .enter()
-  .append("g")
-  .append("rect")
-  .attr("width", (d) => calculateNodeWidth(d))
-  .attr("height", (d) => calculateNodeHeight(d))
-  .attr("fill", (d) => determineNodeColor(d))
-  .attr("opacity", (d) => determineNodeOpacity(d))
-  .attr("class", (d) => setGroupClasses(d))
-  .attr("id", (d) => d.id)
-  .call(d3.drag().on("start", dragStart).on("drag", drag).on("end", dragEnd))
-  .on("mouseover", (d) => columnMouseOver(d.id))
-  .on("mouseout", (d) => columnMouseOut(d.id));
+  .append('g')
+  .append('rect')
+  .attr('width', (d) => calculateNodeWidth(d))
+  .attr('height', (d) => calculateNodeHeight(d))
+  .attr('fill', (d) => determineNodeColor(d))
+  .attr('opacity', (d) => determineNodeOpacity(d))
+  .attr('class', (d) => setGroupClasses(d))
+  .attr('id', (d) => d.id)
+  .call(d3.drag().on('start', dragStart).on('drag', drag).on('end', dragEnd))
+  .on('mouseover', (d) => columnMouseOver(d.id))
+  .on('mouseout', (d) => columnMouseOut(d.id));
 
   linkSelection = svg
-  .selectAll("line")
+  .selectAll('line')
   .data(links)
   .enter()
-  .append("line")
-  .attr("stroke", linkDefaultColor)
-  .attr("fill", linkFill)
-  .attr("stroke-width", linkDefaultWidth)
-  .attr("id", (d) => d.id)
-  .attr("class", "link")
-  .on("mouseover", (d) => linkMouseOver(d))
-  .on("mouseout", (d) => linkMouseOut(d));
+  .append('line')
+  .attr('stroke', linkDefaultColor)
+  .attr('fill', linkFill)
+  .attr('stroke-width', linkDefaultWidth)
+  .attr('id', (d) => d.id)
+  .attr('class', 'link')
+  .on('mouseover', (d) => linkMouseOver(d))
+  .on('mouseout', (d) => linkMouseOut(d));
 
   lables = svg
-  .selectAll("g")
-  .append("text")
-  .attr("fill", (d) => determineTextColor(d))
-  .attr("font-size", fontSize)
-  .attr("font-family", fontFamily)
-  .attr("font-weight", (d) =>
+  .selectAll('g')
+  .append('text')
+  .attr('fill', (d) => determineTextColor(d))
+  .attr('font-size', fontSize)
+  .attr('font-family', fontFamily)
+  .attr('font-weight', (d) =>
     isTopLevelNode(d) ? topLevelNodeDefaultFontWeight : columnFontWeight
   )
-  .attr("class", "label")
-  .attr("id", (d) => "label-" + d.id)
+  .attr('class', 'label')
+  .attr('id', (d) => 'label-' + d.id)
   .text((d) => d.name)
-  .on("mouseover", labelMouseOver)
-  .on("mouseout", labelMouseOut);
+  .on('mouseover', labelMouseOver)
+  .on('mouseout', labelMouseOut);
 
   simulation = d3.forceSimulation(nodes);
 
   simulation
-    .force("center", d3.forceCenter(canvasWidth / 2, canvasHeight / 2))
-    .force("nodes", d3.forceManyBody().strength(nodeForceStrength))
+    .force('center', d3.forceCenter(canvasWidth / 2, canvasHeight / 2))
+    .force('nodes', d3.forceManyBody().strength(nodeForceStrength))
     .force(
-      "links",
+      'links',
       d3
         .forceLink(links)
         .id((d) => d.id)
         .distance(linkPreferredDistance)
         .strength(linkStrength)
     )
-    .on("tick", ticked);
+    .on('tick', ticked);
 }
 
 function ticked() {
-  nodeSelection.attr("x", (d) => getNodeX(d)).attr("y", (d) => getNodeY(d));
+  nodeSelection.attr('x', (d) => getNodeX(d)).attr('y', (d) => getNodeY(d));
 
-  lables.attr("x", (d) => getLabelX(d)).attr("y", (d) => getLabelY(d));
+  lables.attr('x', (d) => getLabelX(d)).attr('y', (d) => getLabelY(d));
 
   linkSelection
-    .attr("x1", (d) => getLinkSourceX(d))
-    .attr("y1", (d) => getLinkSourceY(d))
-    .attr("x2", (d) => getLinkTargetX(d))
-    .attr("y2", (d) => getLinkTargetY(d));
+    .attr('x1', (d) => getLinkSourceX(d))
+    .attr('y1', (d) => getLinkSourceY(d))
+    .attr('x2', (d) => getLinkTargetX(d))
+    .attr('y2', (d) => getLinkTargetY(d));
 }

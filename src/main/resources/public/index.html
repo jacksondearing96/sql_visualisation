@@ -19,9 +19,13 @@
   </header>
 
   <div id="file-upload-container">
-      <input ref="file" type="file" id="upload-files-button" multiple>
-      <button type="button" disabled>Generate Visualisation</button>
-      <div id="file-list"></div>
+    <div class="row">
+      <input ref="file" type="file" id="upload-files-input" multiple>
+      <button id='choose-files-button'>Choose SQL File(s)</button>
+      <button id='generate-visualisation-button' type="button" disabled>Generate Visualisation</button>
+      <button id='demo-button' type="button">Demo</button>
+    </div>
+    <div id="file-list-container"></div>
   </div>
 
   <div id="visualisation-container">
@@ -30,6 +34,7 @@
 
   <script src="https://d3js.org/d3.v4.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="js/demoData.js"></script>
   <script src="js/fileUploader.js"></script>
   <script src="js/lineageGraph.js"></script>
 </body>

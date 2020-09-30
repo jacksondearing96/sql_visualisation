@@ -50,12 +50,21 @@ h1 {
   margin: 0 auto;
   border-radius: 10px;
   background-color: rgb(200,200,200);
-  padding: 10px;
+  padding: 15px;
   width: 95%;
+  max-width: 900px;
+}
+
+#file-upload-container .row {
+  display: block;
+  width: 100%;
+  display: flex;
+  margin: 0px;
+  justify-content: space-around;
 }
 
 #file-upload-container input {
-  margin-top: 14px;
+  display: none;
 }
 
 #file-upload-container button {
@@ -70,9 +79,6 @@ h1 {
     box-shadow: 3px 3px 3px grey;
     padding-right: 10px;
     padding-left: 10px;
-}
-
-#file-upload-container button:hover {
     cursor: pointer;
 }
 
@@ -83,7 +89,8 @@ h1 {
   cursor: default;
 }
 
-#file-list {
+#file-list-container {
+  display: none;
   margin-top: 20px;
   font-weight: 800;
   color: rgb(20,20,20);
