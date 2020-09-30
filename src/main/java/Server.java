@@ -5,13 +5,6 @@ public class Server {
         staticFiles.location("public");
         
         get("/", (request, response) -> "index.html");
-
-        post("/lineage_extractor", (request, response) -> {
-            String json = LineageExtractor.extractLineageAsJson(request.body());
-            System.out.println(json);
-            return json;
-        }
-            
-        );
+        post("/lineage_extractor", (request, response) ->  LineageExtractor.extractLineageAsJson(request.body()));
     }
 }
