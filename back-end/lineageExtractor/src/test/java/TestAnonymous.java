@@ -1,4 +1,5 @@
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -6,10 +7,14 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TestAnonymous {
+    @BeforeAll
+    static void setup() {
+        System.out.println("Testing for SIVT Back-end:");
+    }
 
     @Test
     @DisplayName("testBasicAnonymousTableGeneration")
-    void testBasicAnonymousTableGeneration() {
+    public void testBasicAnonymousTableGeneration() {
         String statement = "select column1, column2, cast(someDate as date) as columnA from \"tablename\"###";
 
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(statement).getNodeList();
@@ -38,7 +43,7 @@ public class TestAnonymous {
 
     @Test
     @DisplayName("testBypassAnonymousTables")
-    void testBypassAnonymousTables() {
+    public void testBypassAnonymousTables() {
         String sql = "CREATE VIEW view AS " + "SELECT b " + "FROM (" + "SELECT b " + "FROM B" + ") AS A" + "###";
 
         // Source table.

@@ -5,19 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TestCreate {
-    @BeforeEach
-    void beforeEach(TestInfo testInfo) {
-        System.out.println("Testing: " + testInfo.getDisplayName() + " - Started");
-    }
-
-    @AfterEach
-    void afterEach(TestInfo testInfo) {
-        System.out.println("Testing: " + testInfo.getDisplayName() + " - Complete");
-    }
 
     @Test
     @DisplayName("testCreateTable")
     public void testCreateTable() {
+        System.out.println("first test create");
         String sql = "CREATE TABLE createdTable(" +
                 "col1 varchar," +
                 "col2 double" +
