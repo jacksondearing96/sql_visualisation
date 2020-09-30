@@ -137,13 +137,10 @@ public class DataLineage {
         }
     }
 
-<<<<<<< HEAD:src/main/java/DataLineage.java
-=======
     public static String makeId(String source) {
         return makeId(source, "");
     }
 
->>>>>>> top-level-node-ids:back-end/lineageExtractor/src/main/java/DataLineage.java
     public static String makeId(String source, String target) {
         return Util.removeDatabasePrefix(source).concat("::").concat(target);
     }
