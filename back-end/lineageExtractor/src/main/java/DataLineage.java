@@ -31,6 +31,15 @@ public class DataLineage {
         }
     }
 
+    public void clearAllAliases() {
+        for (LineageNode node : nodeList) {
+            node.setAlias("");
+            for (Column column : node.getColumns()) {
+                column.setAlias("");
+            }
+        }
+    }
+
     /**
      * Removes all the anonymous tables in the nodeList, updating the sources accordingly.
      */

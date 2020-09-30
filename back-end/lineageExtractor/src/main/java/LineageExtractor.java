@@ -33,7 +33,10 @@ public class LineageExtractor {
         for (StatementSplitter.Statement statement : statements) {
             Statement parsedStatement = SivtParser.parse(statement);
             dataLineage.addListOfNodes(sivtVisitor.extractLineage(parsedStatement));
-            if (bypassAnonymousTables) dataLineage.bypassAnonymousTables();
+            if (bypassAnonymousTables) {
+                dataLineage.bypassAnonymousTables();
+                dataLineage.clearAllAliases();
+            }
         }
         return dataLineage;
     }
