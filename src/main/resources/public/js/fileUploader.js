@@ -22,6 +22,8 @@ const propic_file_order = [
     'agent_leads.sql'
 ]
 
+let sql = '';
+
 function isValidSqlFileContents(contents) {
     return true;
 }
@@ -44,7 +46,9 @@ function readFile(file) {
         reader.readAsText(file, 'UTF-8');
         reader.onload = event => {
             let isValid = isValidSqlFileContents(event.target.result);
-            resolve(isValid ? validFile(file.name) : invalidFile(file.name))
+            let listItem = isValid ? validFile(file.name) : invalidFile(file.name);
+            let contentsAndListItem = { contents: event.target.result, listItem: listItem };
+            resolve(contentsAndListItem);
         }
     });
 }
@@ -71,16 +75,20 @@ function errorFileExists() {
 }
 
 function uploadFiles() {
-    // Clear any files currently uploaded.
+    // Clear any files currently uploaded and the sql.
     fileListContainer.html('');
+    sql = '';
 
     // Read files asynchronously.
     let files = document.getElementById('upload-files-input').files;
     let readFilePromises = sortFiles(files).map(file => readFile(file));
 
-    Promise.all(readFilePromises).then(listItems => {
+    Promise.all(readFilePromises).then(contentsAndListItems => {
         fileListContainer.show();
-        listItems.forEach(listItem => fileListContainer.append(listItem));
+        contentsAndListItems.forEach(contentsAndListItem => {
+            fileListContainer.append(contentsAndListItem.listItem);
+            sql += contentsAndListItem.contents;
+        });
 
         // Activate button if all files are validated.
         if (!errorFileExists()) generateVisualisationButton.prop('disabled', false);
@@ -88,7 +96,10 @@ function uploadFiles() {
 }
 
 function generateVisualisationButtonClicked() {
-    generateVisualisation(demoGraph);
+    $.post("/lineage_extractor", sql, lineageNodes => {
+        let graph = backendToFrontendDataStructureConversion(JSON.parse(lineageNodes));
+        generateVisualisation(graph);
+    });
 }
 
 function initialiseEventListeners() {
@@ -98,4 +109,4 @@ function initialiseEventListeners() {
     demoButton.click(() => generateVisualisation(demoGraph));
 }
 
-$(document).ready(() => initialiseEventListeners);
+$(document).ready(() => initialiseEventListeners());

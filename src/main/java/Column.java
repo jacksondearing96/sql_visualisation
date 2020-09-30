@@ -7,6 +7,7 @@ import java.util.Optional;
  */
 public class Column implements Cloneable {
 
+    private String type = Constants.Node.TYPE_COLUMN;
     private String name = "";
     private String alias = "";
     private String id = "";
@@ -60,6 +61,8 @@ public class Column implements Cloneable {
                 String.format("Column aliases are not equal ('%s' and '%s')", alias, column.alias);
         assert id.equals(column.id) :
                 String.format("Column IDs are not equal ('%s' and '%s')", id, column.id);
+        assert type.equals(column.type) :
+                String.format("Column types are not equal ('%s' and '%s')", type, column.type);
         assert sources.equals(column.sources) :
                 String.format("Column sources are not equal ('%s' and '%s')", sources, column.sources);
 
@@ -123,6 +126,10 @@ public class Column implements Cloneable {
 
     public String getName() {
         return this.name;
+    }
+
+    public String getType() {
+        return this.type;
     }
 
     public String getAlias() {

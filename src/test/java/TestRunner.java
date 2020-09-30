@@ -60,7 +60,7 @@ public class TestRunner {
         column.addListOfSources(sources);
         column.addSource("source1");
         Assertions.assertEquals(
-                "alias=newAlias,id=newID,name=newName,sources={source1,source2,source3,source4,source5},stagedRename=Optional.empty",
+                "alias=newAlias,id=newID,name=newName,sources={source1,source2,source3,source4,source5},stagedRename=Optional.empty,type=COLUMN",
                 getColumnDataString(column));
 
         // Test Column cloning and equals
