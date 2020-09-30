@@ -68,7 +68,7 @@ public class DataLineage {
         }
 
         // Delete the now redundant anonymous nodes.
-        nodeList.removeIf(node -> node.getType().equals("ANONYMOUS"));
+        nodeList.removeIf(node -> node.getType().equals(Constants.Node.TYPE_ANON));
     }
 
 
@@ -135,6 +135,10 @@ public class DataLineage {
         for (LineageNode node : nodes) {
             addNode(node);
         }
+    }
+
+    public static String makeId(String source) {
+        return makeId(source, "");
     }
 
     public static String makeId(String source, String target) {

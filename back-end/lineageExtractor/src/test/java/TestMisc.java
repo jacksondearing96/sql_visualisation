@@ -89,4 +89,14 @@ public class TestMisc {
         Assertions.assertEquals(1, nodeList.size());
         table.equals(nodeList.get(0));
     }
+
+    @Test
+    @DisplayName("testTopLevelNodeIds")
+    public void testTopLevelNodeIds() {
+        LineageNode node = new LineageNode(Constants.Node.TYPE_TABLE, "node");
+        Assertions.assertEquals("node::", node.getID());
+
+        node.setName("newname");
+        Assertions.assertEquals("newname::", node.getID());
+    }
 }
