@@ -1,11 +1,18 @@
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.junit.jupiter.api.*;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class TestRunner {
+
+    void TestRunner() {
+        System.out.println("InsideMain");
+        Result result = JUnitCore.runClasses(TestCreate.class);
+    }
 
     @BeforeAll
     static void setup() {
@@ -28,6 +35,18 @@ public class TestRunner {
     }
 
     @Test
+    @DisplayName("testCreates")
+    void testCreates(){
+        JUnitCore.runClasses(TestCreate.class);
+    }
+
+    @Test
+    @DisplayName("testInserts")
+    void testInserts(){
+        JUnitCore.runClasses(TestInsert.class);
+    }
+
+    @Test
     @DisplayName("testFileReader")
     void testFileReader() {
         Assertions.assertEquals(" SELECT * FROM hello### SELECT a FROM goodbye",
@@ -37,7 +56,7 @@ public class TestRunner {
     /**
      * Get the data from a column in the format:
      * "alias=columnAlias,id=columnID,name=columnName,sources={source1,source2,...}"
-     * 
+     *
      * @param column The column which will have its data extracted and stringified.
      * @return The column data in the string form (above).
      */
@@ -254,64 +273,7 @@ public class TestRunner {
         Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
     }
 
-    @Test
-    @DisplayName("testCreateTable")
-    void testCreateTable() {
-        String sql = "CREATE TABLE createdTable(" +
-                        "col1 varchar," +
-                        "col2 double" +
-                     ")###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
-        LineageNode createdTable = new LineageNode("TABLE", "createdtable");
-        createdTable.addListOfColumns(Arrays.asList(new Column("col1"), new Column("col2")));
-
-        Assertions.assertEquals(1, nodeList.size());
-        createdTable.equals(nodeList.get(0));
-    }
-
-    @Test
-    @DisplayName("testCreateTableAsSelect")
-    void testCreateTableAsSelect() {
-        String sql = "CREATE TABLE createdtable AS SELECT a, b FROM existingtable###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
-
-        LineageNode existingTable = new LineageNode("TABLE", "existingtable");
-        Column a = new Column("a");
-        Column b = new Column("b");
-        existingTable.addListOfColumns(Arrays.asList(a, b));
-
-        LineageNode createdTable = new LineageNode("TABLE", "createdtable");
-        a.addSource(DataLineage.makeId(existingTable.getName(), a.getName()));
-        b.addSource(DataLineage.makeId(existingTable.getName(), b.getName()));
-        createdTable.addListOfColumns(Arrays.asList(a, b));
-
-        Assertions.assertEquals(2, nodeList.size());
-        existingTable.equals(nodeList.get(0));
-        createdTable.equals(nodeList.get(1));
-    }
-
-    @Test
-    @DisplayName("testCreateView")
-    void testCreateView() {
-        String statement = "CREATE VIEW a AS SELECT b from c###";
-
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(statement).getNodeList();
-
-        // Source table.
-        LineageNode table = new LineageNode(Constants.Node.TYPE_TABLE, "c");
-        table.addColumn(new Column("b"));
-
-        // View.
-        LineageNode view = new LineageNode(Constants.Node.TYPE_VIEW, "a");
-        Column columnA = new Column("b");
-        columnA.addSource("c::b");
-        view.addColumn(columnA);
-
-        Assertions.assertEquals(2, nodeList.size());
-        Assertions.assertTrue(table.equals(nodeList.get(0)));
-        Assertions.assertTrue(view.equals(nodeList.get(1)));
-    }
 
     @Test
     @DisplayName("testWildCardOperator")
@@ -587,7 +549,7 @@ public class TestRunner {
         sourceA.equals(nodeList.get(0));
         sourceB.equals(nodeList.get(1));
     }
-  
+
     @Test
     @DisplayName("testStandAloneLiteralTable")
     void testStandAloneLiteralTable() {
@@ -619,7 +581,7 @@ public class TestRunner {
         Assertions.assertEquals(2, nodeList.size());
         inlineLiteral.equals(nodeList.get(0));
     }
-  
+
     @Test
     @DisplayName("testFunctionCall")
     void testFunctionCall() {
@@ -705,96 +667,6 @@ public class TestRunner {
         Assertions.assertEquals(2, nodeList.size());
         inlineLiteral.equals(nodeList.get(0));
         anonymous.equals(nodeList.get(1));
-    }
-
-    @Test
-    @DisplayName("testInsertStatement")
-    void testInsertStatement() {
-        String sql = "INSERT INTO existingTable VALUES a###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
-
-        // The only table that will be derived from this.
-        LineageNode existingTable = new LineageNode("TABLE", "existingtable");
-
-        Assertions.assertEquals(1, nodeList.size());
-        existingTable.equals(nodeList.get(0));
-    }
-
-    @Test
-    @DisplayName("testInsertFromSelect")
-    void testInsertFromSelect() {
-        String sql = "INSERT INTO existingTable SELECT * FROM a###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
-
-        // Source table a.
-        LineageNode sourceA = new LineageNode("TABLE", "a");
-
-        // Anonymous table from select statement.
-        LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        Column wildcard = new Column("*");
-        wildcard.addSource("a::*");
-        anonymous.addColumn(wildcard);
-
-        // The existing table that is having values inserted.
-        LineageNode existingTable = new LineageNode("TABLE", "existingtable");
-        wildcard = new Column("*");
-        wildcard.addSource(DataLineage.makeId(anonymous.getName(), wildcard.getName()));
-        existingTable.addColumn(wildcard);
-
-        Assertions.assertEquals(3, nodeList.size());
-        sourceA.equals(nodeList.get(0));
-        anonymous.equals(nodeList.get(1));
-        existingTable.equals(nodeList.get(2));
-    }
-
-    @Test
-    @DisplayName("testInsertWithListedColumnsAndInlineLiteral")
-    void testInsertWithListedColumnsAndInlineLiteral() {
-        String sql = "INSERT INTO existingTable (a, b, c) VALUES d, e, f###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
-
-        // The existing table that is having values inserted.
-        LineageNode existingTable = new LineageNode("TABLE", "existingtable");
-        existingTable.addListOfColumns(Arrays.asList(new Column("a"), new Column("b"), new Column("c")));
-
-        Assertions.assertEquals(1, nodeList.size());
-        existingTable.equals(nodeList.get(0));
-    }
-
-    @Test
-    @DisplayName("testInsertWithListedColumnsAndSelect")
-    void testInsertWithListedColumnsAndSelect() {
-        String sql = "INSERT INTO existingTable (a, b, c) SELECT d, e, f FROM sourceTable###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
-
-        // Source table.
-        LineageNode sourceTable = new LineageNode("TABLE", "sourcetable");
-        Column d = new Column("d");
-        Column e = new Column("e");
-        Column f = new Column("f");
-        sourceTable.addListOfColumns(Arrays.asList(d, e, f));
-
-        // Anonymous table from select statement.
-        LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        d.addSource(DataLineage.makeId(sourceTable.getName(), d.getName()));
-        e.addSource(DataLineage.makeId(sourceTable.getName(), e.getName()));
-        f.addSource(DataLineage.makeId(sourceTable.getName(), f.getName()));
-        anonymous.addListOfColumns(Arrays.asList(d, e, f));
-
-        // The existing table that is having values inserted.
-        LineageNode existingTable = new LineageNode("TABLE", "existingtable");
-        Column a = new Column("a");
-        Column b = new Column("b");
-        Column c = new Column("c");
-        a.addSource(DataLineage.makeId(anonymous.getName(), d.getName()));
-        b.addSource(DataLineage.makeId(anonymous.getName(), e.getName()));
-        c.addSource(DataLineage.makeId(anonymous.getName(), f.getName()));
-        existingTable.addListOfColumns(Arrays.asList(a, b, c));
-
-        Assertions.assertEquals(3, nodeList.size());
-        sourceTable.equals(nodeList.get(0));
-        anonymous.equals(nodeList.get(1));
-        existingTable.equals(nodeList.get(2));
     }
 
     @Test
@@ -955,137 +827,5 @@ public class TestRunner {
         prepareNode.equals(nodeList.get(1));
     }
 
-    @Test
-    @DisplayName("testWithClause")
-    void testWithClause() {
-        String sql = "WITH withtable AS (" +
-                        "SELECT a, b FROM existingtable" +
-                     ")" +
-                     "SELECT a FROM withtable###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
-        LineageNode existingTable = new LineageNode(Constants.Node.TYPE_TABLE, "existingtable");
-        Column a = new Column("a");
-        Column b = new Column("b");
-        existingTable.addListOfColumns(Arrays.asList(a, b));
-
-        LineageNode withTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"), "withtable");
-        a.addSource(DataLineage.makeId(existingTable.getName(), a.getName()));
-        b.addSource(DataLineage.makeId(existingTable.getName(), b.getName()));
-        withTable.addListOfColumns(Arrays.asList(a, b));
-
-        LineageNode resultantTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"));
-        a = new Column("a");
-        a.addSource(DataLineage.makeId(withTable.getName(), a.getName()));
-        resultantTable.addColumn(a);
-
-        Assertions.assertEquals(3, nodeList.size());
-        existingTable.equals(nodeList.get(0));
-        withTable.equals(nodeList.get(1));
-        resultantTable.equals(nodeList.get(2));
-    }
-
-    @Test
-    @DisplayName("testMultipleWithClause")
-    void testMultipleWithClause() {
-        String sql = "WITH withtable1 AS (" +
-                        "SELECT a, b FROM existingtable1" +
-                     "), " +
-                     "withtable2 AS (" +
-                        "SELECT c, d FROM existingtable2" +
-                     ") " +
-                     "SELECT withtable1.a, withtable2.c " +
-                     "FROM withtable1 INNER JOIN withtable2 ON 1 = 1###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
-
-        LineageNode existingTable1 = new LineageNode(Constants.Node.TYPE_TABLE, "existingtable1");
-        Column a = new Column("a");
-        Column b = new Column("b");
-        existingTable1.addListOfColumns(Arrays.asList(a, b));
-
-        LineageNode existingTable2 = new LineageNode(Constants.Node.TYPE_TABLE, "existingtable2");
-        Column c = new Column("c");
-        Column d = new Column("d");
-        existingTable2.addListOfColumns(Arrays.asList(c, d));
-
-        LineageNode withTable1 = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"), "withtable1");
-        a.addSource(DataLineage.makeId(existingTable1.getName(), a.getName()));
-        b.addSource(DataLineage.makeId(existingTable1.getName(), b.getName()));
-        withTable1.addListOfColumns(Arrays.asList(a, b));
-
-        LineageNode withTable2 = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"), "withtable2");
-        c.addSource(DataLineage.makeId(existingTable2.getName(), c.getName()));
-        d.addSource(DataLineage.makeId(existingTable2.getName(), d.getName()));
-        withTable2.addListOfColumns(Arrays.asList(c, d));
-
-        LineageNode resultantTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("2"));
-        a = new Column("a");
-        c = new Column("c");
-        a.addSource(DataLineage.makeId(withTable1.getName(), a.getName()));
-        c.addSource(DataLineage.makeId(withTable2.getName(), c.getName()));
-        resultantTable.addListOfColumns(Arrays.asList(a, c));
-
-        Assertions.assertEquals(5, nodeList.size());
-        existingTable1.equals(nodeList.get(0));
-        withTable1.equals(nodeList.get(1));
-        existingTable2.equals(nodeList.get(2));
-        withTable2.equals(nodeList.get(3));
-        resultantTable.equals(nodeList.get(4));
-    }
-
-    @Test
-    @DisplayName("testMultipleWithClauseEarlyReference")
-    void testMultipleWithClaseEarlyReference() {
-        String sql = "CREATE VIEW myview AS " + 
-                     "WITH withtable1 AS (" +
-                        "SELECT a, b FROM existingtable1" +
-                     "), " +
-                     "withtable2 AS (" +
-                        "SELECT b AS c FROM withtable1" +
-                     ") " +
-                     "SELECT withtable1.a, withtable2.c " +
-                     "FROM withtable1 INNER JOIN withtable2 ON 1 = 1###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
-
-        LineageNode existingTable1 = new LineageNode(Constants.Node.TYPE_TABLE, "existingtable1");
-        Column a = new Column("a");
-        Column b = new Column("b");
-        existingTable1.addListOfColumns(Arrays.asList(a, b));
-
-        LineageNode view = new LineageNode(Constants.Node.TYPE_VIEW, "myview");
-        a = new Column("a");
-        Column c = new Column("c");
-        a.addSource(DataLineage.makeId(existingTable1.getName(), a.getName()));
-        c.addSource(DataLineage.makeId(existingTable1.getName(), b.getName()));
-        view.addListOfColumns(Arrays.asList(a, c));
-
-        Assertions.assertEquals(2, nodeList.size());
-        existingTable1.equals(nodeList.get(0));
-        view.equals(nodeList.get(1));
-    }
-
-    @Test
-    @DisplayName("testBypassAnonymousWithTable")
-    void testBypassAnonymousWithTable() {
-        String sql = "CREATE OR REPLACE VIEW view1 AS " + 
-                     "WITH withtable AS (" +
-                        "SELECT a, b FROM existingtable" +
-                     ")" +
-                     "SELECT a FROM withtable###";
-        List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
-
-        LineageNode existingTable = new LineageNode(Constants.Node.TYPE_TABLE, "existingtable");
-        Column a = new Column("a");
-        Column b = new Column("b");
-        existingTable.addListOfColumns(Arrays.asList(a, b));
-
-        LineageNode view = new LineageNode(Constants.Node.TYPE_VIEW, "view1");
-        a = new Column("a");
-        a.addSource(DataLineage.makeId(existingTable.getName(), a.getName()));
-        view.addColumn(a);
-
-        Assertions.assertEquals(2, nodeList.size());
-        existingTable.equals(nodeList.get(0));
-        view.equals(nodeList.get(1));
-    }
 }
