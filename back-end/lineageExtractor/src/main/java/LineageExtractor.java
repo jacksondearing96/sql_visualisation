@@ -9,13 +9,16 @@ public class LineageExtractor {
         return extractLineage(sql).getNodeListAsJson();
     }
 
-    public static DataLineage extractLineage(String sql) {
-        DataLineage dataLineage = extractLineageWithAnonymousTables(sql);
-        dataLineage.bypassAnonymousTables();
-        return dataLineage;
+    public static DataLineage extractLineageWithAnonymousTables(String sql) {
+        return extractLineage(sql, false);
     }
 
-    public static DataLineage extractLineageWithAnonymousTables(String sql) {
+    public static DataLineage extractLineage(String sql) {
+        return extractLineage(sql, true);
+    }
+
+    public static DataLineage extractLineage(String sql, boolean bypassAnonymousTables) {
+        
         DataLineage dataLineage = new DataLineage();
 
         List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
@@ -30,6 +33,10 @@ public class LineageExtractor {
         for (StatementSplitter.Statement statement : statements) {
             Statement parsedStatement = SivtParser.parse(statement);
             dataLineage.addListOfNodes(sivtVisitor.extractLineage(parsedStatement));
+            if (bypassAnonymousTables) {
+                dataLineage.bypassAnonymousTables();
+                dataLineage.clearAllAliases();
+            }
         }
         return dataLineage;
     }
