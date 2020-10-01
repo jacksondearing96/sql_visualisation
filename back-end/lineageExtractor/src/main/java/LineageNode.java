@@ -1,3 +1,5 @@
+import org.junit.jupiter.api.Assertions;
+
 import javax.sound.sampled.Line;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -171,7 +173,7 @@ public class LineageNode {
         return !this.alias.equals("");
     }
 
-    public static boolean areNodeListsEqual(List<LineageNode> listA, List<LineageNode> listB) {
+    public static void testNodeListEquivalency(List<LineageNode> listA, List<LineageNode> listB) {
         assert listA.size() == listB.size() :
             String.format("Unequal number of nodes. List A: %d nodes, List B: %d nodes", listA.size(), listB.size());
 
@@ -179,7 +181,7 @@ public class LineageNode {
                 a.getName().compareTo(b.getName());
         listA.sort(compareByName);
         listB.sort(compareByName);
-        return listA.equals(listB);
+        Assertions.assertTrue(listA.equals(listB));
     }
 
 }

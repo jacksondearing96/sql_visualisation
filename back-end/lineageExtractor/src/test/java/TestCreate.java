@@ -18,8 +18,7 @@ public class TestCreate {
         LineageNode createdTable = new LineageNode("TABLE", "createdtable");
         createdTable.addListOfColumns(Arrays.asList(new Column("col1"), new Column("col2")));
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(createdTable), nodeList));
-
+        LineageNode.testNodeListEquivalency(Arrays.asList(createdTable), nodeList);
     }
 
     @Test
@@ -38,7 +37,7 @@ public class TestCreate {
         b.addSource(DataLineage.makeId(existingTable.getName(), b.getName()));
         createdTable.addListOfColumns(Arrays.asList(a, b));
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(existingTable, createdTable), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(existingTable, createdTable), nodeList);
     }
 
     @Test
@@ -58,6 +57,6 @@ public class TestCreate {
         columnA.addSource("c::b");
         view.addColumn(columnA);
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(table, view), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(table, view), nodeList);
     }
 }

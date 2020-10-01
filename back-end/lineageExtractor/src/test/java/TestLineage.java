@@ -42,7 +42,7 @@ public class TestLineage {
         a.addSource("b::a");
         anonymousNode.addColumn(a);
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(sourceNode, anonymousNode), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(sourceNode, anonymousNode), nodeList);
     }
 
 }

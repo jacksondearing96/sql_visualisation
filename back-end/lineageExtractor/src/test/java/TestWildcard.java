@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -24,7 +23,7 @@ public class TestWildcard {
         columnA.addSource("b::*");
         anonymousTable.addColumn(columnA);
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(table, anonymousTable), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(table, anonymousTable), nodeList);
     }
 
     @Test
@@ -48,6 +47,6 @@ public class TestWildcard {
         c.addSource("b::c");
         anonymous.addListOfColumns(Arrays.asList(wildcard, c));
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(sourceA, sourceB, anonymous), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(sourceA, sourceB, anonymous), nodeList);
     }
 }

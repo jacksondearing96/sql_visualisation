@@ -24,7 +24,7 @@ public class TestMisc {
         LineageNode anonymousTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
         anonymousTable.addColumn(new Column("one"));
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(sourceTable, anonymousTable), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(sourceTable, anonymousTable), nodeList);
     }
 
     @Test
@@ -43,7 +43,7 @@ public class TestMisc {
         b.addSource("c::a");
         anonymous.addColumn(b);
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(source, anonymous), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(source, anonymous), nodeList);
     }
 
     @Test
@@ -69,7 +69,7 @@ public class TestMisc {
         a.addSource("ANONYMOUS0::a");
         anonymous1.addColumn(a);
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(tableC, anonymous0, anonymous1), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(tableC, anonymous0, anonymous1), nodeList);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class TestMisc {
 
         LineageNode table = new LineageNode(Constants.Node.TYPE_TABLE, "newname");
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(table), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(table), nodeList);
     }
 
     @Test

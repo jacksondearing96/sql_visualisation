@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -31,8 +30,7 @@ public class TestAnonymous {
         columnA.addSource("tablename::someDate");
         anonymousTable.addListOfColumns(Arrays.asList(column1a, column2a, columnA));
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(table, anonymousTable), nodeList));
-
+        LineageNode.testNodeListEquivalency(Arrays.asList(table, anonymousTable), nodeList);
     }
 
     @Test
@@ -59,7 +57,7 @@ public class TestAnonymous {
 
         // First, verify that the anonymous table is produced correctly as the intermediate table.
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(source, anonymous, view), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(source, anonymous, view), nodeList);
 
 
         // Now extract the lineage, including the step where the anonymous tables are bypassed.
@@ -71,8 +69,7 @@ public class TestAnonymous {
         b.addSource(DataLineage.makeId(source.getName(), b.getName()));
         view.addColumn(b);
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(view, source), nodeList));
-
+        LineageNode.testNodeListEquivalency(Arrays.asList(view, source), nodeList);
     }
 
 }

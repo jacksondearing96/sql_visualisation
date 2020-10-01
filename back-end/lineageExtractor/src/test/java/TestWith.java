@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -31,7 +30,7 @@ public class TestWith {
         a.addSource(DataLineage.makeId(withTable.getName(), a.getName()));
         resultantTable.addColumn(a);
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(existingTable, withTable, resultantTable), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(existingTable, withTable, resultantTable), nodeList);
     }
 
     @Test
@@ -74,8 +73,7 @@ public class TestWith {
         c.addSource(DataLineage.makeId(withTable2.getName(), c.getName()));
         resultantTable.addListOfColumns(Arrays.asList(a, c));
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(
-                Arrays.asList(existingTable1, existingTable2, withTable1, withTable2, resultantTable), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(existingTable1, existingTable2, withTable1, withTable2, resultantTable), nodeList);
     }
 
     @Test
@@ -104,7 +102,7 @@ public class TestWith {
         c.addSource(DataLineage.makeId(existingTable1.getName(), b.getName()));
         view.addListOfColumns(Arrays.asList(a, c));
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(existingTable1, view), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(existingTable1, view), nodeList);
     }
 
     @Test
@@ -127,7 +125,7 @@ public class TestWith {
         a.addSource(DataLineage.makeId(existingTable.getName(), a.getName()));
         view.addColumn(a);
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(existingTable, view), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(existingTable, view), nodeList);
     }
 
 }

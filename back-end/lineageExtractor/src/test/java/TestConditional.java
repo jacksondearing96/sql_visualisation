@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -21,7 +20,7 @@ public class TestConditional {
                 new Column("d")
         ));
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(myTable), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(myTable), nodeList);
     }
 
     @Test
@@ -43,7 +42,7 @@ public class TestConditional {
                 new Column("d")
         ));
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(leftTable, rightTable), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(leftTable, rightTable), nodeList);
     }
 
 }

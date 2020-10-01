@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -24,7 +23,7 @@ public class TestAlias {
         aliasedColumn.addSource("c::a");
         anonymousTable.addColumn(aliasedColumn);
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(table, anonymousTable), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(table, anonymousTable), nodeList);
     }
 
     @Test
@@ -44,7 +43,7 @@ public class TestAlias {
         aliasedColumn.addSource("b::a");
         anonymousTable.addColumn(aliasedColumn);
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(table, anonymousTable), nodeList));
+        LineageNode.testNodeListEquivalency(Arrays.asList(table, anonymousTable), nodeList);
     }
 
     @Test
@@ -63,8 +62,7 @@ public class TestAlias {
         b.addSource("c::a");
         anonymous.addColumn(b);
 
-        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(source, anonymous), nodeList));
-
+        LineageNode.testNodeListEquivalency(Arrays.asList(source, anonymous), nodeList);
     }
 
 }
