@@ -1,27 +1,3 @@
-let NOT_FOUND = -1;
-
-let uploadFilesInput = $('#upload-files-input');
-let generateVisualisationButton = $('#generate-visualisation-button');
-let demoButton = $('#demo-button');
-let chooseFilesButton = $('#choose-files-button');
-let fileListContainer = $('#file-list-container');
-let fileNameContainers = $('.file-name-container');
-
-let tickImg = "<img class='tick' src='https://lesspestcontrol.com.au/wp-content/uploads/green-tick.png'>";
-let crossImg = "<img class='cross' src='https://freesvg.org/img/milker_X_icon.png'>";
-
-const propic_file_order = [
-    'crm_join.sql',
-    'supporting_views.sql',
-    'appraisal_case.sql',
-    'buyer_vendor_case.sql',
-    'record_sale_nearby.sql',
-    'leads_from_crm.sql',
-    'leads_from_market.sql',
-    'leads_with_score.sql',
-    'agent_leads.sql'
-]
-
 let sql = '';
 
 function isValidSqlFileContents(contents) {
@@ -94,19 +70,3 @@ function uploadFiles() {
         if (!errorFileExists()) generateVisualisationButton.prop('disabled', false);
     });
 }
-
-function generateVisualisationButtonClicked() {
-    $.post("/lineage_extractor", sql, lineageNodes => {
-        let graph = backendToFrontendDataStructureConversion(JSON.parse(lineageNodes));
-        generateVisualisation(graph);
-    });
-}
-
-function initialiseEventListeners() {
-    uploadFilesInput.change(uploadFiles);
-    chooseFilesButton.click(() => uploadFilesInput.trigger('click'));
-    generateVisualisationButton.click(generateVisualisationButtonClicked);
-    demoButton.click(() => generateVisualisation(demoGraph));
-}
-
-$(document).ready(() => initialiseEventListeners());
