@@ -1,10 +1,12 @@
 function highlightColumns(columns) {
+    if (freezeHighlight) return;
     $(columns).attr({
         fill: columnHighlightBackgroundColor,
     });
 }
 
 function highlightTopLevelNodes(nodes) {
+    if (freezeHighlight) return;
     $(nodes).attr({
         fill: topLevelNodeBackgroundHighlightColor,
         opacity: topLevelNodeHighlightOpacity
@@ -12,10 +14,12 @@ function highlightTopLevelNodes(nodes) {
 }
 
 function highlightLabels(labels) {
+    if (freezeHighlight) return;
     $(labels).attr('fill', labelHighlightTextColor);
 }
 
 function highlightLinks(links) {
+    if (freezeHighlight) return;
     $(links).attr({
         stroke: linkHighlightColor,
         fill: linkHighlightColor,
@@ -23,23 +27,32 @@ function highlightLinks(links) {
     });
 }
 
+function unHighlightGraph() {
+    nodes.forEach(node => unHighlightIds(node.id));
+    links.forEach(link => unHighlightIds(link.id));
+}
+
 function unHighlightColumns(columns) {
+    if (freezeHighlight) return;
     columns.attr('fill', columnDefaultBackgroundColor);
 }
 
 function unHighlightTopLevelNodes(nodes) {
+    if (freezeHighlight) return;
     nodes
         .attr('fill', topLevelNodeDefaultBackgroundColor)
         .attr('opacity', topLevelNodeDefaultOpacity);
 }
 
 function unHighlightLabels(labels) {
+    if (freezeHighlight) return;
     $(labels)
         .filter((index, label) => isTopLevelId(columnOfLabel(label)))
         .attr('fill', topLevelNodeDefaultTextColor);
 }
 
 function unHighlightLinks(links) {
+    if (freezeHighlight) return;
     $(links).attr({
         stroke: linkDefaultColor,
         fill: linkDefaultColor,

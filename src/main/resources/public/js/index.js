@@ -10,6 +10,7 @@ function initialiseEventListeners() {
     chooseFilesButton.click(() => uploadFilesInput.trigger('click'));
     generateVisualisationButton.click(generateVisualisationButtonClicked);
     demoButton.click(() => generateVisualisation(demoGraph));
+    searchInput.keydown(() => setTimeout(searchInputChanged, 50));
 }
 
 $(document).ready(() => initialiseEventListeners());

@@ -124,3 +124,22 @@ h1 {
     padding-right: 8px;
     padding-top: 5px;
 }
+
+#search-input {
+    display:inline-block !important;
+    font-family: 'Montserrat', sans-serif;
+    color: rgb(60,60,60);
+    font-weight: 800;
+    border-radius: 10px;
+    height: 35px;
+    font-size: 16px;
+    border: 0px;
+    box-shadow: 3px 3px 3px grey;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+#search-input:focus {
+    border: 0px;
+    outline: none;
+}
