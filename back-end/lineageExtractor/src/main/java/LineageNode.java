@@ -1,4 +1,6 @@
+import javax.sound.sampled.Line;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Optional;
@@ -167,6 +169,17 @@ public class LineageNode {
 
     public boolean hasAlias() {
         return !this.alias.equals("");
+    }
+
+    public static boolean areNodeListsEqual(List<LineageNode> listA, List<LineageNode> listB) {
+        assert listA.size() == listB.size() :
+            String.format("Unequal number of nodes. List A: %d nodes, List B: %d nodes", listA.size(), listB.size());
+
+        Comparator<LineageNode> compareByName = (LineageNode a, LineageNode b) ->
+                a.getName().compareTo(b.getName());
+        listA.sort(compareByName);
+        listB.sort(compareByName);
+        return listA.equals(listB);
     }
 
 }

@@ -31,10 +31,7 @@ public class TestWith {
         a.addSource(DataLineage.makeId(withTable.getName(), a.getName()));
         resultantTable.addColumn(a);
 
-        Assertions.assertEquals(3, nodeList.size());
-        existingTable.equals(nodeList.get(0));
-        withTable.equals(nodeList.get(1));
-        resultantTable.equals(nodeList.get(2));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(existingTable, withTable, resultantTable), nodeList));
     }
 
     @Test
@@ -77,12 +74,8 @@ public class TestWith {
         c.addSource(DataLineage.makeId(withTable2.getName(), c.getName()));
         resultantTable.addListOfColumns(Arrays.asList(a, c));
 
-        Assertions.assertEquals(5, nodeList.size());
-        existingTable1.equals(nodeList.get(0));
-        withTable1.equals(nodeList.get(1));
-        existingTable2.equals(nodeList.get(2));
-        withTable2.equals(nodeList.get(3));
-        resultantTable.equals(nodeList.get(4));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(
+                Arrays.asList(existingTable1, existingTable2, withTable1, withTable2, resultantTable), nodeList));
     }
 
     @Test
@@ -111,9 +104,7 @@ public class TestWith {
         c.addSource(DataLineage.makeId(existingTable1.getName(), b.getName()));
         view.addListOfColumns(Arrays.asList(a, c));
 
-        Assertions.assertEquals(2, nodeList.size());
-        existingTable1.equals(nodeList.get(0));
-        view.equals(nodeList.get(1));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(existingTable1, view), nodeList));
     }
 
     @Test
@@ -136,9 +127,7 @@ public class TestWith {
         a.addSource(DataLineage.makeId(existingTable.getName(), a.getName()));
         view.addColumn(a);
 
-        Assertions.assertEquals(2, nodeList.size());
-        existingTable.equals(nodeList.get(0));
-        view.equals(nodeList.get(1));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(existingTable, view), nodeList));
     }
 
 }

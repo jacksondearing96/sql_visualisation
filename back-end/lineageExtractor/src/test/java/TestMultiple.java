@@ -39,9 +39,7 @@ public class TestMultiple {
         multipleIdentifiersSelectStatement = "select someFunction(a, b) as c, d from mytable###";
         nodeList = LineageExtractor.extractLineageWithAnonymousTables(multipleIdentifiersSelectStatement).getNodeList();
 
-        Assertions.assertEquals(2, nodeList.size(), "nodeList size");
-        Assertions.assertTrue(myTable.equals(nodeList.get(0)));
-        Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(myTable, anonymousTable), nodeList));
     }
 
     @Test
@@ -64,9 +62,7 @@ public class TestMultiple {
         columnB.addSource("c::b");
         anonymousTable.addListOfColumns(Arrays.asList(columnA, columnB));
 
-        Assertions.assertEquals(2, nodeList.size());
-        Assertions.assertTrue(table.equals(nodeList.get(0)));
-        Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(table, anonymousTable), nodeList));
     }
 
     @Test
@@ -96,11 +92,8 @@ public class TestMultiple {
         c.addSource("d::c");
         secondAnonymous.addColumn(c);
 
-        Assertions.assertEquals(4, nodeList.size());
-        Assertions.assertTrue(firstSource.equals(nodeList.get(0)));
-        Assertions.assertTrue(firstAnonymous.equals(nodeList.get(1)));
-        Assertions.assertTrue(secondSource.equals(nodeList.get(2)));
-        Assertions.assertTrue(secondAnonymous.equals(nodeList.get(3)));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(
+                Arrays.asList(firstSource, firstAnonymous, secondSource, secondAnonymous), nodeList));
     }
 
     @Test
@@ -126,10 +119,7 @@ public class TestMultiple {
         c.addSource("b::c");
         secondAnonymous.addColumn(c);
 
-        Assertions.assertEquals(3, nodeList.size());
-        Assertions.assertTrue(source.equals(nodeList.get(0)));
-        Assertions.assertTrue(firstAnonymous.equals(nodeList.get(1)));
-        Assertions.assertTrue(secondAnonymous.equals(nodeList.get(2)));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(source, firstAnonymous, secondAnonymous), nodeList));
     }
 
     @Test
@@ -154,9 +144,6 @@ public class TestMultiple {
         b.addSource("table2::b");
         anonymous.addListOfColumns(Arrays.asList(a, b));
 
-        Assertions.assertEquals(3, nodeList.size());
-        table1.equals(nodeList.get(0));
-        table2.equals(nodeList.get(1));
-        anonymous.equals(nodeList.get(2));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(table1, table2, anonymous), nodeList));
     }
 }

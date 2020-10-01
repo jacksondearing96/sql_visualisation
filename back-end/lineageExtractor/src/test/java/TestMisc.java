@@ -2,6 +2,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class TestMisc {
@@ -23,9 +24,7 @@ public class TestMisc {
         LineageNode anonymousTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
         anonymousTable.addColumn(new Column("one"));
 
-        Assertions.assertEquals(2, nodeList.size());
-        Assertions.assertTrue(sourceTable.equals(nodeList.get(0)));
-        Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(sourceTable, anonymousTable), nodeList));
     }
 
     @Test
@@ -44,9 +43,7 @@ public class TestMisc {
         b.addSource("c::a");
         anonymous.addColumn(b);
 
-        Assertions.assertEquals(2, nodeList.size());
-        source.equals(nodeList.get(0));
-        anonymous.equals(nodeList.get(1));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(source, anonymous), nodeList));
     }
 
     @Test
@@ -72,10 +69,7 @@ public class TestMisc {
         a.addSource("ANONYMOUS0::a");
         anonymous1.addColumn(a);
 
-        Assertions.assertEquals(3, nodeList.size());
-        tableC.equals(nodeList.get(0));
-        anonymous0.equals(nodeList.get(1));
-        anonymous1.equals(nodeList.get(2));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(tableC, anonymous0, anonymous1), nodeList));
     }
 
     @Test
@@ -86,8 +80,7 @@ public class TestMisc {
 
         LineageNode table = new LineageNode(Constants.Node.TYPE_TABLE, "newname");
 
-        Assertions.assertEquals(1, nodeList.size());
-        table.equals(nodeList.get(0));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(table), nodeList));
     }
 
     @Test

@@ -23,9 +23,7 @@ public class TestPrepare {
         columnB.addSource(DataLineage.makeId(tableC.getName(), columnB.getName()));
         prepareNode.addListOfColumns(Arrays.asList(columnA, columnB));
 
-        Assertions.assertEquals(2, nodeList.size());
-        tableC.equals(nodeList.get(0));
-        prepareNode.equals(nodeList.get(1));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(tableC, prepareNode), nodeList));
     }
 
 }

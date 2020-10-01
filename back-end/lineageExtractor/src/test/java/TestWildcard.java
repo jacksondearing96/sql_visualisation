@@ -24,9 +24,7 @@ public class TestWildcard {
         columnA.addSource("b::*");
         anonymousTable.addColumn(columnA);
 
-        Assertions.assertEquals(2, nodeList.size());
-        Assertions.assertTrue(table.equals(nodeList.get(0)));
-        Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(table, anonymousTable), nodeList));
     }
 
     @Test
@@ -50,8 +48,6 @@ public class TestWildcard {
         c.addSource("b::c");
         anonymous.addListOfColumns(Arrays.asList(wildcard, c));
 
-        Assertions.assertEquals(3, nodeList.size());
-        sourceA.equals(nodeList.get(0));
-        sourceB.equals(nodeList.get(1));
+        Assertions.assertTrue(LineageNode.areNodeListsEqual(Arrays.asList(sourceA, sourceB, anonymous), nodeList));
     }
 }
