@@ -66,6 +66,7 @@ let demoButton = $('#demo-button');
 let chooseFilesButton = $('#choose-files-button');
 let fileListContainer = $('#file-list-container');
 let fileNameContainers = $('.file-name-container');
+let toggleColumnsButton = $('#toggle-columns-button');
 
 let tickImg = "<img class='tick' src='https://lesspestcontrol.com.au/wp-content/uploads/green-tick.png'>";
 let crossImg = "<img class='cross' src='https://freesvg.org/img/milker_X_icon.png'>";

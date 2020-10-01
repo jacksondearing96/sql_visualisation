@@ -10,6 +10,7 @@ function initialiseEventListeners() {
     chooseFilesButton.click(() => uploadFilesInput.trigger('click'));
     generateVisualisationButton.click(generateVisualisationButtonClicked);
     demoButton.click(() => generateVisualisation(demoGraph));
+    toggleColumnsButton.click(() => toggleColumns());
 }
 
 $(document).ready(() => initialiseEventListeners());
