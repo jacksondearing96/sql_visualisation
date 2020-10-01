@@ -70,7 +70,7 @@ public class TestMisc {
         // Outer-most anonymous table.
         LineageNode anonymous1 = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"));
         anonymous0.addColumn(new Column("a"));
-        anonymous1.addColumn(new Column("a", "ANONYMOUS0::a"));
+        anonymous1.addColumn(new Column("a", Constants.Node.TYPE_ANON.concat("0::a")));
 
         Assertions.assertEquals(3, nodeList.size());
         tableC.equals(nodeList.get(0));

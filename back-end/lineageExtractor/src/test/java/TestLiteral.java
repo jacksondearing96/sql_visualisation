@@ -30,7 +30,7 @@ public class TestLiteral {
 
         // Anonymous table (from select statement).
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"));
-        anonymous.addColumn(new Column("b", "ANONYMOUS0::b"));
+        anonymous.addColumn(new Column("b", Constants.Node.TYPE_ANON.concat("0::b")));
 
         Assertions.assertEquals(2, nodeList.size());
         inlineLiteral.equals(nodeList.get(0));
@@ -49,7 +49,7 @@ public class TestLiteral {
 
         // Anonymous table (from select statement).
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"));
-        anonymous.addColumn(new Column("b", "ANONYMOUS0::b"));
+        anonymous.addColumn(new Column("b", Constants.Node.TYPE_ANON.concat("0::b")));
 
         Assertions.assertEquals(2, nodeList.size());
         inlineLiteral.equals(nodeList.get(0));
@@ -68,7 +68,7 @@ public class TestLiteral {
 
         // Anonymous table (from select statement).
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"));
-        anonymous.addColumn(new Column("b", "ANONYMOUS0::b"));
+        anonymous.addColumn(new Column("b", Constants.Node.TYPE_ANON.concat("0::b")));
 
         Assertions.assertEquals(2, nodeList.size());
         inlineLiteral.equals(nodeList.get(0));
