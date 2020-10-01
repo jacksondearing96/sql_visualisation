@@ -14,7 +14,7 @@ function getAllSourceSiblings(id) {
 
     let sourceSiblings = [];
     sourceSiblings.push(
-        ...[id, ...sourceColumnIds, ...column.incoming.map((link) => link.id)]
+        ...[id, ...sourceColumnIds, ...column.incoming.map(link => link.id)]
     );
     return sourceSiblings;
 }
@@ -35,7 +35,7 @@ function getAllTargetSiblings(id) {
 
     let targetSiblings = [];
     targetSiblings.push(
-        ...[id, ...targetColumnIds, ...column.outgoing.map((link) => link.id)]
+        ...[id, ...targetColumnIds, ...column.outgoing.map(link => link.id)]
     );
     return targetSiblings;
 }

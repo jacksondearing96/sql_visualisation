@@ -14,15 +14,15 @@ Array.prototype.max = function() {
 
 function maxColumnWidthForGroup(group) {
     return nodes
-        .filter((node) => node.group === group)
-        .filter((node) => node.type === columnType)
-        .map((node) => calculateTextWidthWithPadding(node.name))
+        .filter(node => node.group === group)
+        .filter(node => node.type === columnType)
+        .map(node => calculateTextWidthWithPadding(node.name))
         .max();
 }
 
 function topLevelWidthForGroup(group) {
     return calculateTextWidthWithPadding(
-        nodes.filter((node) => isTopLevelNode(node) && node.group === group)[0].name
+        nodes.filter(node => isTopLevelNode(node) && node.group === group)[0].name
     );
 }
 
@@ -96,13 +96,17 @@ function getLinkTargetY(link) {
 }
 
 function ticked() {
-    nodeSelection.attr('x', (d) => getNodeX(d)).attr('y', (d) => getNodeY(d));
+    nodeSelection
+        .attr('x', node => getNodeX(node))
+        .attr('y', node => getNodeY(node));
 
-    lables.attr('x', (d) => getLabelX(d)).attr('y', (d) => getLabelY(d));
+    labels
+        .attr('x', label => getLabelX(label))
+        .attr('y', label => getLabelY(label));
 
     linkSelection
-        .attr('x1', (d) => getLinkSourceX(d))
-        .attr('y1', (d) => getLinkSourceY(d))
-        .attr('x2', (d) => getLinkTargetX(d))
-        .attr('y2', (d) => getLinkTargetY(d));
+        .attr('x1', link => getLinkSourceX(link))
+        .attr('y1', link => getLinkSourceY(link))
+        .attr('x2', link => getLinkTargetX(link))
+        .attr('y2', link => getLinkTargetY(link));
 }

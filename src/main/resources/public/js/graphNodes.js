@@ -14,11 +14,11 @@ function isTopLevelId(id) {
 }
 
 function countColumnsInGroup(group) {
-    return nodes.filter((node) => node.group === group).length;
+    return nodes.filter(node => node.group === group).length;
 }
 
-function getParentTable(node) {
-    let parent = nodes.filter((n) => isTopLevelNode(n) && n.group === node.group);
+function getParentTable(childNode) {
+    let parent = nodes.filter(node => isTopLevelNode(node) && node.group === childNode.group);
     if (parent.length !== 1) error('Could not find parent table.');
     return parent[0];
 }
@@ -34,8 +34,6 @@ function setGroupClasses(node) {
 
 function getAllChildColumnIdsFromTopLevelId(id) {
     return nodes
-        .filter(
-            (node) => node.group === getNodeById(id).group && node.type === columnType
-        )
-        .map((node) => node.id);
+        .filter(node => node.group === getNodeById(id).group && node.type === columnType)
+        .map(node => node.id);
 }

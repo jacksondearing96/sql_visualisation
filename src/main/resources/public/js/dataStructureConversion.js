@@ -51,9 +51,7 @@ function backendToFrontendDataStructureConversion(lineageNodes) {
         graph.nodes.push(makeNode(lineageNode.type, lineageNode.name, lineageNode.id));
 
         // Add each of the columns.
-        lineageNode.columns.forEach((column, index) => {
-            addColumnToGraph(graph, column, index);
-        });
+        lineageNode.columns.forEach((column, index) => addColumnToGraph(graph, column, index));
     });
 
     return graph;

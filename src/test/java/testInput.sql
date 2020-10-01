@@ -1,1 +1,0 @@
-SELECT * FROM hello### SELECT a FROM goodbye
