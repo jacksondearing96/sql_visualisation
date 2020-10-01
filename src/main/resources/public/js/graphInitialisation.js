@@ -85,14 +85,13 @@ function generateForceDirectedSimulation() {
 
     simulation
         .force('center', d3.forceCenter(canvasWidth / 2, canvasHeight / 2))
-        .force('nodes', d3.forceManyBody().strength(nodeForceStrength))
-        .force(
+        .force('collision', d3.forceCollide(d => calculateNodeWidth(d) * collisionWidthRatio / 2)).force(
             'links',
             d3
             .forceLink(links)
             .id((d) => d.id)
             .distance(linkPreferredDistance)
-            .strength(linkStrength)
+            .strength(linkForceStrength)
         )
         .on('tick', ticked);
 }
