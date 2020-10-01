@@ -33,12 +33,7 @@ public class DataLineage {
     }
 
     public Optional<LineageNode> getNodeWithName(String name) {
-        for (LineageNode node : nodeList) {
-            if (node.getName().equals(name)) {
-                return Optional.of(node);
-            }
-        }
-        return Optional.empty();
+        return nodeList.stream().filter(o -> o.getName().equals(name)).findFirst();
     }
 
     public void clearAllAliases() {
