@@ -16,20 +16,16 @@ public class TestAnonymous {
 
         // Source table.
         LineageNode table = new LineageNode(Constants.Node.TYPE_TABLE, "tablename");
-        Column column1 = new Column("column1");
-        Column column2 = new Column("column2");
-        Column dateColumn = new Column("someDate");
-        table.addListOfColumns(Arrays.asList(column1, column2, dateColumn));
+        table.addListOfColumns(Column.arrayToColumns(Arrays.asList("column1", "column2", "someDate")));
 
         // Anonymous table.
         LineageNode anonymousTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        Column column1a = new Column("column1");
-        Column column2a = new Column("column2");
-        Column columnA = new Column("columnA");
-        column1a.addSource("tablename::column1");
-        column2a.addSource("tablename::column2");
-        columnA.addSource("tablename::someDate");
-        anonymousTable.addListOfColumns(Arrays.asList(column1a, column2a, columnA));
+        anonymousTable.addListOfColumns(
+            Column.arrayToColumns(
+                Arrays.asList("column1", "column2", "columnA"),
+                Arrays.asList("tablename::column1", "tablename::column2", "tablename::someDate")
+            )
+        );
 
         Assertions.assertEquals(2, nodeList.size());
         Assertions.assertTrue(table.equals(nodeList.get(0)));
@@ -73,9 +69,7 @@ public class TestAnonymous {
 
         // Adjust the view, it's column's sources have now bypassed the anonymous table.
         view = new LineageNode(Constants.Node.TYPE_VIEW, "view");
-        b = new Column("b");
-        b.addSource(DataLineage.makeId(source.getName(), b.getName()));
-        view.addColumn(b);
+        view.addColumn(new Column("b", DataLineage.makeId(source.getName(), b.getName())));
 
         // Check the resultant lineage is as expected.
         Assertions.assertEquals(2, nodeList.size());

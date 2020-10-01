@@ -33,13 +33,11 @@ public class TestLineage {
 
         // Source table.
         LineageNode sourceNode = new LineageNode(Constants.Node.TYPE_TABLE, "b");
-        Column a = new Column("a");
-        sourceNode.addColumn(a);
+        sourceNode.addColumn(new Column("a"));
 
         // Anonymous table.
         LineageNode anonymousNode = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        a.addSource("b::a");
-        anonymousNode.addColumn(a);
+        anonymousNode.addColumn(new Column("a", "b::a"));
 
         Assertions.assertEquals(2, nodeList.size());
         Assertions.assertTrue(anonymousNode.equals(nodeList.get(1)));

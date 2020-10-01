@@ -19,9 +19,7 @@ public class TestAlias {
         table.addColumn(new Column("a"));
 
         LineageNode anonymousTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        Column aliasedColumn = new Column("b");
-        aliasedColumn.addSource("c::a");
-        anonymousTable.addColumn(aliasedColumn);
+        anonymousTable.addColumn(new Column("b", "c::a"));
 
         Assertions.assertEquals(2, nodeList.size());
         Assertions.assertTrue(table.equals(nodeList.get(0)));
@@ -41,9 +39,7 @@ public class TestAlias {
         table.addColumn(new Column("a"));
 
         LineageNode anonymousTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        Column aliasedColumn = new Column("a");
-        aliasedColumn.addSource("b::a");
-        anonymousTable.addColumn(aliasedColumn);
+        anonymousTable.addColumn(new Column("a", "b::a"));
 
         Assertions.assertEquals(2, nodeList.size());
         Assertions.assertTrue(table.equals(nodeList.get(0)));
@@ -62,9 +58,7 @@ public class TestAlias {
 
         // Anonymous table.
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        Column b = new Column("b");
-        b.addSource("c::a");
-        anonymous.addColumn(b);
+        anonymous.addColumn(new Column("b", "c::a"));
 
         Assertions.assertEquals(2, nodeList.size());
         source.equals(nodeList.get(0));

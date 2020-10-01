@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,17 @@ public class Column implements Cloneable {
     private Optional<String> stagedRename = Optional.empty();
 
     public Column() { this("", "", ""); }
+
+    /**
+     * Create a column with a comma separated list of sources.
+     * @param name Column name.
+     * @param sources Comma separated list of sources.
+     */
+    public Column(String name, String sources) {
+        this(name, "", "");
+        this.addListOfSources(Arrays.asList(sources.split(",")));
+    }
+
     public Column(String name) {
         this(name, "", "");
     }
@@ -37,6 +49,22 @@ public class Column implements Cloneable {
         this.name = name;
         this.alias = alias;
         this.id = id;
+    }
+
+    public static ArrayList<Column> arrayToColumns(List<String> names) {
+        ArrayList<Column> columns = new ArrayList<>();
+        for (int i = 0; i < names.size(); i++) {
+            columns.add(new Column(names.get(i), "", ""));
+        }
+        return columns;
+    }
+
+    public static ArrayList<Column> arrayToColumns(List<String> names, List<String> sources) {
+        ArrayList<Column> columns = new ArrayList<>();
+        for (int i = 0; i < names.size(); i++) {
+            columns.add(new Column(names.get(i), sources.get(i)));
+        }
+        return columns;
     }
 
     public Object clone() throws CloneNotSupportedException {

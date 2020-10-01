@@ -14,18 +14,13 @@ public class TestPrepare {
         List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
 
         LineageNode tableC = new LineageNode(Constants.Node.TYPE_TABLE, "c");
-        Column columnA = new Column("a");
-        Column columnB = new Column("b");
-        tableC.addListOfColumns(Arrays.asList(columnA, columnB));
+        tableC.addListOfColumns(Column.arrayToColumns(Arrays.asList("a", "b")));
 
         LineageNode prepareNode = new LineageNode(Constants.Node.TYPE_TABLE, "mytable");
-        columnA.addSource(DataLineage.makeId(tableC.getName(), columnA.getName()));
-        columnB.addSource(DataLineage.makeId(tableC.getName(), columnB.getName()));
-        prepareNode.addListOfColumns(Arrays.asList(columnA, columnB));
+        prepareNode.addListOfColumns(Column.arrayToColumns(Arrays.asList("a", "b"), Arrays.asList("c::a", "c::b")));
 
         Assertions.assertEquals(2, nodeList.size());
         tableC.equals(nodeList.get(0));
         prepareNode.equals(nodeList.get(1));
     }
-
 }
