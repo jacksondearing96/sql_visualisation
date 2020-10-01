@@ -49,7 +49,11 @@ function generateForceDirectedSimulation() {
         .attr('opacity', node => determineNodeOpacity(node))
         .attr('class', node => setGroupClasses(node))
         .attr('id', node => node.id)
-        .call(d3.drag().on('start', dragStart).on('drag', drag).on('end', dragEnd))
+        .call(
+            d3.drag()
+            .on('start', dragStart)
+            .on('drag', drag)
+            .on('end', dragEnd))
         .on('mouseover', node => columnMouseOver(node.id))
         .on('mouseout', node => columnMouseOut(node.id));
 
@@ -79,7 +83,12 @@ function generateForceDirectedSimulation() {
         .attr('id', label => 'label-' + label.id)
         .text(label => label.name)
         .on('mouseover', labelMouseOver)
-        .on('mouseout', labelMouseOut);
+        .on('mouseout', labelMouseOut)
+        .call(
+            d3.drag()
+            .on('start', dragStart)
+            .on('drag', drag)
+            .on('end', dragEnd));
 
     simulation = d3.forceSimulation(nodes);
 

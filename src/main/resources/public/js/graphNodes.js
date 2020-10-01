@@ -18,6 +18,7 @@ function countColumnsInGroup(group) {
 }
 
 function getParentTable(childNode) {
+    if (isTopLevelNode(childNode)) return childNode;
     let parent = nodes.filter(node => isTopLevelNode(node) && node.group === childNode.group);
     if (parent.length !== 1) error('Could not find parent table.');
     return parent[0];

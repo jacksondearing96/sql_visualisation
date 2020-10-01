@@ -1,16 +1,34 @@
-function dragStart(d) {
+let correctionX = 0;
+let correctionY = 0;
+
+function dragStart(node) {
+    node = getParentTable(node);
+
     simulation.alphaTarget(dragStartAlphaTarget).restart();
-    d.fx = d.x;
-    d.fy = d.y;
+
+    node.fx = node.x;
+    node.fy = node.y;
+
+    correctionX = 0;
+    correctionY = 0;
 }
 
-function drag(d) {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
+function drag(node) {
+    let parent = getParentTable(node);
+
+    if (correctionX === 0 && correctionY === 0) {
+        correctionX = parent.fx - node.x;
+        correctionY = parent.fy - node.y;
+    }
+
+    parent.fx = d3.event.x + correctionX;
+    parent.fy = d3.event.y + correctionY;
 }
 
-function dragEnd(d) {
+function dragEnd(node) {
+    node = getParentTable(node);
     simulation.alphaTarget(dragEndAlphaTarget);
-    d.fx = null;
-    d.fy = null;
+
+    node.fx = null;
+    node.fy = null;
 }

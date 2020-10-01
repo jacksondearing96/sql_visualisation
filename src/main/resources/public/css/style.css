@@ -124,3 +124,7 @@ h1 {
     padding-right: 8px;
     padding-top: 5px;
 }
+
+.top-level-node:hover, .column:hover, .label:hover {
+    cursor: pointer;
+}
