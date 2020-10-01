@@ -10,6 +10,8 @@ function getAllSourceSiblings(id) {
         for (let columnId of allColumnsIds) {
             sourceColumnIds.push(...getAllSourceSiblings(columnId));
         }
+    } else {
+        if (!showColumns) sourceColumnIds.push(getParentTable(getNodeById(id)).id);
     }
 
     let sourceSiblings = [];
@@ -31,6 +33,8 @@ function getAllTargetSiblings(id) {
         for (let columnId of allColumnsIds) {
             targetColumnIds.push(...getAllTargetSiblings(columnId));
         }
+    } else {
+        if (!showColumns) targetColumnIds.push(getParentTable(getNodeById(id)).id);
     }
 
     let targetSiblings = [];

@@ -40,9 +40,10 @@ function calculateNodeWidth(node) {
 }
 
 function calculateNodeHeight(node) {
-    return isTopLevelNode(node) ?
-        columnHeight * countColumnsInGroup(node.group) + topLevelNodePaddingVertical :
-        columnHeight;
+    if (isTopLevelNode(node) && showColumns) {
+        return columnHeight * countColumnsInGroup(node.group) + topLevelNodePaddingVertical;
+    }
+    return isTopLevelNode(node) ? topLevelNodeCollapsedHeight : columnHeight;
 }
 
 
@@ -68,37 +69,44 @@ function getLabelY(node) {
     return getNodeY(node) + columnHeight / 2 + labelOffsetToReachCenter;
 }
 
+function getLinkSource(link) {
+    return isTopLevelNode(link.source) ? link.source :
+        showColumns ? link.source : getParentTable(link.source);
+}
+
+function getLinkTarget(link) {
+    return isTopLevelNode(link.target) ? link.target :
+        showColumns ? link.target : getParentTable(link.target);
+}
+
 function getLinkSourceX(link) {
-    if (isTopLevelId(link.source.id)) {
-        return (
-            getNodeX(link.source) + calculateTextWidthWithPadding(link.source.name)
-        );
-    }
-    return getNodeX(link.source) + calculateNodeWidth(link.source);
+    let linkSource = getLinkSource(link);
+    return getNodeX(linkSource) + calculateNodeWidth(linkSource);
 }
 
 function getLinkSourceY(link) {
-    if (isTopLevelId(link.source.id)) {
-        return getNodeY(link.source) + calculateNodeHeight(link.source) / 2;
-    }
-    return getNodeY(link.source) + columnHeight / 2;
+    let linkSource = getLinkSource(link);
+    return isTopLevelNode(linkSource) ?
+        getNodeY(linkSource) + calculateNodeHeight(linkSource) / 2 :
+        getNodeY(linkSource) + columnHeight / 2;
 }
 
 function getLinkTargetX(link) {
-    return getNodeX(link.target);
+    return getNodeX(getLinkTarget(link));
 }
 
 function getLinkTargetY(link) {
-    if (isTopLevelId(link.target.id)) {
-        return getNodeY(link.target) + calculateNodeHeight(link.target) / 2;
-    }
-    return getNodeY(link.target) + columnHeight / 2;
+    let linkTarget = getLinkTarget(link);
+    return isTopLevelId(linkTarget.id) ?
+        getNodeY(linkTarget) + calculateNodeHeight(linkTarget) / 2 :
+        getNodeY(linkTarget) + columnHeight / 2;
 }
 
 function ticked() {
     nodeSelection
         .attr('x', node => getNodeX(node))
-        .attr('y', node => getNodeY(node));
+        .attr('y', (node) => getNodeY(node));
+    if (showColumnsChanged) nodeSelection.attr('height', node => calculateNodeHeight(node));
 
     labels
         .attr('x', label => getLabelX(label))
@@ -109,4 +117,7 @@ function ticked() {
         .attr('y1', link => getLinkSourceY(link))
         .attr('x2', link => getLinkTargetX(link))
         .attr('y2', link => getLinkTargetY(link));
+
+    // Performance optimisation.
+    showColumnsChanged = false;
 }

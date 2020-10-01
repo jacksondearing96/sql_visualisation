@@ -1,8 +1,21 @@
+function activateToggleColumnsButton() {
+    $('.slider').css('opacity', showColumns ? 1 : 0.5);
+    $('#show-columns-toggle-switch').attr('disabled', false);
+}
+
 function generateVisualisationButtonClicked() {
     $.post("/lineage_extractor", sql, lineageNodes => {
         let graph = backendToFrontendDataStructureConversion(JSON.parse(lineageNodes));
         generateVisualisation(graph);
     });
+    activateToggleColumnsButton();
+}
+
+function toggleColumns() {
+    showColumns = showColumns ? false : true;
+    $('.column').css('display', showColumns ? 'block' : 'none');
+    showColumnsChanged = true;
+    ticked();
 }
 
 function initialiseEventListeners() {
@@ -10,7 +23,7 @@ function initialiseEventListeners() {
     chooseFilesButton.click(() => uploadFilesInput.trigger('click'));
     generateVisualisationButton.click(generateVisualisationButtonClicked);
     demoButton.click(() => generateVisualisation(demoGraph));
-    toggleColumnsButton.click(() => toggleColumns());
+    showColumnsToggleSwitch.click(() => toggleColumns());
 }
 
 $(document).ready(() => initialiseEventListeners());

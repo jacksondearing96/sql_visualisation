@@ -28,8 +28,8 @@ function columnOfLabel(label) {
     return label.id.split('label-')[1];
 }
 
-function setGroupClasses(node) {
-    return node.group + ' ' + isTopLevelNode(node) ? topLevelNodeClass : columnClass;
+function setNodeClass(node) {
+    return isTopLevelNode(node) ? topLevelNodeClass : columnClass;
 }
 
 function getAllChildColumnIdsFromTopLevelId(id) {

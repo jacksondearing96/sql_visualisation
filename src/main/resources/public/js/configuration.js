@@ -42,12 +42,16 @@ const topLevelNodeHighlightOpacity = 0.6;
 const topLevelNodeDefaultOpacity = 0.2;
 const topLevelNodeDefaultFontWeight = 'bold';
 const topLevelNodeClass = 'top-level-node';
+const topLevelNodeCollapsedHeight = 30;
 
 const tableType = 'TABLE';
 const viewType = 'VIEW';
 const columnType = 'COLUMN';
 
 const idDelimiter = '::';
+
+let showColumns = true;
+let showColumnsChanged = false;
 
 /**
  * Enforce a maximum number of logging messages that can be produced.
@@ -66,7 +70,7 @@ let demoButton = $('#demo-button');
 let chooseFilesButton = $('#choose-files-button');
 let fileListContainer = $('#file-list-container');
 let fileNameContainers = $('.file-name-container');
-let toggleColumnsButton = $('#toggle-columns-button');
+let showColumnsToggleSwitch = $('#show-columns-toggle-switch');
 
 let tickImg = "<img class='tick' src='https://lesspestcontrol.com.au/wp-content/uploads/green-tick.png'>";
 let crossImg = "<img class='cross' src='https://freesvg.org/img/milker_X_icon.png'>";
