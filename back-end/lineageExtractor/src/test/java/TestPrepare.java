@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -23,9 +22,7 @@ public class TestPrepare {
         columnB.addSource(DataLineage.makeId(tableC.getName(), columnB.getName()));
         prepareNode.addListOfColumns(Arrays.asList(columnA, columnB));
 
-        Assertions.assertEquals(2, nodeList.size());
-        tableC.equals(nodeList.get(0));
-        prepareNode.equals(nodeList.get(1));
+        LineageNode.testNodeListEquivalency(Arrays.asList(tableC, prepareNode), nodeList);
     }
 
 }

@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -13,16 +12,15 @@ public class TestConditional {
         String sql = "SELECT CASE WHEN a = b THEN c ELSE d END FROM mytable###";
         List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
 
-        LineageNode mytable = new LineageNode(Constants.Node.TYPE_TABLE, "mytable");
-        mytable.addListOfColumns(Arrays.asList(
+        LineageNode myTable = new LineageNode(Constants.Node.TYPE_TABLE, "mytable");
+        myTable.addListOfColumns(Arrays.asList(
                 new Column("a"),
                 new Column("b"),
                 new Column("c"),
                 new Column("d")
         ));
 
-        Assertions.assertEquals(1, nodeList.size());
-        mytable.equals(nodeList.get(0));
+        LineageNode.testNodeListEquivalency(Arrays.asList(myTable), nodeList);
     }
 
     @Test
@@ -44,9 +42,7 @@ public class TestConditional {
                 new Column("d")
         ));
 
-        Assertions.assertEquals(2, nodeList.size());
-        leftTable.equals(nodeList.get(0));
-        rightTable.equals(nodeList.get(1));
+        LineageNode.testNodeListEquivalency(Arrays.asList(leftTable, rightTable), nodeList);
     }
 
 }

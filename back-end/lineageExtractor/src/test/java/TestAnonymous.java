@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -31,9 +30,7 @@ public class TestAnonymous {
         columnA.addSource("tablename::someDate");
         anonymousTable.addListOfColumns(Arrays.asList(column1a, column2a, columnA));
 
-        Assertions.assertEquals(2, nodeList.size());
-        Assertions.assertTrue(table.equals(nodeList.get(0)));
-        Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
+        LineageNode.testNodeListEquivalency(Arrays.asList(table, anonymousTable), nodeList);
     }
 
     @Test
@@ -58,17 +55,12 @@ public class TestAnonymous {
         b.addSource(DataLineage.makeId(anonymous.getName(), b.getName()));
         view.addColumn(b);
 
-        // First, verify that the anonymous table is produced correctly as the
-        // intermediate table.
+        // First, verify that the anonymous table is produced correctly as the intermediate table.
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
+        LineageNode.testNodeListEquivalency(Arrays.asList(source, anonymous, view), nodeList);
 
-        Assertions.assertEquals(3, nodeList.size());
-        Assertions.assertTrue(source.equals(nodeList.get(0)));
-        Assertions.assertTrue(anonymous.equals(nodeList.get(1)));
-        Assertions.assertTrue(view.equals(nodeList.get(2)));
 
-        // Now extract the lineage, including the step where the anonymous tables are
-        // bypassed.
+        // Now extract the lineage, including the step where the anonymous tables are bypassed.
         nodeList = LineageExtractor.extractLineage(sql).getNodeList();
 
         // Adjust the view, it's column's sources have now bypassed the anonymous table.
@@ -77,10 +69,7 @@ public class TestAnonymous {
         b.addSource(DataLineage.makeId(source.getName(), b.getName()));
         view.addColumn(b);
 
-        // Check the resultant lineage is as expected.
-        Assertions.assertEquals(2, nodeList.size());
-        Assertions.assertTrue(source.equals(nodeList.get(0)));
-        Assertions.assertTrue(view.equals(nodeList.get(1)));
+        LineageNode.testNodeListEquivalency(Arrays.asList(view, source), nodeList);
     }
 
 }

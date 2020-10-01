@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -16,8 +15,7 @@ public class TestInsert {
         // The only table that will be derived from this.
         LineageNode existingTable = new LineageNode("TABLE", "existingtable");
 
-        Assertions.assertEquals(1, nodeList.size());
-        existingTable.equals(nodeList.get(0));
+        LineageNode.testNodeListEquivalency(Arrays.asList(existingTable), nodeList);
     }
 
     @Test
@@ -42,10 +40,7 @@ public class TestInsert {
         col.addSource(DataLineage.makeId(anonymous.getName(), col.getName()));
         existingTable.addColumn(col);
 
-        Assertions.assertEquals(3, nodeList.size());
-        sourceA.equals(nodeList.get(0));
-        anonymous.equals(nodeList.get(1));
-        existingTable.equals(nodeList.get(2));
+        LineageNode.testNodeListEquivalency(Arrays.asList(sourceA, anonymous, existingTable), nodeList);
     }
 
     @Test
@@ -58,8 +53,7 @@ public class TestInsert {
         LineageNode existingTable = new LineageNode("TABLE", "existingtable");
         existingTable.addListOfColumns(Arrays.asList(new Column("a"), new Column("b"), new Column("c")));
 
-        Assertions.assertEquals(1, nodeList.size());
-        existingTable.equals(nodeList.get(0));
+        LineageNode.testNodeListEquivalency(Arrays.asList(existingTable), nodeList);
     }
 
     @Test
@@ -92,10 +86,7 @@ public class TestInsert {
         c.addSource(DataLineage.makeId(anonymous.getName(), f.getName()));
         existingTable.addListOfColumns(Arrays.asList(a, b, c));
 
-        Assertions.assertEquals(3, nodeList.size());
-        sourceTable.equals(nodeList.get(0));
-        anonymous.equals(nodeList.get(1));
-        existingTable.equals(nodeList.get(2));
+        LineageNode.testNodeListEquivalency(Arrays.asList(sourceTable, anonymous, existingTable), nodeList);
     }
 
 }

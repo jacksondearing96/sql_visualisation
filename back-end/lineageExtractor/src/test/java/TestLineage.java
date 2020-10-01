@@ -2,6 +2,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class TestLineage {
@@ -41,9 +42,7 @@ public class TestLineage {
         a.addSource("b::a");
         anonymousNode.addColumn(a);
 
-        Assertions.assertEquals(2, nodeList.size());
-        Assertions.assertTrue(anonymousNode.equals(nodeList.get(1)));
-        Assertions.assertTrue(sourceNode.equals(nodeList.get(0)));
+        LineageNode.testNodeListEquivalency(Arrays.asList(sourceNode, anonymousNode), nodeList);
     }
 
 }
