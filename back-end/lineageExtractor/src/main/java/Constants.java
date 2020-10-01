@@ -15,6 +15,7 @@ public final class Constants {
     }
 
     public final class Node {
+        public static final String TYPE_COLUMN = "COLUMN";
         public static final String TYPE_TABLE = "TABLE";
         public static final String TYPE_VIEW = "VIEW";
         public static final String TYPE_ANON = "ANONYMOUS";
