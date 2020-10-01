@@ -23,23 +23,24 @@ public class TestInsert {
     @Test
     @DisplayName("testInsertFromSelect")
     public void testInsertFromSelect() {
-        String sql = "INSERT INTO existingTable SELECT * FROM a###";
+        String sql = "INSERT INTO existingTable SELECT col FROM a###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
         // Source table a.
         LineageNode sourceA = new LineageNode("TABLE", "a");
+        Column col = new Column("col");
+        sourceA.addColumn(col);
 
         // Anonymous table from select statement.
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        Column wildcard = new Column("*");
-        wildcard.addSource("a::*");
-        anonymous.addColumn(wildcard);
+        col.addSource("a::col");
+        anonymous.addColumn(col);
 
         // The existing table that is having values inserted.
         LineageNode existingTable = new LineageNode("TABLE", "existingtable");
-        wildcard = new Column("*");
-        wildcard.addSource(DataLineage.makeId(anonymous.getName(), wildcard.getName()));
-        existingTable.addColumn(wildcard);
+        col = new Column("col");
+        col.addSource(DataLineage.makeId(anonymous.getName(), col.getName()));
+        existingTable.addColumn(col);
 
         Assertions.assertEquals(3, nodeList.size());
         sourceA.equals(nodeList.get(0));

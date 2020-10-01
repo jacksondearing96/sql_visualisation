@@ -3,6 +3,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.HashMap;
 
 /**
@@ -29,6 +30,10 @@ public class DataLineage {
         for (String source : sources) {
             column.getSources().add(++index, source);
         }
+    }
+
+    public Optional<LineageNode> getNodeWithName(String name) {
+        return nodeList.stream().filter(o -> o.getName().equals(name)).findFirst();
     }
 
     public void clearAllAliases() {
