@@ -13,11 +13,11 @@ import org.slf4j.LoggerFactory;
 public class SelectStatement {
     final static Logger LOGGING = LoggerFactory.getLogger(SelectStatement.class);
 
-    private Stack<SelectItem> selectItems = new Stack<>();
+    private final Stack<SelectItem> selectItems = new Stack<>();
     private ArrayList<LineageNode> sourceTables = new ArrayList<>();
     private LineageNode anonymousTable;
     private boolean isReconciled = false;
-    private DataLineage existingLineage;
+    private final DataLineage existingLineage;
 
     public SelectStatement(DataLineage existingLineage) {
         this.existingLineage = existingLineage;

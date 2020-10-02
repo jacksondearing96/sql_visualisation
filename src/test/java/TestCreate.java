@@ -16,10 +16,9 @@ public class TestCreate {
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
         LineageNode createdTable = new LineageNode("TABLE", "createdtable");
-        createdTable.addListOfColumns(Arrays.asList(new Column("col1"), new Column("col2")));
+        createdTable.addListOfColumns(Column.arrayToColumns(Arrays.asList("col1", "col2")));
 
-        Assertions.assertEquals(1, nodeList.size());
-        createdTable.equals(nodeList.get(0));
+        LineageNode.testNodeListEquivalency(Arrays.asList(createdTable), nodeList);
     }
 
     @Test
@@ -29,18 +28,13 @@ public class TestCreate {
         List<LineageNode> nodeList = LineageExtractor.extractLineage(sql).getNodeList();
 
         LineageNode existingTable = new LineageNode("TABLE", "existingtable");
-        Column a = new Column("a");
-        Column b = new Column("b");
-        existingTable.addListOfColumns(Arrays.asList(a, b));
+        existingTable.addListOfColumns(Column.arrayToColumns(Arrays.asList("a", "b")));
 
         LineageNode createdTable = new LineageNode("TABLE", "createdtable");
-        a.addSource(DataLineage.makeId(existingTable.getName(), a.getName()));
-        b.addSource(DataLineage.makeId(existingTable.getName(), b.getName()));
-        createdTable.addListOfColumns(Arrays.asList(a, b));
+        createdTable.addListOfColumns(Column.arrayToColumns(
+            Arrays.asList("a", "b"), Arrays.asList("existingtable::a", "existingtable::b")));
 
-        Assertions.assertEquals(2, nodeList.size());
-        existingTable.equals(nodeList.get(0));
-        createdTable.equals(nodeList.get(1));
+        LineageNode.testNodeListEquivalency(Arrays.asList(existingTable, createdTable), nodeList);
     }
 
     @Test
@@ -56,12 +50,8 @@ public class TestCreate {
 
         // View.
         LineageNode view = new LineageNode(Constants.Node.TYPE_VIEW, "a");
-        Column columnA = new Column("b");
-        columnA.addSource("c::b");
-        view.addColumn(columnA);
+        view.addColumn(new Column("b", "c::b"));
 
-        Assertions.assertEquals(2, nodeList.size());
-        Assertions.assertTrue(table.equals(nodeList.get(0)));
-        Assertions.assertTrue(view.equals(nodeList.get(1)));
+        LineageNode.testNodeListEquivalency(Arrays.asList(table, view), nodeList);
     }
 }
