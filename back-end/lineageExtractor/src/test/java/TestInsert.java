@@ -31,14 +31,11 @@ public class TestInsert {
 
         // Anonymous table from select statement.
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        col.addSource("a::col");
-        anonymous.addColumn(col);
+        anonymous.addColumn(new Column("*", "a::*"));
 
         // The existing table that is having values inserted.
         LineageNode existingTable = new LineageNode("TABLE", "existingtable");
-        col = new Column("col");
-        col.addSource(DataLineage.makeId(anonymous.getName(), col.getName()));
-        existingTable.addColumn(col);
+        existingTable.addColumn(new Column("*", Constants.Node.TYPE_ANON.concat("0::*")));
 
         LineageNode.testNodeListEquivalency(Arrays.asList(sourceA, anonymous, existingTable), nodeList);
     }
@@ -64,27 +61,22 @@ public class TestInsert {
 
         // Source table.
         LineageNode sourceTable = new LineageNode("TABLE", "sourcetable");
-        Column d = new Column("d");
-        Column e = new Column("e");
-        Column f = new Column("f");
-        sourceTable.addListOfColumns(Arrays.asList(d, e, f));
+        sourceTable.addListOfColumns(Column.arrayToColumns(Arrays.asList("d", "e", "f")));
 
         // Anonymous table from select statement.
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        d.addSource(DataLineage.makeId(sourceTable.getName(), d.getName()));
-        e.addSource(DataLineage.makeId(sourceTable.getName(), e.getName()));
-        f.addSource(DataLineage.makeId(sourceTable.getName(), f.getName()));
-        anonymous.addListOfColumns(Arrays.asList(d, e, f));
+        anonymous.addListOfColumns(Column.arrayToColumns(
+            Arrays.asList("d", "e", "f"), Arrays.asList("sourcetable::d", "sourcetable::e", "sourcetable::f")));
 
         // The existing table that is having values inserted.
         LineageNode existingTable = new LineageNode("TABLE", "existingtable");
-        Column a = new Column("a");
-        Column b = new Column("b");
-        Column c = new Column("c");
-        a.addSource(DataLineage.makeId(anonymous.getName(), d.getName()));
-        b.addSource(DataLineage.makeId(anonymous.getName(), e.getName()));
-        c.addSource(DataLineage.makeId(anonymous.getName(), f.getName()));
-        existingTable.addListOfColumns(Arrays.asList(a, b, c));
+        existingTable.addListOfColumns(Column.arrayToColumns(
+            Arrays.asList("a", "b", "c"),
+            Arrays.asList(
+                Constants.Node.TYPE_ANON.concat("0::d"),
+                Constants.Node.TYPE_ANON.concat("0::e"),
+                Constants.Node.TYPE_ANON.concat("0::f"))
+        ));
 
         LineageNode.testNodeListEquivalency(Arrays.asList(sourceTable, anonymous, existingTable), nodeList);
     }

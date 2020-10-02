@@ -19,6 +19,7 @@ public class TestWildcard {
 
         // Anonymous table.
         LineageNode anonymousTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
+        anonymousTable.addColumn(new Column("*", "b::*"));
 
         LineageNode.testNodeListEquivalency(Arrays.asList(table, anonymousTable), nodeList);
     }
@@ -55,15 +56,11 @@ public class TestWildcard {
 
         // Source table b.
         LineageNode sourceB = new LineageNode(Constants.Node.TYPE_TABLE, "b");
-        Column c = new Column("c");
-        sourceB.addColumn(c);
+        sourceB.addColumn(new Column("c"));
 
         // Anonymous table.
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        Column wildcard = new Column("*");
-        wildcard.addSource("a::*");
-        c.addSource("b::c");
-        anonymous.addListOfColumns(Arrays.asList(wildcard, c));
+        anonymous.addListOfColumns(Column.arrayToColumns(Arrays.asList("*", "c"), Arrays.asList("a::*", "b::c")));
 
         LineageNode.testNodeListEquivalency(Arrays.asList(sourceA, sourceB, anonymous), nodeList);
     }

@@ -39,9 +39,7 @@ public class TestMisc {
 
         // Anonymous table.
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        Column b = new Column("b");
-        b.addSource("c::a");
-        anonymous.addColumn(b);
+        anonymous.addColumn(new Column("b", "c::a"));
 
         LineageNode.testNodeListEquivalency(Arrays.asList(source, anonymous), nodeList);
     }
@@ -55,19 +53,20 @@ public class TestMisc {
         // Table c.
         LineageNode tableC = new LineageNode(Constants.Node.TYPE_TABLE, "c");
         Column b = new Column("b");
-        tableC.addColumn(b);
+//        tableC.addColumn(b);
+//        tableC.addListOfColumns(Column.arrayToColumns(Arrays.asList("b")));
+        tableC.addColumn(new Column("b"));
 
         // Inner-most anonymous table.
         LineageNode anonymous0 = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
+        anonymous0.addColumn(new Column("b", "c::b"));
         b.addSource("c::b");
-        anonymous0.addColumn(b);
+//        anonymous0.addColumn(b);
 
         // Outer-most anonymous table.
         LineageNode anonymous1 = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"));
-        Column a = new Column("a");
-        anonymous0.addColumn(a);
-        a.addSource("ANONYMOUS0::a");
-        anonymous1.addColumn(a);
+        anonymous0.addColumn(new Column("a"));
+        anonymous1.addColumn(new Column("a", Constants.Node.TYPE_ANON.concat("0::a")));
 
         LineageNode.testNodeListEquivalency(Arrays.asList(tableC, anonymous0, anonymous1), nodeList);
     }
