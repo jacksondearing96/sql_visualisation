@@ -4,8 +4,12 @@ const scrollIncrementWidthToInitInCenter = -500;
 const scrollIncrementHeightToInitInCenter = -300;
 
 const nodeForceStrength = -30;
-const dragEndAlphaTarget = 0;
-const dragStartAlphaTarget = 0.5;
+const nodeCollisionRadius = 10;
+const linkForceStrength = 0.01;
+const linkPreferredDistance = 50;
+const dragEndAlphaTarget = 0.1;
+const dragStartAlphaTarget = 0.1;
+const collisionWidthRatio = 1.25;
 
 const offWhite = 'rgb(200,200,200)';
 
@@ -26,8 +30,6 @@ const linkHighlightColor = 'crimson';
 const linkFill = 'none';
 const linkDefaultWidth = '1';
 const linkHighlightWidth = '5';
-const linkPreferredDistance = 50;
-const linkStrength = 0.1;
 
 const labelPaddingHorizontal = 15;
 const labelOffsetToReachCenter = 4;
