@@ -15,7 +15,7 @@ public class TestConditional {
         LineageNode mytable = new LineageNode(Constants.Node.TYPE_TABLE, "mytable");
         mytable.addListOfColumns(Column.arrayToColumns(Arrays.asList("a", "b", "c", "d")));
 
-        LineageNode.testNodeListEquivalency(Arrays.asList(myTable), nodeList);
+        LineageNode.testNodeListEquivalency(Arrays.asList(mytable), nodeList);
     }
 
     @Test
