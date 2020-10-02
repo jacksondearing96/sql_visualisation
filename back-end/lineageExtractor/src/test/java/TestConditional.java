@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -16,8 +15,7 @@ public class TestConditional {
         LineageNode mytable = new LineageNode(Constants.Node.TYPE_TABLE, "mytable");
         mytable.addListOfColumns(Column.arrayToColumns(Arrays.asList("a", "b", "c", "d")));
 
-        Assertions.assertEquals(1, nodeList.size());
-        mytable.equals(nodeList.get(0));
+        LineageNode.testNodeListEquivalency(Arrays.asList(myTable), nodeList);
     }
 
     @Test
@@ -33,9 +31,7 @@ public class TestConditional {
         LineageNode rightTable = new LineageNode(Constants.Node.TYPE_TABLE, "righttable");
         rightTable.addListOfColumns(Column.arrayToColumns(Arrays.asList("b", "d")));
 
-        Assertions.assertEquals(2, nodeList.size());
-        leftTable.equals(nodeList.get(0));
-        rightTable.equals(nodeList.get(1));
+        LineageNode.testNodeListEquivalency(Arrays.asList(leftTable, rightTable), nodeList);
     }
 
 }

@@ -32,8 +32,7 @@ public class TestLiteral {
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"));
         anonymous.addColumn(new Column("b", Constants.Node.TYPE_ANON.concat("0::b")));
 
-        Assertions.assertEquals(2, nodeList.size());
-        inlineLiteral.equals(nodeList.get(0));
+        LineageNode.testNodeListEquivalency(Arrays.asList(inlineLiteral, anonymous), nodeList);
     }
 
     @Test
@@ -51,8 +50,7 @@ public class TestLiteral {
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"));
         anonymous.addColumn(new Column("b", Constants.Node.TYPE_ANON.concat("0::b")));
 
-        Assertions.assertEquals(2, nodeList.size());
-        inlineLiteral.equals(nodeList.get(0));
+        LineageNode.testNodeListEquivalency(Arrays.asList(inlineLiteral, anonymous), nodeList);
     }
 
     @Test
@@ -70,9 +68,7 @@ public class TestLiteral {
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"));
         anonymous.addColumn(new Column("b", Constants.Node.TYPE_ANON.concat("0::b")));
 
-        Assertions.assertEquals(2, nodeList.size());
-        inlineLiteral.equals(nodeList.get(0));
-        anonymous.equals(nodeList.get(1));
+        LineageNode.testNodeListEquivalency(Arrays.asList(inlineLiteral, anonymous), nodeList);
     }
 
 }

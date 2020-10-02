@@ -32,7 +32,7 @@ public class LineageExtractor {
         // Call the accept method to traverse the AST for that statement.
         for (StatementSplitter.Statement statement : statements) {
             Statement parsedStatement = SivtParser.parse(statement);
-            dataLineage.addListOfNodes(sivtVisitor.extractLineage(parsedStatement));
+            dataLineage.addListOfNodes(sivtVisitor.extractLineage(parsedStatement, dataLineage));
             if (bypassAnonymousTables) {
                 dataLineage.bypassAnonymousTables();
                 dataLineage.clearAllAliases();

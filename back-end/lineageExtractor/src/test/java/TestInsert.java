@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -16,18 +15,19 @@ public class TestInsert {
         // The only table that will be derived from this.
         LineageNode existingTable = new LineageNode("TABLE", "existingtable");
 
-        Assertions.assertEquals(1, nodeList.size());
-        existingTable.equals(nodeList.get(0));
+        LineageNode.testNodeListEquivalency(Arrays.asList(existingTable), nodeList);
     }
 
     @Test
     @DisplayName("testInsertFromSelect")
     public void testInsertFromSelect() {
-        String sql = "INSERT INTO existingTable SELECT * FROM a###";
+        String sql = "INSERT INTO existingTable SELECT col FROM a###";
         List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(sql).getNodeList();
 
         // Source table a.
         LineageNode sourceA = new LineageNode("TABLE", "a");
+        Column col = new Column("col");
+        sourceA.addColumn(col);
 
         // Anonymous table from select statement.
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
@@ -37,10 +37,7 @@ public class TestInsert {
         LineageNode existingTable = new LineageNode("TABLE", "existingtable");
         existingTable.addColumn(new Column("*", Constants.Node.TYPE_ANON.concat("0::*")));
 
-        Assertions.assertEquals(3, nodeList.size());
-        sourceA.equals(nodeList.get(0));
-        anonymous.equals(nodeList.get(1));
-        existingTable.equals(nodeList.get(2));
+        LineageNode.testNodeListEquivalency(Arrays.asList(sourceA, anonymous, existingTable), nodeList);
     }
 
     @Test
@@ -53,8 +50,7 @@ public class TestInsert {
         LineageNode existingTable = new LineageNode("TABLE", "existingtable");
         existingTable.addListOfColumns(Arrays.asList(new Column("a"), new Column("b"), new Column("c")));
 
-        Assertions.assertEquals(1, nodeList.size());
-        existingTable.equals(nodeList.get(0));
+        LineageNode.testNodeListEquivalency(Arrays.asList(existingTable), nodeList);
     }
 
     @Test
@@ -82,10 +78,7 @@ public class TestInsert {
                 Constants.Node.TYPE_ANON.concat("0::f"))
         ));
 
-        Assertions.assertEquals(3, nodeList.size());
-        sourceTable.equals(nodeList.get(0));
-        anonymous.equals(nodeList.get(1));
-        existingTable.equals(nodeList.get(2));
+        LineageNode.testNodeListEquivalency(Arrays.asList(sourceTable, anonymous, existingTable), nodeList);
     }
 
 }

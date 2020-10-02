@@ -13,6 +13,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     final static Logger LOGGING = LoggerFactory.getLogger(SivtVisitor.class);
 
     private final ArrayList<LineageNode> lineageNodes = new ArrayList<>();
+    private DataLineage existingLineage;
 
     private final Stack<SelectStatement> selectStatementStack = new Stack<>();
     private final Stack<ArrayList<LineageNode>> sourcesStack = new Stack<>();
@@ -59,7 +60,8 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
      * @param statement The statement which will have its AST traversed recursively to extract the lineage.
      * @return A list of the lineage nodes that have been extracted from statement
      */
-    public ArrayList<LineageNode> extractLineage(Statement statement) {
+    public ArrayList<LineageNode> extractLineage(Statement statement, DataLineage existingLineage) {
+        this.existingLineage = existingLineage;
         statement.accept(this, null);
         return lineageNodes;
     }
@@ -346,7 +348,7 @@ class SivtVisitor<R, C> extends AstVisitor<R, C> {
     @Override
     protected R visitSelect(Select select, C context) {
 
-        selectStatementStack.push(new SelectStatement());
+        selectStatementStack.push(new SelectStatement(existingLineage));
 
         currentlyInside.push(Select.class);
         R node = visitNode(select, context);

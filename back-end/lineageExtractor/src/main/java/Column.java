@@ -104,6 +104,10 @@ public class Column implements Cloneable {
         return false;
     }
 
+    public boolean isWildcard() {
+        return name.equals(Constants.WILDCARD);
+    }
+
     public void setName(String name) {
         this.name = name;
     }

@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -19,8 +18,6 @@ public class TestPrepare {
         LineageNode prepareNode = new LineageNode(Constants.Node.TYPE_TABLE, "mytable");
         prepareNode.addListOfColumns(Column.arrayToColumns(Arrays.asList("a", "b"), Arrays.asList("c::a", "c::b")));
 
-        Assertions.assertEquals(2, nodeList.size());
-        tableC.equals(nodeList.get(0));
-        prepareNode.equals(nodeList.get(1));
+        LineageNode.testNodeListEquivalency(Arrays.asList(tableC, prepareNode), nodeList);
     }
 }

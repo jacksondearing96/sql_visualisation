@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -8,8 +7,8 @@ import java.util.List;
 public class TestWildcard {
 
     @Test
-    @DisplayName("testWildCardOperator")
-    public void testWildCardOperator() {
+    @DisplayName("testWildCardOperatorWithoutColumns")
+    public void testWildCardOperatorWithoutColumns() {
         String statement = "SELECT * from b###";
 
         // Output
@@ -22,9 +21,28 @@ public class TestWildcard {
         LineageNode anonymousTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
         anonymousTable.addColumn(new Column("*", "b::*"));
 
-        Assertions.assertEquals(2, nodeList.size());
-        Assertions.assertTrue(table.equals(nodeList.get(0)));
-        Assertions.assertTrue(anonymousTable.equals(nodeList.get(1)));
+        LineageNode.testNodeListEquivalency(Arrays.asList(table, anonymousTable), nodeList);
+    }
+
+    @Test
+    @DisplayName("testWildCardOperatorWithColumns")
+    public void testWildCardOperatorWithColumns() {
+        String statement = "SELECT a, b FROM mytable### SELECT * from mytable###";
+        List<LineageNode> nodeList = LineageExtractor.extractLineageWithAnonymousTables(statement).getNodeList();
+
+        LineageNode mytable = new LineageNode(Constants.Node.TYPE_TABLE, "mytable");
+        Column a = new Column("a");
+        Column b = new Column("b");
+        mytable.addListOfColumns(Arrays.asList(a, b));
+
+        LineageNode anonymous1 = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("1"));
+        a.addSource(DataLineage.makeId(mytable.getName(), a.getName()));
+        b.addSource(DataLineage.makeId(mytable.getName(), b.getName()));
+        anonymous1.addListOfColumns(Arrays.asList(a, b));
+
+        Assertions.assertEquals(3, nodeList.size());
+        Assertions.assertTrue(mytable.equals(nodeList.get(0)));
+        Assertions.assertTrue(anonymous1.equals(nodeList.get(2)));
     }
 
     @Test
@@ -44,8 +62,6 @@ public class TestWildcard {
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
         anonymous.addListOfColumns(Column.arrayToColumns(Arrays.asList("*", "c"), Arrays.asList("a::*", "b::c")));
 
-        Assertions.assertEquals(3, nodeList.size());
-        sourceA.equals(nodeList.get(0));
-        sourceB.equals(nodeList.get(1));
+        LineageNode.testNodeListEquivalency(Arrays.asList(sourceA, sourceB, anonymous), nodeList);
     }
 }
