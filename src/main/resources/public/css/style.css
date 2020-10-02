@@ -126,9 +126,9 @@ h1 {
 }
 
 #search-input {
-    display:inline-block !important;
+    display: inline-block !important;
     font-family: 'Montserrat', sans-serif;
-    color: rgb(60,60,60);
+    color: rgb(60, 60, 60);
     font-weight: 800;
     border-radius: 10px;
     height: 35px;
@@ -142,4 +142,10 @@ h1 {
 #search-input:focus {
     border: 0px;
     outline: none;
+}
+
+.top-level-node:hover,
+.column:hover,
+.label:hover {
+    cursor: pointer;
 }
