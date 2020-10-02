@@ -6,6 +6,7 @@ function generateVisualisation(graph) {
     initialiseContainer();
     initialiseGraphData(graph);
     generateForceDirectedSimulation();
+    activateToggleColumnsButton();
 }
 
 function initialiseContainer() {
@@ -42,12 +43,14 @@ function generateForceDirectedSimulation() {
         .data(nodes)
         .enter()
         .append('g')
+        .attr('class', node => setNodeClass(node))
         .append('rect')
+        .attr('class', node => node.group)
         .attr('width', node => calculateNodeWidth(node))
         .attr('height', node => calculateNodeHeight(node))
         .attr('fill', node => determineNodeColor(node))
         .attr('opacity', node => determineNodeOpacity(node))
-        .attr('class', node => setGroupClasses(node))
+        .attr('class', node => setNodeClass(node))
         .attr('id', node => node.id)
         .call(
             d3.drag()
