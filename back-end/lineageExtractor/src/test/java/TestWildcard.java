@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
@@ -19,7 +20,6 @@ public class TestWildcard {
 
         // Anonymous table.
         LineageNode anonymousTable = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        anonymousTable.addColumn(new Column("*", "b::*"));
 
         LineageNode.testNodeListEquivalency(Arrays.asList(table, anonymousTable), nodeList);
     }
@@ -60,7 +60,7 @@ public class TestWildcard {
 
         // Anonymous table.
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        anonymous.addListOfColumns(Column.arrayToColumns(Arrays.asList("*", "c"), Arrays.asList("a::*", "b::c")));
+        anonymous.addColumn(new Column("c", "b::c"));
 
         LineageNode.testNodeListEquivalency(Arrays.asList(sourceA, sourceB, anonymous), nodeList);
     }

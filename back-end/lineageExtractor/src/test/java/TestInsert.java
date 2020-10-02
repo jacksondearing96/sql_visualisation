@@ -26,16 +26,15 @@ public class TestInsert {
 
         // Source table a.
         LineageNode sourceA = new LineageNode("TABLE", "a");
-        Column col = new Column("col");
-        sourceA.addColumn(col);
+        sourceA.addColumn(new Column("col"));
 
         // Anonymous table from select statement.
         LineageNode anonymous = new LineageNode(Constants.Node.TYPE_ANON, Constants.Node.TYPE_ANON.concat("0"));
-        anonymous.addColumn(new Column("*", "a::*"));
+        anonymous.addColumn(new Column("col", "a::col"));
 
         // The existing table that is having values inserted.
         LineageNode existingTable = new LineageNode("TABLE", "existingtable");
-        existingTable.addColumn(new Column("*", Constants.Node.TYPE_ANON.concat("0::*")));
+        existingTable.addColumn(new Column("col", Constants.Node.TYPE_ANON.concat("0::col")));
 
         LineageNode.testNodeListEquivalency(Arrays.asList(sourceA, anonymous, existingTable), nodeList);
     }
