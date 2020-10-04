@@ -36,7 +36,11 @@ function generateForceDirectedSimulation() {
     svg = d3
         .select('svg')
         .attr('width', canvasWidth)
-        .attr('height', canvasHeight);
+        .attr('height', canvasHeight)
+        .call(d3.zoom().on("zoom", function() {
+            svg.attr("transform", d3.event.transform)
+        }))
+        .append("g");
 
     nodeSelection = svg
         .selectAll('rect')
