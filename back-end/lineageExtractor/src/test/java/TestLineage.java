@@ -1,3 +1,4 @@
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
@@ -41,6 +42,20 @@ public class TestLineage {
         anonymousNode.addColumn(new Column("a", "b::a"));
 
         LineageNode.testNodeListEquivalency(Arrays.asList(sourceNode, anonymousNode), nodeList);
+    }
+
+    @Test
+    @DisplayName("testSyntaxError")
+    public void testSyntaxError() {
+        DataLineage testDataLineage = new DataLineage();
+        LineageNode errorNode = new LineageNode("ERROR", "Parsing Error");
+        errorNode.setAlias("com.facebook.presto.sql.parser.ParsingException: line 1:26: mismatched input 'is'. Expecting: 'DISTINCT', 'NOT', 'NULL'");
+        testDataLineage.addNode(errorNode);
+
+        DataLineage errorLineage = LineageExtractor.extractLineage("select a as b where c is is not null###");
+
+        Assertions.assertEquals(testDataLineage.getNodeListAsJson(), errorLineage.getNodeListAsJson());
+
     }
 
 }
