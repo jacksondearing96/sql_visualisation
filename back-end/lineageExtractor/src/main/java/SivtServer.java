@@ -24,9 +24,8 @@ public class SivtServer {
         router.post("/extract_lineage").handler(handler -> {
             handler.request().setExpectMultipart(true);
             handler.request().endHandler(endHandler -> {
-                MultiMap formAttributes = handler.request().formAttributes();
-                String sqlString = formAttributes.get("sql");
-                String lineage = LineageExtractor.extractLineageAsJson(sqlString);
+                String sql = handler.request().formAttributes().get("sql");
+                String lineage = LineageExtractor.extractLineageAsJson(sql);
                 handler.response().end(lineage);
             });
         });
