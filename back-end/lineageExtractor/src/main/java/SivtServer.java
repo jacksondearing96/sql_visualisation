@@ -17,6 +17,7 @@ public class SivtServer {
         Set<String> allowedHeaders = new HashSet<>();
         
         allowedHeaders.add("Access-Control-Allow-Origin");
+        
         Router router = Router.router(vertx);
         router.route().handler(CorsHandler.create("*").allowedHeaders(allowedHeaders));
         
