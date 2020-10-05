@@ -104,19 +104,19 @@ function getLinkTargetY(link) {
 
 function ticked() {
     nodeSelection
-        .attr('x', node => getNodeX(node))
-        .attr('y', (node) => getNodeY(node));
-    if (showColumnsChanged) nodeSelection.attr('height', node => calculateNodeHeight(node));
+        .attr('x', getNodeX)
+        .attr('y', getNodeY);
+    if (showColumnsChanged) nodeSelection.attr('height', calculateNodeHeight);
 
     labels
-        .attr('x', label => getLabelX(label))
-        .attr('y', label => getLabelY(label));
+        .attr('x', getLabelX)
+        .attr('y', getLabelY);
 
     linkSelection
-        .attr('x1', link => getLinkSourceX(link))
-        .attr('y1', link => getLinkSourceY(link))
-        .attr('x2', link => getLinkTargetX(link))
-        .attr('y2', link => getLinkTargetY(link));
+        .attr('x1', getLinkSourceX)
+        .attr('y1', getLinkSourceY)
+        .attr('x2', getLinkTargetX)
+        .attr('y2', getLinkTargetY);
 
     // Performance optimisation.
     showColumnsChanged = false;

@@ -47,14 +47,14 @@ function generateForceDirectedSimulation() {
         .data(nodes)
         .enter()
         .append('g')
-        .attr('class', node => setNodeClass(node))
+        .attr('class', setNodeClass)
         .append('rect')
         .attr('class', node => node.group)
-        .attr('width', node => calculateNodeWidth(node))
-        .attr('height', node => calculateNodeHeight(node))
-        .attr('fill', node => determineNodeColor(node))
-        .attr('opacity', node => determineNodeOpacity(node))
-        .attr('class', node => setNodeClass(node))
+        .attr('width', calculateNodeWidth)
+        .attr('height', calculateNodeHeight)
+        .attr('fill', determineNodeColor)
+        .attr('opacity', determineNodeOpacity)
+        .attr('class', setNodeClass)
         .attr('id', node => node.id)
         .call(
             d3.drag()
@@ -74,13 +74,13 @@ function generateForceDirectedSimulation() {
         .attr('stroke-width', linkDefaultWidth)
         .attr('id', link => link.id)
         .attr('class', 'link')
-        .on('mouseover', link => linkMouseOver(link))
-        .on('mouseout', link => linkMouseOut(link));
+        .on('mouseover', linkMouseOver)
+        .on('mouseout', linkMouseOut);
 
     labels = svg
         .selectAll('g')
         .append('text')
-        .attr('fill', label => determineTextColor(label))
+        .attr('fill', determineTextColor)
         .attr('font-size', fontSize)
         .attr('font-family', fontFamily)
         .attr('font-weight', label =>

@@ -24,7 +24,7 @@ function initialiseEventListeners() {
     generateVisualisationButton.click(generateVisualisationButtonClicked);
     demoButton.click(() => generateVisualisation(demoGraph));
     searchInput.keydown(() => setTimeout(searchInputChanged, 50));
-    showColumnsToggleSwitch.click(() => toggleColumns());
+    showColumnsToggleSwitch.click(toggleColumns);
 }
 
-$(document).ready(() => initialiseEventListeners());
+$(document).ready(initialiseEventListeners);

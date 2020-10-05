@@ -57,7 +57,7 @@ function uploadFiles() {
 
     // Read files asynchronously.
     let files = document.getElementById('upload-files-input').files;
-    let readFilePromises = sortFiles(files).map(file => readFile(file));
+    let readFilePromises = sortFiles(files).map(readFile);
 
     Promise.all(readFilePromises).then(contentsAndListItems => {
         fileListContainer.show();
