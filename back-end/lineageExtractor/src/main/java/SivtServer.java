@@ -21,13 +21,13 @@ public class SivtServer {
         Router router = Router.router(vertx);
         router.route().handler(CorsHandler.create("*").allowedHeaders(allowedHeaders));
         
-        router.post("/uploader").handler(hndlr -> {
-            hndlr.request().setExpectMultipart(true);
-            hndlr.request().endHandler(endHndlr -> {
-                MultiMap formAttr = hndlr.request().formAttributes();
-                String sqlString = formAttr.get("sqlString");
+        router.post("/extract_lineage").handler(handler -> {
+            handler.request().setExpectMultipart(true);
+            handler.request().endHandler(endHandler -> {
+                MultiMap formAttributes = handler.request().formAttributes();
+                String sqlString = formAttributes.get("sql");
                 String lineage = LineageExtractor.extractLineageAsJson(sqlString);
-                hndlr.response().end(lineage);
+                handler.response().end(lineage);
             });
         });
         
