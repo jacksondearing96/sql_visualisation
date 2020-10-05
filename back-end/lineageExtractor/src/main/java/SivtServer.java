@@ -8,30 +8,18 @@ import io.vertx.ext.web.handler.CorsHandler;
 import java.util.HashSet;
 import java.util.Set;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-/**
- *
- * @author gabriel a1673698
- */
-public class SivtServer {
 
-    /**
-     * @param args the command line arguments
-     */
+public class SivtServer {
     public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
 
-        // Initialise server
+       
         Set<String> allowedHeaders = new HashSet<>();
-        // Allowing cross-origin
+        
         allowedHeaders.add("Access-Control-Allow-Origin");
         Router router = Router.router(vertx);
         router.route().handler(CorsHandler.create("*").allowedHeaders(allowedHeaders));
-        // Setting up /uploader route handler
+        
         router.post("/uploader").handler(hndlr -> {
             hndlr.request().setExpectMultipart(true);
             hndlr.request().endHandler(endHndlr -> {
@@ -42,7 +30,7 @@ public class SivtServer {
             });
         });
         
-        // Creating server and listening
+       
         HttpServer server = vertx.createHttpServer().requestHandler(router).listen(5000);
     }
 
