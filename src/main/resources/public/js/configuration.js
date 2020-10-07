@@ -8,7 +8,8 @@ const nodeCollisionRadius = 10;
 const linkForceStrength = 0.01;
 const linkPreferredDistance = 50;
 const dragEndAlphaTarget = 0.1;
-const dragStartAlphaTarget = 0.1;
+const alphaMin = 0.05;
+const dragStartAlphaTarget = 0.08;
 const collisionWidthRatio = 1.25;
 
 const offWhite = 'rgb(200,200,200)';
@@ -53,7 +54,7 @@ const columnType = 'COLUMN';
 const idDelimiter = '::';
 
 let freezeHighlight = false;
-let showColumns = true;
+let showColumns = false;
 let showColumnsChanged = false;
 
 /**

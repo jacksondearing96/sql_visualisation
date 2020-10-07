@@ -1,5 +1,5 @@
 function activateToggleColumnsButton() {
-    $('.slider').css('opacity', showColumns ? 1 : 0.5);
+    $('.slider').css('opacity', 1);
     $('#show-columns-toggle-switch').attr('disabled', false);
 }
 

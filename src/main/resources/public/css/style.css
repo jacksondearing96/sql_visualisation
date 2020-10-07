@@ -150,6 +150,10 @@ h1 {
     cursor: pointer;
 }
 
+.column {
+    display: none;
+}
+
 .switch {
     position: relative;
     display: inline-block;
