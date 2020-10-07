@@ -14,8 +14,8 @@ function initialiseContainer() {
 }
 
 function initialiseScrollPosition() {
-    $('#visualisation-container').scrollTop(canvasHeight / 2 + scrollIncrementHeightToInitInCenter);
-    $('#visualisation-container').scrollLeft(canvasWidth / 2 + scrollIncrementWidthToInitInCenter);
+    // $('#visualisation-container').scrollTop(scrollIncrementHeightToInitInCenter);
+    // $('#visualisation-container').scrollLeft(scrollIncrementWidthToInitInCenter);
 }
 
 function initialiseGraphData(graph) {
@@ -100,9 +100,9 @@ function generateForceDirectedSimulation() {
     simulation = d3.forceSimulation(nodes);
 
     simulation
-        .force('center', d3.forceCenter(canvasWidth / 2, canvasHeight / 2))
-        .force('collision', d3.forceCollide(d => calculateNodeWidth(d) * collisionWidthRatio / 2))
-        .force('charge', d3.forceManyBody().strength(30))
+    // .force('center', d3.forceCenter(canvasWidth / 2, canvasHeight / 2))
+    // .force('collision', d3.forceCollide(d => calculateNodeWidth(d) * collisionWidthRatio / 2))
+    // .force('charge', d3.forceManyBody().strength(30))
         .force(
             'links',
             d3
