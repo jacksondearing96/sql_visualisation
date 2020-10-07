@@ -228,12 +228,20 @@ function allocateInitialPositions() {
 }
 
 function getNodeX(node) {
-    if (isTopLevelNode(node)) return gridStartingWidths[node.gridColumn];
+    if (isTopLevelNode(node)) {
+        return staticMode ?
+            canvasWidth / 2 + gridStartingWidths[node.gridColumn] :
+            node.x;
+    }
     return getNodeX(getParentTable(node)) + topLevelNodePaddingHorizontal;
 }
 
 function getNodeY(node) {
-    if (isTopLevelNode(node)) return gridStartingHeights[getGridKey(node.gridColumn, node.verticalOrder)];
+    if (isTopLevelNode(node)) {
+        return staticMode ?
+            canvasHeight / 2 + gridStartingHeights[getGridKey(node.gridColumn, node.verticalOrder)] :
+            node.y;
+    }
     let parentY = getNodeY(getParentTable(node));
     return (
         parentY + parseInt(node.order, 10) * columnHeight + topLevelNodePaddingVertical

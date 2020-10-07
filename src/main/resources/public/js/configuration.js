@@ -1,7 +1,7 @@
 const canvasWidth = 5000;
 const canvasHeight = 2500;
-const scrollIncrementWidthToInitInCenter = -500;
-const scrollIncrementHeightToInitInCenter = -300;
+const scrollIncrementWidthToInitInCenter = 100;
+const scrollIncrementHeightToInitInCenter = -100;
 
 const nodeForceStrength = -30;
 const nodeCollisionRadius = 10;
@@ -45,7 +45,7 @@ const topLevelNodeHighlightOpacity = 0.6;
 const topLevelNodeDefaultOpacity = 0.2;
 const topLevelNodeDefaultFontWeight = 'bold';
 const topLevelNodeClass = 'top-level-node';
-const topLevelNodeCollapsedHeight = 30;
+const topLevelNodeCollapsedHeight = 60;
 const topLevelNodeWidthBuffer = 100;
 const topLevelNodeHeightBuffer = 80;
 
@@ -62,7 +62,9 @@ let showColumnsChanged = false;
 let gridStartingWidths = { 0: 0 };
 let gridStartingHeights = {};
 
-const optimistaionIterations = 300;
+const optimisationIterations = 300;
+
+let staticMode = true;
 
 /**
  * Enforce a maximum number of logging messages that can be produced.

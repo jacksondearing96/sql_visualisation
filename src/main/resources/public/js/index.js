@@ -19,6 +19,11 @@ function toggleColumns() {
     ticked();
 }
 
+function toggleStaticMode() {
+    staticMode = !staticMode;
+    ticked();
+}
+
 function initialiseEventListeners() {
     uploadFilesInput.change(uploadFiles);
     chooseFilesButton.click(() => uploadFilesInput.trigger('click'));
