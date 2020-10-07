@@ -14,6 +14,7 @@ function generateVisualisationButtonClicked() {
 function toggleColumns() {
     showColumns = showColumns ? false : true;
     $('.column').css('display', showColumns ? 'block' : 'none');
+    setGridStartingHeights();
     showColumnsChanged = true;
     ticked();
 }

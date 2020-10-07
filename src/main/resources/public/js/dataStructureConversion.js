@@ -13,6 +13,7 @@ function makeNode(type, name, id, order = null) {
     node.group = getGroupFromId(id);
     node.incoming = [];
     node.outgoing = [];
+    node.gridColumn = 0;
     return node;
 }
 

@@ -16,7 +16,7 @@ function getAllSourceSiblings(id) {
 
     let sourceSiblings = [];
     sourceSiblings.push(
-        ...[id, ...sourceColumnIds, ...column.incoming.map(link => link.id)]
+        ...[...sourceColumnIds, ...column.incoming.map(link => link.id), id]
     );
     return sourceSiblings;
 }
@@ -46,8 +46,8 @@ function getAllTargetSiblings(id) {
 
 function getAllLineageSiblingIds(id) {
     let siblingIds = [
-        id,
         ...getAllSourceSiblings(id),
+        id,
         ...getAllTargetSiblings(id)
     ];
 
@@ -56,4 +56,16 @@ function getAllLineageSiblingIds(id) {
     );
 
     return siblingIds;
+}
+
+function topLevelLineageTargets(node) {
+
+}
+
+function topLevelLineageSources(node) {
+
+}
+
+function topLevelLineageLine(node) {
+    if (!isTopLevelNode(node)) node = getParentTable(node.id);
 }

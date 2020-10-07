@@ -5,6 +5,7 @@ var demoGraph = {
             group: '%(crm)s_task',
             incoming: [],
             outgoing: [],
+            gridColumn: 0,
             type: 'TABLE'
         },
         {
@@ -50,6 +51,7 @@ var demoGraph = {
             group: 'customer_insight',
             incoming: [],
             outgoing: [],
+            gridColumn: 0,
             type: 'TABLE'
         },
         {
@@ -77,6 +79,7 @@ var demoGraph = {
             group: 'note_count_by_agent',
             incoming: [],
             outgoing: [],
+            gridColumn: 0,
             type: 'VIEW'
         },
         {

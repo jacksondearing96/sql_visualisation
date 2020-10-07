@@ -6,6 +6,7 @@ function generateVisualisation(graph) {
     initialiseContainer();
     initialiseGraphData(graph);
     generateForceDirectedSimulation();
+    allocateInitialPositions();
     activateToggleColumnsButton();
 }
 
@@ -31,6 +32,41 @@ function allocateIncomingAndOutgoingLinks() {
     });
 }
 
+function generateSimplifiedGraph() {
+    let simplifiedNodes = [];
+    let simplifiedLinks = [];
+    $.extend(simplifiedNodes, nodes);
+    $.extend(simplifiedLinks, links);
+
+    simplifiedNodes = simplifiedNodes.filter(isTopLevelNode);
+
+    let uniqueLinkIdentifiers = {};
+    let uniqueLinks = [];
+    simplifiedLinks = simplifiedLinks.filter(l => {
+
+        let link = {};
+        $.extend(link, l);
+
+        let sourceParent = {};
+        let targetParent = {};
+        $.extend(sourceParent, getParentTable(link.source));
+        $.extend(targetParent, getParentTable(link.target));
+
+        link.source = sourceParent;
+        link.target = targetParent;
+
+        let uniqueLinkIdentifier = link.source.id + "#" + link.target.id;
+        if (uniqueLinkIdentifier in uniqueLinkIdentifiers) return false;
+        uniqueLinkIdentifiers[uniqueLinkIdentifier] = "exists";
+        uniqueLinks.push(link);
+        return true;
+    });
+
+    simplifiedLinks = uniqueLinks;
+
+    return { nodes: simplifiedNodes, links: simplifiedLinks };
+}
+
 function generateForceDirectedSimulation() {
 
     svg = d3
@@ -41,6 +77,19 @@ function generateForceDirectedSimulation() {
             svg.attr("transform", d3.event.transform)
         }))
         .append("g");
+
+    linkSelection = svg
+        .selectAll('line')
+        .data(links)
+        .enter()
+        .append('line')
+        .attr('stroke', linkDefaultColor)
+        .attr('fill', linkFill)
+        .attr('stroke-width', linkDefaultWidth)
+        .attr('id', link => link.id)
+        .attr('class', 'link')
+        .on('mouseover', linkMouseOver)
+        .on('mouseout', linkMouseOut);
 
     nodeSelection = svg
         .selectAll('rect')
@@ -63,19 +112,6 @@ function generateForceDirectedSimulation() {
             .on('end', dragEnd))
         .on('mouseover', node => columnMouseOver(node.id))
         .on('mouseout', node => columnMouseOut(node.id));
-
-    linkSelection = svg
-        .selectAll('line')
-        .data(links)
-        .enter()
-        .append('line')
-        .attr('stroke', linkDefaultColor)
-        .attr('fill', linkFill)
-        .attr('stroke-width', linkDefaultWidth)
-        .attr('id', link => link.id)
-        .attr('class', 'link')
-        .on('mouseover', linkMouseOver)
-        .on('mouseout', linkMouseOut);
 
     labels = svg
         .selectAll('g')

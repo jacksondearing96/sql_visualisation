@@ -46,6 +46,8 @@ const topLevelNodeDefaultOpacity = 0.2;
 const topLevelNodeDefaultFontWeight = 'bold';
 const topLevelNodeClass = 'top-level-node';
 const topLevelNodeCollapsedHeight = 30;
+const topLevelNodeWidthBuffer = 100;
+const topLevelNodeHeightBuffer = 80;
 
 const tableType = 'TABLE';
 const viewType = 'VIEW';
@@ -56,6 +58,11 @@ const idDelimiter = '::';
 let freezeHighlight = false;
 let showColumns = false;
 let showColumnsChanged = false;
+
+let gridStartingWidths = { 0: 0 };
+let gridStartingHeights = {};
+
+const optimistaionIterations = 300;
 
 /**
  * Enforce a maximum number of logging messages that can be produced.
