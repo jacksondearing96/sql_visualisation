@@ -14,11 +14,11 @@ const collisionWidthRatio = 1.25;
 
 const offWhite = 'rgb(200,200,200)';
 
-const fontSize = 15;
+const fontSize = 40;
 const fontFamily = 'courier new';
 const fontSizeToCharacterWidthRatio = 0.6;
 
-const columnHeight = 20;
+const columnHeight = 45;
 const columnDefaultBackgroundColor = 'dodgerblue';
 const columnHighlightBackgroundColor = 'crimson';
 const columnDefaultTextColor = offWhite;
@@ -33,11 +33,11 @@ const linkDefaultWidth = '1';
 const linkHighlightWidth = '5';
 
 const labelPaddingHorizontal = 15;
-const labelOffsetToReachCenter = 4;
+const labelOffsetToReachCenter = 8;
 const labelHighlightTextColor = offWhite;
 
 const topLevelNodePaddingHorizontal = 10;
-const topLevelNodePaddingVertical = 25;
+const topLevelNodePaddingVertical = 10;
 const topLevelNodeDefaultBackgroundColor = offWhite;
 const topLevelNodeDefaultTextColor = offWhite;
 const topLevelNodeBackgroundHighlightColor = 'crimson';
@@ -48,6 +48,7 @@ const topLevelNodeClass = 'top-level-node';
 const topLevelNodeCollapsedHeight = 60;
 const topLevelNodeWidthBuffer = 100;
 const topLevelNodeHeightBuffer = 80;
+const topLevelNodeTitleHeight = 45;
 
 const tableType = 'TABLE';
 const viewType = 'VIEW';
@@ -56,13 +57,17 @@ const columnType = 'COLUMN';
 const idDelimiter = '::';
 
 let freezeHighlight = false;
-let showColumns = false;
+let showColumns = true;
 let showColumnsChanged = false;
 
 let gridStartingWidths = { 0: 0 };
 let gridStartingHeights = {};
 
+let correctionX = 0;
+let correctionY = 0;
+
 const optimisationIterations = 300;
+let optimisedPadding = {};
 
 let staticMode = true;
 
@@ -85,6 +90,7 @@ let fileListContainer = $('#file-list-container');
 let fileNameContainers = $('.file-name-container');
 let searchInput = $('#search-input');
 let showColumnsToggleSwitch = $('#show-columns-toggle-switch');
+let staticModeToggleSwitch = $('#static-mode-toggle-switch');
 
 let tickImg = "<img class='tick' src='https://lesspestcontrol.com.au/wp-content/uploads/green-tick.png'>";
 let crossImg = "<img class='cross' src='https://freesvg.org/img/milker_X_icon.png'>";

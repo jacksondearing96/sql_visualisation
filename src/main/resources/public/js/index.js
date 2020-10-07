@@ -1,6 +1,7 @@
-function activateToggleColumnsButton() {
+function activateToggleButtons() {
     $('.slider').css('opacity', 1);
-    $('#show-columns-toggle-switch').attr('disabled', false);
+    showColumnsToggleSwitch.attr('disabled', false);
+    staticModeToggleSwitch.attr('disabled', false);
 }
 
 function generateVisualisationButtonClicked() {
@@ -8,7 +9,6 @@ function generateVisualisationButtonClicked() {
         let graph = backendToFrontendDataStructureConversion(JSON.parse(lineageNodes));
         generateVisualisation(graph);
     });
-    activateToggleColumnsButton();
 }
 
 function toggleColumns() {
@@ -31,6 +31,7 @@ function initialiseEventListeners() {
     demoButton.click(() => generateVisualisation(demoGraph));
     searchInput.keydown(() => setTimeout(searchInputChanged, 50));
     showColumnsToggleSwitch.click(toggleColumns);
+    staticModeToggleSwitch.click(toggleStaticMode);
 }
 
 $(document).ready(initialiseEventListeners);

@@ -117,7 +117,7 @@ function maxVerticalOrderForGridColumn(columnIndex) {
 }
 
 function getGridKey(columnIndex, verticalOrder) {
-    return columnIndex + "::" + verticalOrder;
+    return columnIndex + '::' + verticalOrder;
 }
 
 function setGridStartingHeights() {
@@ -133,7 +133,9 @@ function setGridStartingHeights() {
                 height += calculateNodeHeight(prevNode);
                 height += topLevelNodeHeightBuffer;
             }
-            gridStartingHeights[getGridKey(columnIndex, verticalOrder)] = height;
+            let gridKey = getGridKey(columnIndex, verticalOrder);
+            gridStartingHeights[gridKey] = height;
+            optimisedPadding[gridKey] = 0;
         }
     }
 }
@@ -158,7 +160,6 @@ function randomiseVerticalOrder(columnIndex) {
         node.verticalOrder = verticalOptions.pop();
     });
 }
-
 
 function randomShuffleColumn(columnIndex) {
     randomiseVerticalOrder(columnIndex);
@@ -202,19 +203,43 @@ function optimiseTablePositions() {
         }
     }
 
-    let proportionDecrease = 1.0 - (minimisedLinkSquaredDistance / startingDistance);
-    let percentageDecrease = proportionDecrease * 100;
-    console.log('Optimisation: ' + percentageDecrease.toFixed(2) + "%");
-
     revertToBestVerticalOrder();
     setGridStartingHeights();
     ticked();
+
+    printOptimisationOutcome(startingDistance, totalLinksSquaredDistance());
+}
+
+function printOptimisationOutcome(startingDistance, optimisedDistance) {
+    let proportionDecrease = 1.0 - (optimisedDistance / startingDistance);
+    let percentageDecrease = proportionDecrease * 100;
+    console.log('Optimisation: ' + percentageDecrease.toFixed(2) + "%");
+}
+
+function optimiseVerticalPadding() {
+    let startingDistance = totalLinksSquaredDistance();
+
+    let numberOfColumns = maxGridColumnIndex() + 1;
+    for (let columnIndex = 1; columnIndex < numberOfColumns; ++columnIndex) {
+        let nodesInColumn = maxVerticalOrderForGridColumn(columnIndex) + 1;
+        for (let verticalIndex = 0; verticalIndex < nodesInColumn; ++verticalIndex) {
+            let gridKey = getGridKey(columnIndex, verticalIndex);
+
+            let prevTotalLinkSquaredDistance = totalLinksSquaredDistance();
+            do {
+                prevTotalLinkSquaredDistance = totalLinksSquaredDistance();
+                incrementDownStreamVerticalPadding(columnIndex, verticalIndex, 10)
+                ticked();
+            } while (totalLinksSquaredDistance() < prevTotalLinkSquaredDistance)
+            incrementDownStreamVerticalPadding(columnIndex, verticalIndex, -10);
+        }
+    }
+
+    printOptimisationOutcome(startingDistance, totalLinksSquaredDistance());
 }
 
 function allocateInitialPositions() {
     let showColumnsSavedState = showColumns;
-    // Ensure the top level nodes are the only ones that appear in the lineage extraction.
-    showColumns = false;
 
     generateSimplifiedGraph().links.forEach(setGridColumns);
     separateNonLinkedNodes();
@@ -223,14 +248,20 @@ function allocateInitialPositions() {
     setGridVerticalOrders();
     setGridStartingHeights();
     optimiseTablePositions();
+    optimiseVerticalPadding();
+}
 
-    showColumns = showColumnsSavedState;
+function incrementDownStreamVerticalPadding(columnIndex, verticalOrderStart, increment) {
+    let maxVerticalOrder = maxVerticalOrderForGridColumn(columnIndex);
+    for (let verticalOrder = verticalOrderStart; verticalOrder <= maxVerticalOrder; ++verticalOrder) {
+        optimisedPadding[getGridKey(columnIndex, verticalOrder)] += increment;
+    }
 }
 
 function getNodeX(node) {
     if (isTopLevelNode(node)) {
         return staticMode ?
-            canvasWidth / 2 + gridStartingWidths[node.gridColumn] :
+            canvasWidth / 2 + gridStartingWidths[node.gridColumn] + (getGridColumnWidth(node.gridColumn) - calculateNodeWidth(node)) / 2 :
             node.x;
     }
     return getNodeX(getParentTable(node)) + topLevelNodePaddingHorizontal;
@@ -238,13 +269,14 @@ function getNodeX(node) {
 
 function getNodeY(node) {
     if (isTopLevelNode(node)) {
+        let gridKey = getGridKey(node.gridColumn, node.verticalOrder);
         return staticMode ?
-            canvasHeight / 2 + gridStartingHeights[getGridKey(node.gridColumn, node.verticalOrder)] :
+            canvasHeight / 2 + gridStartingHeights[gridKey] + optimisedPadding[gridKey] :
             node.y;
     }
     let parentY = getNodeY(getParentTable(node));
     return (
-        parentY + parseInt(node.order, 10) * columnHeight + topLevelNodePaddingVertical
+        parentY + parseInt(node.order, 10) * columnHeight + topLevelNodeTitleHeight
     );
 }
 
@@ -288,6 +320,38 @@ function getLinkTargetY(link) {
     return isTopLevelId(linkTarget.id) ?
         getNodeY(linkTarget) + calculateNodeHeight(linkTarget) / 2 :
         getNodeY(linkTarget) + columnHeight / 2;
+}
+
+function dragStart(node) {
+    node = getParentTable(node);
+
+    simulation.alphaTarget(dragStartAlphaTarget).restart();
+
+    node.fx = node.x;
+    node.fy = node.y;
+
+    correctionX = 0;
+    correctionY = 0;
+}
+
+function drag(node) {
+    let parent = getParentTable(node);
+
+    if (correctionX === 0 && correctionY === 0) {
+        correctionX = parent.fx - node.x;
+        correctionY = parent.fy - node.y;
+    }
+
+    parent.fx = d3.event.x + correctionX;
+    parent.fy = d3.event.y + correctionY;
+}
+
+function dragEnd(node) {
+    node = getParentTable(node);
+    simulation.alphaTarget(dragEndAlphaTarget);
+
+    node.fx = null;
+    node.fy = null;
 }
 
 function ticked() {

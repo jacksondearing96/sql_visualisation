@@ -151,7 +151,7 @@ h1 {
 }
 
 .column {
-    display: none;
+    display: block;
 }
 
 .switch {

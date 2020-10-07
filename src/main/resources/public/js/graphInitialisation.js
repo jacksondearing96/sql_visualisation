@@ -7,7 +7,7 @@ function generateVisualisation(graph) {
     initialiseGraphData(graph);
     generateForceDirectedSimulation();
     allocateInitialPositions();
-    activateToggleColumnsButton();
+    activateToggleButtons();
 }
 
 function initialiseContainer() {

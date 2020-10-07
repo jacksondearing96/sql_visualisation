@@ -9,11 +9,11 @@ function makeNode(type, name, id, order = null) {
     node.type = type;
     node.name = name;
     node.id = id;
-    if (type === "COLUMN") node.order = order;
     node.group = getGroupFromId(id);
     node.incoming = [];
     node.outgoing = [];
     node.gridColumn = 0;
+    if (type === "COLUMN") node.order = order;
     return node;
 }
 
