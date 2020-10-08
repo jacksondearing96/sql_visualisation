@@ -1,3 +1,5 @@
+import com.facebook.presto.sql.parser.StatementSplitter;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
@@ -41,6 +43,13 @@ public class TestLineage {
         anonymousNode.addColumn(new Column("a", "b::a"));
 
         LineageNode.testNodeListEquivalency(Arrays.asList(sourceNode, anonymousNode), nodeList);
+    }
+
+    @Test
+    @DisplayName("testSyntaxError")
+    public void testSyntaxError() {
+        String incorrectSQL = "select a as b where c is is not null###";
+        Assertions.assertFalse(VerifierSQL.verifySQL(incorrectSQL));
     }
 
 }
