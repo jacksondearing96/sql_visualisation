@@ -16,5 +16,5 @@ java -jar target/lineage-extractor-jar-with-dependencies.jar
 
 In your web browser, navigate to:
 ```
-http://localhost:4567/
+http://localhost:4567
 ```

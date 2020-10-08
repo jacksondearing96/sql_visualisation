@@ -1,7 +1,7 @@
 let sql = '';
 
 function isValidSqlFileContents(contents) {
-    let valid = false;
+    let isValid = false;
     return new Promise(resolve => {
         $.post("/verify_sql", contents, isValid => {
             console.log(isValid);

@@ -190,8 +190,6 @@ function linkMouseOver(link) {
     ]);
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-// TODO: Use the dedicated function for this.
 function linkMouseOut(link) {
     unHighlightIds([
         link.id,
