@@ -1,7 +1,13 @@
 let sql = '';
 
 function isValidSqlFileContents(contents) {
-    return true;
+    let valid = false;
+    return new Promise(resolve => {
+        $.post("/verify_sql", contents, isValid => {
+            console.log(isValid);
+            resolve(isValid === 'true');
+        });
+    });
 }
 
 function fileLine(img, filename) {
@@ -20,8 +26,8 @@ function readFile(file) {
     return new Promise(resolve => {
         let reader = new FileReader();
         reader.readAsText(file, 'UTF-8');
-        reader.onload = event => {
-            let isValid = isValidSqlFileContents(event.target.result);
+        reader.onload = async function(event) {
+            let isValid = await isValidSqlFileContents(event.target.result);
             let listItem = isValid ? validFile(file.name) : invalidFile(file.name);
             let contentsAndListItem = { contents: event.target.result, listItem: listItem };
             resolve(contentsAndListItem);

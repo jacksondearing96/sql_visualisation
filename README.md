@@ -8,12 +8,13 @@ src/main/resources/public/index.html
 ```
 
 ### Run Server
-In the project root directory, run
+In the project root directory, run:
 ```
 mvn package
+java -jar target/lineage-extractor-jar-with-dependencies.jar
 ```
-Run the main function in Server.java
-Navigate to:
+
+In your web browser, navigate to:
 ```
 http://localhost:4567/
 ```
