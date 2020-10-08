@@ -1,3 +1,4 @@
+import com.facebook.presto.sql.parser.ParsingException;
 import com.facebook.presto.sql.parser.StatementSplitter;
 import com.facebook.presto.sql.tree.Node;
 import com.facebook.presto.sql.tree.Statement;
@@ -23,6 +24,10 @@ public class LineageExtractor {
 
         List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
 
+        // Catch Syntax Errors
+        if (!VerifierSQL.verifySQL(sql)){ return dataLineage; }
+
+
         SivtVisitor<Node, ?> sivtVisitor = new SivtVisitor<Node, Object>();
 
         Util.resetAnonymousTableCount();
@@ -31,13 +36,16 @@ public class LineageExtractor {
         // Use the SivtParser to parse the statement.
         // Call the accept method to traverse the AST for that statement.
         for (StatementSplitter.Statement statement : statements) {
+
             Statement parsedStatement = SivtParser.parse(statement);
             dataLineage.addListOfNodes(sivtVisitor.extractLineage(parsedStatement, dataLineage));
+
             if (bypassAnonymousTables) {
                 dataLineage.bypassAnonymousTables();
                 dataLineage.clearAllAliases();
             }
         }
+
         return dataLineage;
     }
 }
