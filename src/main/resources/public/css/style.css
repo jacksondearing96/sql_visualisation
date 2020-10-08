@@ -1,0 +1,217 @@
+body {
+    text-align: center;
+    background-color: rgb(60, 60, 60);
+    font-family: 'Montserrat', sans-serif;
+    color: rgb(200, 200, 200);
+}
+
+svg {
+    margin: 0 auto;
+    display: block;
+    overflow: auto;
+}
+
+#visualisation-container {
+    margin: 0 auto;
+    margin-top: 20px;
+    display: none;
+    border: 1px solid black;
+    box-shadow: 5px 5px 3px rgb(20, 20, 20);
+    overflow: auto !important;
+    background-color: rgb(30, 30, 30);
+    width: 95%;
+    height: 80vh;
+}
+
+header {
+    margin-top: 10px;
+}
+
+h1 {
+    display: inline-block;
+    margin: 0px;
+    margin-bottom: 20px;
+}
+
+#github-logo {
+    margin-top: 6px;
+    display: inline-block;
+    height: 30px;
+    opacity: 0.5;
+    float: right;
+    margin-right: 20px;
+}
+
+#github-logo:hover {
+    opacity: 1;
+}
+
+#file-upload-container {
+    margin: 0 auto;
+    border-radius: 10px;
+    background-color: rgb(200, 200, 200);
+    padding: 15px;
+    width: 95%;
+    max-width: 900px;
+}
+
+#file-upload-container .row {
+    display: block;
+    width: 100%;
+    display: flex;
+    margin: 0px;
+    justify-content: space-around;
+}
+
+#file-upload-container input {
+    display: none;
+}
+
+#file-upload-container button {
+    background-color: dodgerblue;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    border-radius: 10px;
+    height: 35px;
+    font-size: 16px;
+    color: white;
+    border: 0px;
+    box-shadow: 3px 3px 3px grey;
+    padding-right: 10px;
+    padding-left: 10px;
+    cursor: pointer;
+}
+
+#file-upload-container button[disabled] {
+    border: 1px solid #999999;
+    background-color: #cccccc;
+    color: #666666;
+    cursor: default;
+}
+
+#file-list-container {
+    display: none;
+    margin-top: 20px;
+    font-weight: 800;
+    color: rgb(20, 20, 20);
+}
+
+.file-name-container {
+    text-align: center;
+    display: inline-block;
+}
+
+.file-name-container p {
+    display: inline;
+    float: right;
+    margin: 0px;
+    margin-top: 3px;
+}
+
+.tick,
+.cross {
+    display: inline;
+    float: left;
+}
+
+.tick {
+    height: 25px;
+    padding-right: 8px;
+}
+
+.cross {
+    height: 15px;
+    padding-right: 8px;
+    padding-top: 5px;
+}
+
+#search-input {
+    display: inline-block !important;
+    font-family: 'Montserrat', sans-serif;
+    color: rgb(60, 60, 60);
+    font-weight: 800;
+    border-radius: 10px;
+    height: 35px;
+    font-size: 16px;
+    border: 0px;
+    box-shadow: 3px 3px 3px grey;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+#search-input:focus {
+    border: 0px;
+    outline: none;
+}
+
+.top-level-node:hover,
+.column:hover,
+.label:hover {
+    cursor: pointer;
+}
+
+.column {
+    display: block;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    display: none;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgb(60, 60, 60);
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+    opacity: 0.5;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked+.slider {
+    background-color: dodgerblue;
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px dodgerblue;
+}
+
+input:checked+.slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+input[disabled] {
+    opacity: 0.5;
+}

@@ -38,7 +38,7 @@ out/
 .vscode
 
 .settings/
+log
 *.project
 *.classpath
 .bin/
-/nbproject/private/
