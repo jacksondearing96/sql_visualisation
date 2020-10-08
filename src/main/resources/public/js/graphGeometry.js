@@ -185,22 +185,45 @@ function revertToBestVerticalOrder() {
     });
 }
 
+function gridColumns() {
+    let numberOfColumns = maxGridColumnIndex();
+    return Array.from(Array(numberOfColumns).keys());
+}
+
+function verticalOrdersForColumn(columnIndex) {
+    let maxVerticalOrder = maxVerticalOrderForGridColumn(columnIndex);
+    return Array.from(Array(maxVerticalOrder + 1).keys());
+}
+
 function optimiseTablePositions() {
+    optimiseVerticalOrders();
+    optimiseVerticalPadding();
+    optimiseVerticalPadding();
+}
+
+function printOptimisationOutcome(startingDistance, optimisedDistance) {
+    let proportionDecrease = 1.0 - (optimisedDistance / startingDistance);
+    let percentageDecrease = proportionDecrease * 100;
+    console.log('Optimisation: ' + percentageDecrease.toFixed(2) + "%");
+}
+
+function optimiseVerticalOrders() {
     let minimisedLinkSquaredDistance = totalLinksSquaredDistance();
     flagBestVerticalOrderForAll();
     let startingDistance = minimisedLinkSquaredDistance;
 
-    let numberOfColumns = maxGridColumnIndex() + 1;
     for (let i = 0; i < optimisationIterations; ++i) {
-        for (let columnIndex = 1; columnIndex < numberOfColumns; ++columnIndex) {
-
+        gridColumns().filter(columnIndex => columnIndex >= 2).forEach(columnIndex => {
+            // Shuffle adjacent columns.
             randomShuffleColumn(columnIndex);
+            randomShuffleColumn(columnIndex - 1);
             let linkSquaredDistance = totalLinksSquaredDistance();
             if (linkSquaredDistance < minimisedLinkSquaredDistance) {
                 flagBestVerticalOrderForColumn(columnIndex);
+                flagBestVerticalOrderForColumn(columnIndex - 1);
                 minimisedLinkSquaredDistance = linkSquaredDistance;
             }
-        }
+        });
     }
 
     revertToBestVerticalOrder();
@@ -210,36 +233,28 @@ function optimiseTablePositions() {
     printOptimisationOutcome(startingDistance, totalLinksSquaredDistance());
 }
 
-function printOptimisationOutcome(startingDistance, optimisedDistance) {
-    let proportionDecrease = 1.0 - (optimisedDistance / startingDistance);
-    let percentageDecrease = proportionDecrease * 100;
-    console.log('Optimisation: ' + percentageDecrease.toFixed(2) + "%");
-}
-
 function optimiseVerticalPadding() {
     let startingDistance = totalLinksSquaredDistance();
+    let currentLinkSquaredDistance = startingDistance;
 
-    let numberOfColumns = maxGridColumnIndex() + 1;
-    for (let columnIndex = 1; columnIndex < numberOfColumns; ++columnIndex) {
-        let nodesInColumn = maxVerticalOrderForGridColumn(columnIndex) + 1;
-        for (let verticalIndex = 0; verticalIndex < nodesInColumn; ++verticalIndex) {
-            let gridKey = getGridKey(columnIndex, verticalIndex);
+    gridColumns().filter(columnIndex => columnIndex >= 1).forEach(columnIndex => {
+        verticalOrdersForColumn(columnIndex).forEach(verticalIndex => {
 
-            let prevTotalLinkSquaredDistance = totalLinksSquaredDistance();
+            let prevTotalLinkSquaredDistance = currentLinkSquaredDistance;
             do {
                 prevTotalLinkSquaredDistance = totalLinksSquaredDistance();
-                incrementDownStreamVerticalPadding(columnIndex, verticalIndex, 10)
+                incrementDownStreamVerticalPadding(columnIndex, verticalIndex, optimisePaddingIncrement)
                 ticked();
-            } while (totalLinksSquaredDistance() < prevTotalLinkSquaredDistance)
+                currentLinkSquaredDistance = totalLinksSquaredDistance();
+            } while (currentLinkSquaredDistance < prevTotalLinkSquaredDistance)
             incrementDownStreamVerticalPadding(columnIndex, verticalIndex, -10);
-        }
-    }
+        });
+    });
 
     printOptimisationOutcome(startingDistance, totalLinksSquaredDistance());
 }
 
 function allocateInitialPositions() {
-    let showColumnsSavedState = showColumns;
 
     generateSimplifiedGraph().links.forEach(setGridColumns);
     separateNonLinkedNodes();
@@ -248,7 +263,6 @@ function allocateInitialPositions() {
     setGridVerticalOrders();
     setGridStartingHeights();
     optimiseTablePositions();
-    optimiseVerticalPadding();
 }
 
 function incrementDownStreamVerticalPadding(columnIndex, verticalOrderStart, increment) {

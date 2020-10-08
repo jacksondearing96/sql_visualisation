@@ -66,7 +66,8 @@ let gridStartingHeights = {};
 let correctionX = 0;
 let correctionY = 0;
 
-const optimisationIterations = 300;
+const optimisationIterations = 100;
+const optimisePaddingIncrement = 10;
 let optimisedPadding = {};
 
 let staticMode = true;
