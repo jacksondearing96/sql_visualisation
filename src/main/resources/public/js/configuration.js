@@ -48,7 +48,7 @@ const topLevelNodeClass = 'top-level-node';
 const topLevelNodeCollapsedHeight = 60;
 const topLevelNodeWidthBuffer = 100;
 const topLevelNodeHeightBuffer = 80;
-const topLevelNodeTitleHeight = 45;
+const topLevelNodeTitleHeight = 55;
 
 const tableType = 'TABLE';
 const viewType = 'VIEW';

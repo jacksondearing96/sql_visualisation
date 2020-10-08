@@ -41,7 +41,7 @@ function calculateNodeWidth(node) {
 
 function calculateNodeHeight(node) {
     if (isTopLevelNode(node) && showColumns) {
-        return columnHeight * countColumnsInGroup(node.group) + topLevelNodePaddingVertical;
+        return columnHeight * (countColumnsInGroup(node.group) - 1) + topLevelNodeTitleHeight + topLevelNodePaddingVertical;
     }
     return isTopLevelNode(node) ? topLevelNodeCollapsedHeight : columnHeight;
 }
@@ -295,6 +295,7 @@ function getNodeY(node) {
 }
 
 function getLabelX(node) {
+    if (isTopLevelNode(node)) return getNodeX(node) + labelPaddingHorizontal + (calculateNodeWidth(node) - calculateTextWidthWithPadding(node.name)) / 2;
     return getNodeX(node) + labelPaddingHorizontal;
 }
 
