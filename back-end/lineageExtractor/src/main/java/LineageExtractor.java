@@ -25,7 +25,7 @@ public class LineageExtractor {
         List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
 
         // Catch Syntax Errors
-        if (!VerifierSQL.verifySQL(statements)){ return dataLineage; }
+        if (!VerifierSQL.verifySQL(sql)){ return dataLineage; }
 
 
         SivtVisitor<Node, ?> sivtVisitor = new SivtVisitor<Node, Object>();

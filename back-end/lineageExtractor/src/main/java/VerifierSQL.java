@@ -13,7 +13,9 @@ public class VerifierSQL {
      * @param statements - List<StatementSplitter.Statement> with statements from sql file
      * @return boolean: true = SQL correct, false = SQL syntax error
      */
-    public static boolean verifySQL(List<StatementSplitter.Statement> statements){
+    public static boolean verifySQL(String sql){
+
+        List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
 
         // Iterate through each statement.
         // Try running parser - catch errors

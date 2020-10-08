@@ -49,8 +49,7 @@ public class TestLineage {
     @DisplayName("testSyntaxError")
     public void testSyntaxError() {
         String incorrectSQL = "select a as b where c is is not null###";
-        List<StatementSplitter.Statement> statements = SivtParser.getStatements(incorrectSQL);
-        Assertions.assertFalse(VerifierSQL.verifySQL(statements));
+        Assertions.assertFalse(VerifierSQL.verifySQL(incorrectSQL));
     }
 
 }
