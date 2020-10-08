@@ -24,6 +24,10 @@ public class LineageExtractor {
 
         List<StatementSplitter.Statement> statements = SivtParser.getStatements(sql);
 
+        // Catch Syntax Errors
+        if (!VerifierSQL.verifySQL(statements)){ return dataLineage; }
+
+
         SivtVisitor<Node, ?> sivtVisitor = new SivtVisitor<Node, Object>();
 
         Util.resetAnonymousTableCount();
@@ -33,25 +37,15 @@ public class LineageExtractor {
         // Call the accept method to traverse the AST for that statement.
         for (StatementSplitter.Statement statement : statements) {
 
-            Statement parsedStatement;
-
-            // Try to parse the statement
-            // Catch error and return lineage with single ERROR node
-            try {
-                parsedStatement = SivtParser.parse(statement);
-            } catch (ParsingException e){
-                LineageNode errorNode = new LineageNode("ERROR", "Parsing Error");
-                errorNode.setAlias(e.toString());
-                dataLineage.addNode(errorNode);
-                return dataLineage;
-            }
-
+            Statement parsedStatement = SivtParser.parse(statement);
             dataLineage.addListOfNodes(sivtVisitor.extractLineage(parsedStatement, dataLineage));
+
             if (bypassAnonymousTables) {
                 dataLineage.bypassAnonymousTables();
                 dataLineage.clearAllAliases();
             }
         }
+
         return dataLineage;
     }
 }

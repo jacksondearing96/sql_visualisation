@@ -1,3 +1,4 @@
+import com.facebook.presto.sql.parser.StatementSplitter;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -47,15 +48,9 @@ public class TestLineage {
     @Test
     @DisplayName("testSyntaxError")
     public void testSyntaxError() {
-        DataLineage testDataLineage = new DataLineage();
-        LineageNode errorNode = new LineageNode("ERROR", "Parsing Error");
-        errorNode.setAlias("com.facebook.presto.sql.parser.ParsingException: line 1:26: mismatched input 'is'. Expecting: 'DISTINCT', 'NOT', 'NULL'");
-        testDataLineage.addNode(errorNode);
-
-        DataLineage errorLineage = LineageExtractor.extractLineage("select a as b where c is is not null###");
-
-        Assertions.assertEquals(testDataLineage.getNodeListAsJson(), errorLineage.getNodeListAsJson());
-
+        String incorrectSQL = "select a as b where c is is not null###";
+        List<StatementSplitter.Statement> statements = SivtParser.getStatements(incorrectSQL);
+        Assertions.assertFalse(VerifierSQL.verifySQL(statements));
     }
 
 }
