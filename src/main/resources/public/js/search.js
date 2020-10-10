@@ -26,6 +26,23 @@ function getUniqueListBy(arr, key) {
     return [...new Map(arr.map(item => [item[key], item])).values()]
 }
 
+/* Sort the array in the following precedent: alphabetical order of exact matches, & the rest */
+function sortFuzzyMatchedArray(results, searchTerm) {
+    sortedResultScores = []
+    sortedByRelevance = []
+
+    /* Get and sort all the exact matches in alphabetical order */
+    for (i = 0; i < results.length; i++) {
+        if (results[i].target.toLowerCase() == searchTerm.toLowerCase()) {
+            sortedByRelevance.push(results[i]);
+        } else {
+            sortedResultScores.push(results[i]);
+        }
+    }
+    sortedByRelevance.sort((a, b) => (a.target - b.target));
+    return sortedByRelevance.concat(sortedResultScores);
+}
+
 /* Returns a list of possible autocompleted values */
 function getAllPossibleMatches(e) {
     var a, b, i, val = this.value;
@@ -53,13 +70,16 @@ function getAllPossibleMatches(e) {
 
     /* Get all the matching fields */
     let searchValues = searchNodes.map(node => node.name)
-    let searchResult = fuzzysort.go(val, searchValues)
+    let searchResult = fuzzysort.go(val, searchValues, {threshold: -10000})
 
     /* Sort by element score */
     searchResult.sort((a, b) => (a.score - b.score));
 
-    /* When we have not *great* search results, only return 3 *best* matches */
-    for (i = 0; i < Math.min(searchResult.length, 10); i++) {
+    /* Sort by "priority" */
+    searchResult = sortFuzzyMatchedArray(searchResult, val)
+
+    /* When we have not *great* search results, only return 20 *best* matches */
+    for (i = 0; i < Math.min(searchResult.length, maxNumberAutocomplete); i++) {
         /* Create a DIV element for each matching element */
         optElem = document.createElement("DIV")
 
@@ -98,7 +118,16 @@ function navigateOptions(e) {
     } else if (e.keyCode == 13) {
         e.preventDefault();
         if (currentFocus > -1) {
-          if (x) x[currentFocus].click();
+            if (x) x[currentFocus].click();
+        } else {
+            for (i = 0; i < nodes.length; i++) {
+                searchBoxValue = document.getElementById("search-input").value;
+                if (nodes[i].name == searchBoxValue) {
+                    highlightLineage(searchBoxValue);
+                    closeAllLists();
+                    return;
+                }
+            }
         }
     }
 }

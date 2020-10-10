@@ -111,6 +111,8 @@ const propic_file_order = [
 /**
  * Searching options.
  */
+const maxNumberAutocomplete = 15;
+
 const searchOptions = {
     isCaseSensitive: false,
     findAllMatches: true,
