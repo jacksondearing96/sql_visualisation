@@ -30,9 +30,9 @@ function initialiseEventListeners() {
     chooseFilesButton.click(() => uploadFilesInput.trigger('click'));
     generateVisualisationButton.click(generateVisualisationButtonClicked);
     demoButton.click(() => generateVisualisation(demoGraph));
-    searchInput.keydown(() => setTimeout(searchInputChanged, 50));
     showColumnsToggleSwitch.click(toggleColumns);
     staticModeToggleSwitch.click(toggleStaticMode);
+    autocomplete(document.getElementById("search-input"), nodes);
 }
 
 $(document).ready(initialiseEventListeners);

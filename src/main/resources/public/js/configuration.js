@@ -107,3 +107,20 @@ const propic_file_order = [
     'leads_with_score.sql',
     'agent_leads.sql'
 ]
+
+/**
+ * Searching options.
+ */
+const searchOptions = {
+    isCaseSensitive: false,
+    findAllMatches: true,
+    includeMatches: false,
+    includeScore: true,
+    useExtendedSearch: false,
+    threshold: 0.4,
+    location: 0,
+    distance: 2,
+    maxPatternLength: 32,
+    minMatchCharLength: 1,
+    keys: ["name"]
+};
