@@ -22,7 +22,9 @@
             <button id='choose-files-button'>Choose SQL File(s)</button>
             <button id='generate-visualisation-button' type="button" disabled>Generate Visualisation</button>
             <button id='demo-button' type="button">Demo</button>
-            <input id='search-input' type='text' placeholder='Search'>
+            <div class="autocomplete">
+                <input id="search-input" type="text" placeholder="Search">
+            </div>
             <label class="switch">
                 <input type="checkbox" disabled checked id='show-columns-toggle-switch'></input>
                 <span class="slider round"></span>
@@ -41,6 +43,7 @@
 
     <script src='https://d3js.org/d3.v4.js'></script>
     <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
+    <script src="https://rawgit.com/farzher/fuzzysort/master/fuzzysort.js"></script>
     <script src='js/configuration.js'></script>
     <script src='js/dataStructureConversion.js'></script>
     <script src='js/demoData.js'></script>
@@ -53,7 +56,6 @@
     <script src='js/search.js'></script>
     <script src='js/util.js'></script>
     <script src='js/index.js'></script>
-
 </body>
 
 </html>

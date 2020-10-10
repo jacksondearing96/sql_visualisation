@@ -16,7 +16,6 @@ svg {
     margin-top: 20px;
     display: none;
     border: 1px solid black;
-    box-shadow: 5px 5px 3px rgb(20, 20, 20);
     overflow: auto !important;
     background-color: rgb(30, 30, 30);
     width: 95%;
@@ -52,7 +51,7 @@ h1 {
     background-color: rgb(200, 200, 200);
     padding: 15px;
     width: 95%;
-    max-width: 900px;
+    max-width: 1000px;
 }
 
 #file-upload-container .row {
@@ -76,7 +75,6 @@ h1 {
     font-size: 16px;
     color: white;
     border: 0px;
-    box-shadow: 3px 3px 3px grey;
     padding-right: 10px;
     padding-left: 10px;
     cursor: pointer;
@@ -128,17 +126,16 @@ h1 {
 #search-input {
     display: inline-block !important;
     font-family: 'Montserrat', sans-serif;
-    color: rgb(60, 60, 60);
-    font-weight: 800;
+    color: rgb(0, 0, 0);
+    font-weight: 2000;
     border-radius: 10px;
-    height: 35px;
+    height: 33px;
+    width: 100%;
     font-size: 16px;
     border: 0px;
-    box-shadow: 3px 3px 3px grey;
     padding-right: 10px;
     padding-left: 10px;
 }
-
 #search-input:focus {
     border: 0px;
     outline: none;
@@ -213,5 +210,42 @@ input:checked+.slider:before {
 }
 
 input[disabled] {
-    opacity: 0.5;
+    opacity: 1.0;
+}
+
+.autocomplete {
+  position: relative;
+  display: inline-block;
+}
+
+.autocomplete-items {
+  color: rgb(0, 0, 0);
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  width: 261.33px;
+  /* Position the autocomplete items to be the same width as the container */
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+
+.autocomplete-items div {
+  padding: 5px;
+  cursor: pointer;
+  background-color: #ffffff;
+  border-bottom: 1px solid #d4d4d4;
+}
+
+/*when hovering an item:*/
+.autocomplete-items div:hover {
+  background-color: #e9e9e9;
+}
+
+/*when navigating through the items using the arrow keys:*/
+.autocomplete-active {
+  background-color: DodgerBlue !important;
+  color: #ffffff;
 }
