@@ -1,6 +1,6 @@
 body {
     text-align: center;
-    background-color: rgb(60, 60, 60);
+    background-color: rgb(30, 30, 30);
     font-family: 'Montserrat', sans-serif;
     color: rgb(200, 200, 200);
 }
@@ -136,6 +136,7 @@ h1 {
     padding-right: 10px;
     padding-left: 10px;
 }
+
 #search-input:focus {
     border: 0px;
     outline: none;
@@ -214,38 +215,71 @@ input[disabled] {
 }
 
 .autocomplete {
-  position: relative;
-  display: inline-block;
+    position: relative;
+    display: inline-block;
 }
 
 .autocomplete-items {
-  color: rgb(0, 0, 0);
-  position: absolute;
-  border: 1px solid #d4d4d4;
-  border-bottom: none;
-  border-top: none;
-  z-index: 99;
-  width: 261.33px;
-  /* Position the autocomplete items to be the same width as the container */
-  top: 100%;
-  left: 0;
-  right: 0;
+    color: rgb(0, 0, 0);
+    position: absolute;
+    border: 1px solid #d4d4d4;
+    border-bottom: none;
+    border-top: none;
+    z-index: 99;
+    width: 261.33px;
+    /* Position the autocomplete items to be the same width as the container */
+    top: 100%;
+    left: 0;
+    right: 0;
 }
 
 .autocomplete-items div {
-  padding: 5px;
-  cursor: pointer;
-  background-color: #ffffff;
-  border-bottom: 1px solid #d4d4d4;
+    padding: 5px;
+    cursor: pointer;
+    background-color: #ffffff;
+    border-bottom: 1px solid #d4d4d4;
 }
 
 /*when hovering an item:*/
 .autocomplete-items div:hover {
-  background-color: #e9e9e9;
+    background-color: #e9e9e9;
 }
 
 /*when navigating through the items using the arrow keys:*/
 .autocomplete-active {
-  background-color: DodgerBlue !important;
-  color: #ffffff;
+    background-color: DodgerBlue !important;
+    color: #ffffff;
+}
+
+#loading-container img {
+    height: 70px;
+    position: fixed;
+    top: 50%;
+    bottom: 50%;
+    left: 50%;
+    right: 50%;
+}
+
+#loading-container {
+    background-color: rgba(100, 100, 100, 0.6);
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100vh;
+    z-index: 999;
+    display: none;
+}
+
+.rotate {
+    animation: rotation 2s infinite linear;
+}
+
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(359deg);
+    }
 }
