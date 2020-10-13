@@ -4,6 +4,19 @@ function activateToggleButtons() {
     staticModeToggleSwitch.attr('disabled', false);
 }
 
+function startLoading() {
+    return new Promise(resolve => {
+        $('#loading-container').show();
+        setTimeout(() => {
+            resolve();
+        }, 50);
+    });
+}
+
+function endLoading() {
+    $('#loading-container').hide();
+}
+
 function generateVisualisationButtonClicked() {
     $.post("/lineage_extractor", sql, lineageNodes => {
         let graph = backendToFrontendDataStructureConversion(JSON.parse(lineageNodes));
@@ -29,7 +42,9 @@ function initialiseEventListeners() {
     uploadFilesInput.change(uploadFiles);
     chooseFilesButton.click(() => uploadFilesInput.trigger('click'));
     generateVisualisationButton.click(generateVisualisationButtonClicked);
-    demoButton.click(() => generateVisualisation(demoGraph));
+    demoButton.click(() => {
+        generateVisualisation(demoGraph);
+    });
     showColumnsToggleSwitch.click(toggleColumns);
     staticModeToggleSwitch.click(toggleStaticMode);
     autocomplete(document.getElementById("search-input"), nodes);

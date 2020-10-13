@@ -2,12 +2,14 @@ var nodes = []
 var links = []
 var simulation, nodeSelection, linkSelection, labels, svg;
 
-function generateVisualisation(graph) {
+async function generateVisualisation(graph) {
+    await startLoading();
     initialiseContainer();
     initialiseGraphData(graph);
     generateForceDirectedSimulation();
     allocateInitialPositions();
     activateToggleButtons();
+    endLoading();
 }
 
 function initialiseContainer() {
