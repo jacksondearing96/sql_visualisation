@@ -28,7 +28,7 @@ public class InsertStatement {
     private final String UNCERTAIN_SOURCE_COLUMN = "";
 
     InsertStatement(Insert insert, ArrayList<LineageNode> sources) {
-        this.target = new LineageNode("TABLE", insert.getTarget().getSuffix());
+        this.target = new LineageNode(Constants.Node.TYPE_TABLE, insert.getTarget().getSuffix());
         extractSourceForInsertStatement(sources);
 
         hasPredefinedColumnNames = insert.getColumns().isPresent();
