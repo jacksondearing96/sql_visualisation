@@ -82,7 +82,7 @@ public class DataLineage {
         }
 
         // Delete the now redundant anonymous nodes.
-        nodeList.removeIf(node -> node.getType().equals("ANONYMOUS"));
+        nodeList.removeIf(node -> node.getType().equals(Constants.Node.TYPE_ANON));
     }
 
 
@@ -156,6 +156,6 @@ public class DataLineage {
     }
 
     public static String makeId(String source, String target) {
-        return Util.removeDatabasePrefix(source).concat("::").concat(target);
+        return Util.removeDatabasePrefix(source).concat(Constants.Node.SEPARATOR).concat(target);
     }
 }
